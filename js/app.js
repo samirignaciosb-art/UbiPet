@@ -1,9 +1,9 @@
 // ============================================
-// 🐾 UBIPET - APP.JS FINAL FUNCIONAL
+// 🐾 UBIPET - APP.JS CORREGIDO
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
-const supabaseClient = supabase.createClient(
+const supabaseClient = window.supabase.createClient(
     "https://exeeqykieytuvlzdbsnn.supabase.co",
     "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
 );
@@ -18,8 +18,8 @@ async function registrar() {
     const password = document.getElementById("password").value;
 
     const { error } = await supabaseClient.auth.signUp({
-        email,
-        password
+        email: email,
+        password: password
     });
 
     if (error) {
@@ -39,8 +39,8 @@ async function login() {
     const password = document.getElementById("password").value;
 
     const { error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
+        email: email,
+        password: password
     });
 
     if (error) {

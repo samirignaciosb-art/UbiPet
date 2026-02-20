@@ -2,23 +2,64 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Perfil Mascota</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetFinder - Perfil</title>
 <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>🐶 Perfil Mascota</h1>
+    <div class="logo-container">
+        <img src="img/logo.svg" alt="PetFinder Logo">
+    </div>
 
-    <input type="text" id="nombreMascota" placeholder="Nombre mascota">
-    <input type="text" id="telefono" placeholder="Teléfono dueño">
+    <h1>🐶 Perfil de mi Mascota</h1>
 
-    <button onclick="guardarPerfil()">Guardar</button>
-    <button onclick="generarQR()">Generar QR</button>
+    <!-- Datos de la Mascota -->
+    <div class="seccion">
+        <h3>🐕 Datos de la Mascota</h3>
+        <input type="text" id="nombreMascota" placeholder="Nombre de la mascota">
+        <input type="number" id="peso" placeholder="Peso (kg)" step="0.1">
+        <input type="number" id="edad" placeholder="Edad (años)">
+        <input type="text" id="raza" placeholder="Raza">
+        <label><input type="checkbox" id="vacunas"> Vacunas al día</label>
+        <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
 
-    <div id="qrSection" class="hidden">
-        <img id="qrImg">
-        <div id="urlPerfil"></div>
+        <!-- Fotos -->
+        <label>Fotos de la mascota (hasta 5)</label>
+        <input type="file" id="foto1" accept="image/*">
+        <input type="file" id="foto2" accept="image/*">
+        <input type="file" id="foto3" accept="image/*">
+        <input type="file" id="foto4" accept="image/*">
+        <input type="file" id="foto5" accept="image/*">
+
+        <!-- Toggle pérdida -->
+        <div class="perdida-toggle">
+            <label>¿Está perdida?</label>
+            <div class="toggle" onclick="togglePerdida()" id="togglePerdida">
+                <div class="toggle-circle" id="toggleCircle"></div>
+            </div>
+        </div>
+        <input type="hidden" id="estaPerdida" value="false">
+    </div>
+
+    <!-- Datos del Dueño -->
+    <div class="seccion">
+        <h3>👤 Datos del Dueño</h3>
+        <input type="text" id="nombreDueno" placeholder="Nombre del dueño">
+        <input type="email" id="emailDueno" placeholder="Email">
+        <input type="tel" id="telefono" placeholder="Número de contacto (llamada/WhatsApp)">
+    </div>
+
+    <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
+    <button onclick="generarQR()">🖼️ Generar QR</button>
+
+    <!-- QR -->
+    <div class="qr-container hidden" id="qrSection">
+        <h3>QR para placa (¡Imprime esto!)</h3>
+        <img id="qrImg" style="width:200px;height:200px;border:2px solid #ddd;border-radius:10px;">
+        <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
+        <button onclick="copiarURL()" style="background: #f59e0b;">📋 Copiar URL</button>
     </div>
 </div>
 

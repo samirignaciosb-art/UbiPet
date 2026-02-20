@@ -6,7 +6,7 @@ body {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f7ede3; /* fondo */
+    background-color: #f7ede3; /* Fondo principal */
 }
 
 .container {
@@ -39,7 +39,7 @@ h1, h3 {
 }
 
 /* ================================
-   INPUTS Y TEXTAREAS
+   INPUTS, TEXTAREA, SELECT
    ================================ */
 input, textarea, select {
     width: 100%;
@@ -57,7 +57,7 @@ button, .btn-contacto {
     width: 100%;
     padding: 15px;
     margin: 10px 0;
-    background-color: #f5cac2;
+    background-color: #f5cac2; /* Botón principal */
     color: #1f2937;
     border: none;
     border-radius: 10px;
@@ -89,6 +89,7 @@ button:hover, .btn-contacto:hover {
     padding: 15px;
     background-color: #fefefe;
     border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 /* ================================
@@ -107,8 +108,50 @@ button:hover, .btn-contacto:hover {
 }
 
 /* ================================
-   ESTADO OCULTO
+   TOGGLE PÉRDIDA
    ================================ */
-.hidden {
-    display: none;
+.perdida-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.toggle {
+    width: 50px;
+    height: 25px;
+    background: #d1d5db;
+    border-radius: 25px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.toggle.active {
+    background: #dc2626;
+}
+
+.toggle-circle {
+    width: 21px;
+    height: 21px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: 0.3s;
+}
+
+.toggle.active .toggle-circle {
+    left: 27px;
+}
+
+/* ================================
+   FOTOS
+   ================================ */
+input[type="file"] {
+    border: 2px dashed #e1e5e9;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
 }

@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PetFinder - Perfil</title>
-<link rel="stylesheet" href="css/estilos.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UbiPet - Perfil</title>
+    <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
+    <div class="container">
+        <div class="logo">
+            <img src="img/gato-pin.png" alt="UbiPet" width="60">
+        </div>
+        <h1>Perfil de Mascota</h1>
 
-<div class="container">
-    <div class="logo-container">
-        <img src="img/logo.svg" alt="PetFinder Logo">
-    </div>
-
-    <h1>🐶 Perfil de mi Mascota</h1>
-
-    <!-- Datos de la Mascota -->
-    <div class="seccion">
         <h3>🐕 Datos de la Mascota</h3>
         <input type="text" id="nombreMascota" placeholder="Nombre de la mascota">
         <input type="number" id="peso" placeholder="Peso (kg)" step="0.1">
@@ -25,44 +21,36 @@
         <label><input type="checkbox" id="vacunas"> Vacunas al día</label>
         <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
 
-        <!-- Fotos -->
-        <label>Fotos de la mascota (hasta 5)</label>
+        <h4>Fotos (máx 5)</h4>
         <input type="file" id="foto1" accept="image/*">
         <input type="file" id="foto2" accept="image/*">
         <input type="file" id="foto3" accept="image/*">
         <input type="file" id="foto4" accept="image/*">
         <input type="file" id="foto5" accept="image/*">
 
-        <!-- Toggle pérdida -->
         <div class="perdida-toggle">
             <label>¿Está perdida?</label>
             <div class="toggle" onclick="togglePerdida()" id="togglePerdida">
-                <div class="toggle-circle" id="toggleCircle"></div>
+                <div class="toggle-circle"></div>
             </div>
+            <input type="hidden" id="estaPerdida" value="false">
         </div>
-        <input type="hidden" id="estaPerdida" value="false">
-    </div>
 
-    <!-- Datos del Dueño -->
-    <div class="seccion">
         <h3>👤 Datos del Dueño</h3>
-        <input type="text" id="nombreDueno" placeholder="Nombre del dueño">
+        <input type="text" id="nombreDueno" placeholder="Tu nombre">
         <input type="email" id="emailDueno" placeholder="Email">
-        <input type="tel" id="telefono" placeholder="Número de contacto (llamada/WhatsApp)">
+        <input type="tel" id="telefono" placeholder="Número de contacto">
+
+        <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
+        <button onclick="generarQR()">🖼️ Generar QR</button>
+
+        <div id="qrSection" class="hidden">
+            <h3>QR para rescate</h3>
+            <img id="qrImg" width="200" height="200" alt="QR">
+            <p id="urlPerfil" style="word-break: break-all;"></p>
+        </div>
     </div>
 
-    <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
-    <button onclick="generarQR()">🖼️ Generar QR</button>
-
-    <!-- QR -->
-    <div class="qr-container hidden" id="qrSection">
-        <h3>QR para placa (¡Imprime esto!)</h3>
-        <img id="qrImg" style="width:200px;height:200px;border:2px solid #ddd;border-radius:10px;">
-        <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
-        <button onclick="copiarURL()" style="background: #f59e0b;">📋 Copiar URL</button>
-    </div>
-</div>
-
-<script src="js/app.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

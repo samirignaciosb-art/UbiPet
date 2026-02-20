@@ -161,16 +161,34 @@ async function cargarPerfil() {
 }
 
 // -----------------------
-// Generar QR de rescate
+// Generar QR de rescate con datos de Supabase
 // -----------------------
-function generarQR() {
-    // Igual que antes, pero usando perfil cargado
-    const perfil = JSON.parse(localStorage.getItem('perfilMascota'));
-    if(!perfil){ alert("Primero guarda el perfil"); return; }
+async function generarQR() {
+    const { data: user } = await supabase.auth.getUser();
+    const email = user?.email;
+    if (!email) { 
+        alert("Debes iniciar sesión primero"); 
+        return; 
+    }
 
-    const data = btoa(JSON.stringify(perfil));
+    // Traer perfil desde la tabla "perfiles"
+    const { data, error } = await supabase
+        .from('perfiles')
+        .select('perfil_json')
+        .eq('email_dueno', email)
+        .single();
+
+    if (error || !data) {
+        alert("No se encontró tu perfil, guarda primero tu perfil.");
+        return;
+    }
+
+    const perfil = data.perfil_json;
+
+    // Generar QR
+    const dataQR = btoa(JSON.stringify(perfil));
     const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-    const url = `${window.location.origin}${base}rescate.html?data=${encodeURIComponent(data)}`;
+    const url = `${window.location.origin}${base}rescate.html?data=${encodeURIComponent(dataQR)}`;
 
     document.getElementById('qrImg').src =
         `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;

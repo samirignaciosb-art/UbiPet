@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Perfil Mascota</title>
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>🐶 Perfil Mascota</h1>
+
+    <input type="text" id="nombreMascota" placeholder="Nombre mascota">
+    <input type="text" id="telefono" placeholder="Teléfono dueño">
+
+    <button onclick="guardarPerfil()">Guardar</button>
+    <button onclick="generarQR()">Generar QR</button>
+
+    <div id="qrSection" class="hidden">
+        <img id="qrImg">
+        <div id="urlPerfil"></div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

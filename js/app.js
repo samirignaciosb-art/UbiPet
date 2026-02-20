@@ -93,7 +93,7 @@ async function guardarPerfil() {
     const vacunas = document.getElementById("vacunas").checked;
     const descripcion = document.getElementById("descripcion").value;
     const nombreDueno = document.getElementById("nombreDueno").value;
-    const emailDueno = document.getElementById("emailDueno").value; // ✅ capturado
+    const emailDueno = document.getElementById("emailDueno").value;
     const telefono = document.getElementById("telefono").value;
     const estaPerdida = document.getElementById("estaPerdida").value === "true";
 
@@ -111,7 +111,7 @@ async function guardarPerfil() {
             vacunas,
             descripcion,
             nombre_dueno: nombreDueno,
-            email_dueno: emailDueno,   // ✅ agregado aquí
+            email_dueno: emailDueno,
             telefono,
             esta_perdida: estaPerdida
         }], { onConflict: "user_id" });
@@ -147,7 +147,7 @@ async function cargarPerfil() {
     document.getElementById("vacunas").checked = data.vacunas || false;
     document.getElementById("descripcion").value = data.descripcion || "";
     document.getElementById("nombreDueno").value = data.nombre_dueno || "";
-    document.getElementById("emailDueno").value = data.email_dueno || ""; // ✅ agregado aquí
+    document.getElementById("emailDueno").value = data.email_dueno || "";
     document.getElementById("telefono").value = data.telefono || "";
     document.getElementById("estaPerdida").value = data.esta_perdida ? "true" : "false";
 }
@@ -181,4 +181,60 @@ function copiarURL() {
     const url = document.getElementById("urlPerfil").textContent;
     navigator.clipboard.writeText(url);
     alert("URL copiada al portapapeles 📋");
+}
+
+// ============================================
+// 🚑 FUNCIONES DEL RESCATISTA
+// ============================================
+
+// 📞 Contactar dueño por WhatsApp
+function contactarDueno() {
+    const telefono = document.getElementById("telefono").value;
+    if (telefono) {
+        window.open(`https://wa.me/${telefono}`, "_blank");
+    } else {
+        alert("No hay número de contacto disponible.");
+    }
+}
+
+// ✉️ Enviar correo al dueño
+function enviarCorreo() {
+    const email = document.getElementById("emailDueno").value;
+    if (email) {
+        window.location.href = `mailto:${email}`;
+    } else {
+        alert("No hay correo electrónico disponible.");
+    }
+}
+
+// 📋 Copiar número de teléfono al portapapeles
+function copiarTelefono() {
+    const telefono = document.getElementById("telefono").value;
+    if (telefono) {
+        navigator.clipboard.writeText(telefono)
+            .then(() => alert("Número copiado al portapapeles ✅"))
+            .catch(() => alert("Error al copiar el número"));
+    } else {
+        alert("No hay número de contacto disponible.");
+    }
+}
+
+// 🗺️ Ver ubicación en Google Maps (ejemplo básico)
+function verMapa() {
+    const direccion = "Santiago, Chile"; // aquí podrías guardar la dirección en tu BD
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`, "_blank");
+}
+
+// ============================================
+// 🚪 CERRAR SESIÓN
+// ============================================
+async function cerrarSesion() {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        alert("Error al cerrar sesión: " + error.message);
+    } else {
+        alert("Sesión cerrada correctamente 👋");
+        window.location.href = "index.html";
+    }
 }

@@ -1,9 +1,9 @@
 // =======================
-// PetFinder - app.js
+// Ubipet - app.js
 // =======================
 
 // -----------------------
-// Función principal al cargar la página
+// Inicialización al cargar la página
 // -----------------------
 window.onload = function() {
     const path = window.location.pathname.split("/").pop();
@@ -19,7 +19,7 @@ window.onload = function() {
 };
 
 // -----------------------
-// Verificación de sesión
+// Verificar sesión
 // -----------------------
 function verificarSesion() {
     const usuario = JSON.parse(localStorage.getItem('usuario'));
@@ -44,7 +44,9 @@ function login() {
     }
 }
 
-function signup() { login(); }
+function signup() {
+    login(); // misma lógica
+}
 
 // -----------------------
 // Toggle de mascota perdida
@@ -76,7 +78,7 @@ function guardarPerfil() {
         }
     };
 
-    // Leer hasta 5 fotos en base64
+    // Leer hasta 5 fotos y guardarlas en base64
     for(let i=1; i<=5; i++){
         const fileInput = document.getElementById(`foto${i}`);
         if(fileInput && fileInput.files[0]){
@@ -84,18 +86,18 @@ function guardarPerfil() {
             reader.onload = function(e){
                 perfil.fotos.push(e.target.result);
                 localStorage.setItem('perfilMascota', JSON.stringify(perfil));
-            }
+            };
             reader.readAsDataURL(fileInput.files[0]);
         }
     }
 
-    // Guardar perfil sin fotos inmediatas (se llenan con reader)
+    // Guardar perfil completo
     localStorage.setItem('perfilMascota', JSON.stringify(perfil));
     alert("✅ Perfil guardado");
 }
 
 // -----------------------
-// Cargar perfil en formulario
+// Cargar perfil en el formulario
 // -----------------------
 function cargarPerfil() {
     const perfil = JSON.parse(localStorage.getItem('perfilMascota'));
@@ -133,16 +135,25 @@ function generarQR() {
     };
 
     const data = btoa(JSON.stringify(perfilQR));
-    const url = `${window.location.origin}/rescate.html?data=${encodeURIComponent(data)}`;
+
+    // Cambia "tu-usuario" y "UbiPet" por tu usuario y repo de GitHub
+    const url = `https://tu-usuario.github.io/UbiPet/rescate.html?data=${encodeURIComponent(data)}`;
 
     document.getElementById('qrImg').src =
         `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-    document.getElementById('urlPerfil').textContent = url;
+
+    const urlText = document.getElementById('urlPerfil');
+    urlText.textContent = url;
+    urlText.onclick = () => {
+        navigator.clipboard.writeText(url).then(() => alert("✅ URL copiada al portapapeles"));
+    };
+
     document.getElementById('qrSection').classList.remove('hidden');
+    alert("✅ QR generado! Escanéalo para probar la página de rescate");
 }
 
 // -----------------------
-// Mostrar rescate
+// Mostrar datos en rescate.html
 // -----------------------
 function mostrarRescatador() {
     const params = new URLSearchParams(window.location.search);
@@ -172,7 +183,7 @@ function mostrarRescatador() {
         document.getElementById('btnWhatsApp').href = `https://wa.me/${perfil.dueno?.telefono || ''}`;
         document.getElementById('btnSMS').href = `sms:${perfil.dueno?.telefono || ''}?body=¡Encontré tu mascota!`;
 
-        // GPS
+        // Botón GPS
         document.getElementById('btnUbicacion').onclick = function() {
             if(navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(pos => {

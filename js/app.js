@@ -89,6 +89,7 @@ function guardarPerfil() {
         }
     }
 
+    // Guardar perfil principal
     localStorage.setItem('perfilMascota', JSON.stringify(perfil));
     alert("✅ Perfil guardado");
 }
@@ -155,11 +156,13 @@ function mostrarRescatador() {
     try {
         const perfil = JSON.parse(atob(data));
 
+        // Alerta de mascota perdida
         if(perfil.estaPerdida === 'true'){
             document.getElementById('tituloRescate').textContent = '🚨 MASCOTA PERDIDA 🚨';
             document.getElementById('datosRescate').classList.add('alerta-roja');
         }
 
+        // Mostrar info de mascota y dueño
         document.getElementById('datosRescate').innerHTML = `
             <h3>${perfil.nombre}</h3>
             <p>🐕 Raza: ${perfil.raza || 'Desconocida'}</p>

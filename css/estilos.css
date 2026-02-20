@@ -2,33 +2,35 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: #f7ede3;
+  background: #f0f4f8; /* fondo más neutro */
   margin: 0;
-  padding: 20px;
+  padding: 40px;
   display: flex;
   justify-content: center;
+  align-items: center; /* centra verticalmente */
+  min-height: 100vh;   /* ocupa toda la pantalla */
 }
 
 .container {
   max-width: 900px;
   width: 100%;
-  background: #fff;
+  background: #ffffff;
   padding: 30px;
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 h1 {
-  color: #2d6a4f;
+  color: #3a86ff;
   text-align: center;
   margin-bottom: 20px;
 }
 
 h3 {
-  color: #40916c;
+  color: #06d6a0;
   margin-top: 25px;
   margin-bottom: 10px;
-  border-bottom: 2px solid #f5cac2;
+  border-bottom: 2px solid #ff6b6b;
   padding-bottom: 5px;
 }
 
@@ -55,7 +57,7 @@ input, textarea, select {
 }
 
 input:focus, textarea:focus {
-  border-color: #2d6a4f;
+  border-color: #3a86ff;
   outline: none;
 }
 
@@ -68,7 +70,7 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  background: linear-gradient(135deg, #84a59e, #f5cac2);
+  background: linear-gradient(135deg, #3a86ff, #06d6a0);
   color: #fff;
   transition: transform 0.2s, opacity 0.3s;
 }
@@ -79,7 +81,7 @@ button:hover {
 }
 
 .btn-secondary {
-  background: #84a59e;
+  background: #ff6b6b;
   color: #fff;
 }
 
@@ -106,7 +108,7 @@ button:hover {
 }
 
 .toggle.active {
-  background: #f5bd60;
+  background: #06d6a0;
 }
 
 .toggle.active .toggle-circle {

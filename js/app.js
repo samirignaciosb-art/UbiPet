@@ -71,7 +71,6 @@ window.addEventListener("load", async () => {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Si estamos en index.html, redirigir al perfil
         if (window.location.pathname.includes("index.html")) {
             window.location.href = "perfil.html";
         }
@@ -93,19 +92,22 @@ async function guardarPerfil() {
     const telefono = document.getElementById("telefono").value;
     const estaPerdida = document.getElementById("estaPerdida").value === "true";
 
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const userId = sessionData.session?.user?.id;
+
     const { error } = await supabaseClient
-        .from("mascotas")
+        .from("perfiles")
         .insert([{
-            nombre: nombreMascota,
+            user_id: userId,
+            nombre_mascota: nombreMascota,
             peso,
             edad,
             raza,
             vacunas,
             descripcion,
             nombre_dueno: nombreDueno,
-            email_dueno: emailDueno,
             telefono,
-            perdida: estaPerdida
+            esta_perdida: estaPerdida
         }]);
 
     if (error) {
@@ -152,9 +154,9 @@ function copiarURL() {
 window.addEventListener("load", async () => {
     if (window.location.pathname.includes("rescate.html")) {
         const { data, error } = await supabaseClient
-            .from("mascotas")
+            .from("perfiles")
             .select("*")
-            .order("id", { ascending: false })
+            .order("created_at", { ascending: false })
             .limit(1);
 
         if (error) {
@@ -166,10 +168,9 @@ window.addEventListener("load", async () => {
             const mascota = data[0];
             document.getElementById("datosRescate").innerHTML = `
                 <div class="alerta-roja">
-                    <strong>${mascota.nombre}</strong> (${mascota.raza}, ${mascota.edad} años)<br>
+                    <strong>${mascota.nombre_mascota}</strong> (${mascota.raza}, ${mascota.edad} años)<br>
                     Descripción: ${mascota.descripcion}<br>
                     Dueño: ${mascota.nombre_dueno}<br>
-                    Email: ${mascota.email_dueno}<br>
                     Teléfono: ${mascota.telefono}
                 </div>
             `;

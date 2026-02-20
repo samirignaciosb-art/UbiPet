@@ -78,6 +78,20 @@ window.addEventListener("load", async () => {
         if (window.location.hash.includes("access_token")) {
             window.history.replaceState({}, document.title, window.location.pathname);
             alert("Email confirmado correctamente ✅");
+            // ============================================
+// 🔄 PROCESAR REDIRECCIÓN DE SUPABASE
+// ============================================
+
+async function procesarSesion() {
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+        console.log("Sesión activa:", data.session.user.email);
+        window.location.href = "perfil.html";
+    }
+}
+
+procesarSesion();
         }
     }
 });

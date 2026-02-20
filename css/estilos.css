@@ -1,120 +1,53 @@
-/* ================================
-   BODY Y CONTENEDOR
-   ================================ */
-body { 
-    font-family: -apple-system, sans-serif;
-    max-width: 400px;
-    margin: 0 auto;
+body {
+    font-family: sans-serif;
+    background: #f7ede3;
+    margin: 0;
     padding: 20px;
-    background-color: #f7ede3; /* Fondo principal */
 }
 
 .container {
-    background-color: white;
-    padding: 25px;
+    max-width: 400px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-/* ================================
-   LOGO
-   ================================ */
-.logo-container {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     text-align: center;
-    margin-bottom: 20px;
 }
 
-.logo-container img {
-    width: 60px;
-    height: 60px;
-}
-
-/* ================================
-   TITULOS
-   ================================ */
-h1, h3 {
+h1, h3, h4 {
     color: #84a59e;
-    text-align: center;
-    margin-bottom: 15px;
+    margin: 15px 0;
 }
 
-/* ================================
-   INPUTS, TEXTAREA, SELECT
-   ================================ */
-input, textarea, select {
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+button, .btn-contacto {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
-    border: 2px solid #e1e5e9;
-    border-radius: 8px;
-    font-size: 16px;
-}
-
-/* ================================
-   BOTONES
-   ================================ */
-button, .btn-contacto {
-    width: 100%;
-    padding: 15px;
-    margin: 10px 0;
-    background-color: #f5cac2; /* Botón principal */
-    color: #1f2937;
     border: none;
     border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
+    font-weight: bold;
+    background: #f5cac2;
+    color: #333;
     cursor: pointer;
-    transition: 0.3s;
 }
 
 button:hover, .btn-contacto:hover {
     opacity: 0.9;
 }
 
-/* ================================
-   ALERTAS
-   ================================ */
-.alerta-roja {
-    background-color: #f5bd60 !important;
-    border-color: #f5bd60 !important;
-    padding: 15px;
-    border-radius: 10px;
-}
-
-/* ================================
-   SECCIONES
-   ================================ */
-.seccion {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #fefefe;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-}
-
-/* ================================
-   QR
-   ================================ */
-.qr-container {
-    text-align: center;
-    margin: 20px 0;
-}
-
-#qrImg {
-    width: 200px;
-    height: 200px;
-    border-radius: 10px;
-    border: 2px solid #ddd;
-}
-
-/* ================================
-   TOGGLE PÉRDIDA
-   ================================ */
-.perdida-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
+.btn-secondary {
+    background: #84a59e;
+    color: white;
 }
 
 .toggle {
@@ -123,12 +56,9 @@ button:hover, .btn-contacto:hover {
     background: #d1d5db;
     border-radius: 25px;
     position: relative;
+    display: inline-block;
     cursor: pointer;
-    transition: 0.3s;
-}
-
-.toggle.active {
-    background: #dc2626;
+    vertical-align: middle;
 }
 
 .toggle-circle {
@@ -142,16 +72,31 @@ button:hover, .btn-contacto:hover {
     transition: 0.3s;
 }
 
+.toggle.active {
+    background: #f5bd60;
+}
+
 .toggle.active .toggle-circle {
     left: 27px;
 }
 
-/* ================================
-   FOTOS
-   ================================ */
-input[type="file"] {
-    border: 2px dashed #e1e5e9;
-    border-radius: 8px;
+.perdida-toggle {
+    margin: 10px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.rescate-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.alerta-roja {
+    background: #f5bd60;
     padding: 10px;
-    cursor: pointer;
+    border-radius: 8px;
 }

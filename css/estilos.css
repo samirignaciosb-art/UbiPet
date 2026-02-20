@@ -1,23 +1,114 @@
-body {
-    font-family: sans-serif;
+/* ================================
+   BODY Y CONTENEDOR
+   ================================ */
+body { 
+    font-family: -apple-system, sans-serif;
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    background: #f8f9fa;
+    background-color: #f7ede3; /* fondo */
 }
 
 .container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
+    background-color: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-input, button {
+/* ================================
+   LOGO
+   ================================ */
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo-container img {
+    width: 60px;
+    height: 60px;
+}
+
+/* ================================
+   TITULOS
+   ================================ */
+h1, h3 {
+    color: #84a59e;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* ================================
+   INPUTS Y TEXTAREAS
+   ================================ */
+input, textarea, select {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 16px;
 }
 
+/* ================================
+   BOTONES
+   ================================ */
+button, .btn-contacto {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #f5cac2;
+    color: #1f2937;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover, .btn-contacto:hover {
+    opacity: 0.9;
+}
+
+/* ================================
+   ALERTAS
+   ================================ */
+.alerta-roja {
+    background-color: #f5bd60 !important;
+    border-color: #f5bd60 !important;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* ================================
+   SECCIONES
+   ================================ */
+.seccion {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fefefe;
+    border-radius: 10px;
+}
+
+/* ================================
+   QR
+   ================================ */
+.qr-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#qrImg {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+}
+
+/* ================================
+   ESTADO OCULTO
+   ================================ */
 .hidden {
     display: none;
 }

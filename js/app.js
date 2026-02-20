@@ -30,8 +30,8 @@ function generarQR() {
         return;
     }
 
-    // Generar la URL relativa
-    const url = `${window.location.origin}${window.location.pathname.replace(/index\.html$/, '')}rescate.html?data=${btoa(JSON.stringify(perfil))}`;
+    // URL RELATIVA al HTML actual
+    const url = `rescate.html?data=${btoa(JSON.stringify(perfil))}`;
 
     // Mostrar QR
     document.getElementById('qrImg').src =

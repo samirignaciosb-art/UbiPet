@@ -1,11 +1,14 @@
 // ============================================
-// 🐾 UBIPET - APP.JS FINAL SUPABASE
+// 🐾 UBIPET - APP.JS CORREGIDO
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
-const supabaseUrl = "https://exeeqykieytuvlzdbsnn.supabase.co";
-const supabaseKey = "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
+    "https://exeeqykieytuvlzdbsnn.supabase.co",
+    "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
+);
 
 
 // ============================================
@@ -16,12 +19,7 @@ async function registrar() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    if (!email || !password) {
-        alert("Completa todos los campos");
-        return;
-    }
-
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabaseClient.auth.signUp({
         email,
         password
     });
@@ -42,7 +40,7 @@ async function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
     });
@@ -59,7 +57,7 @@ async function login() {
 // 🚪 LOGOUT
 // ============================================
 async function logout() {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     window.location.href = "index.html";
 }
 
@@ -68,7 +66,7 @@ async function logout() {
 // 🔐 VERIFICAR SESIÓN
 // ============================================
 async function verificarSesion() {
-    const { data } = await supabase.auth.getUser();
+    const { data } = await supabaseClient.auth.getUser();
     if (!data.user) {
         window.location.href = "index.html";
     }
@@ -80,7 +78,7 @@ async function verificarSesion() {
 // ============================================
 async function guardarPerfil() {
 
-    const { data } = await supabase.auth.getUser();
+    const { data } = await supabaseClient.auth.getUser();
     const user = data.user;
 
     if (!user) {
@@ -101,7 +99,7 @@ async function guardarPerfil() {
         esta_perdida: document.getElementById("estaPerdida").checked
     };
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from("perfiles")
         .upsert(perfil, { onConflict: "user_id" });
 
@@ -118,12 +116,12 @@ async function guardarPerfil() {
 // ============================================
 async function cargarPerfil() {
 
-    const { data } = await supabase.auth.getUser();
+    const { data } = await supabaseClient.auth.getUser();
     const user = data.user;
 
     if (!user) return;
 
-    const { data: perfil, error } = await supabase
+    const { data: perfil } = await supabaseClient
         .from("perfiles")
         .select("*")
         .eq("user_id", user.id)
@@ -148,22 +146,17 @@ async function cargarPerfil() {
 // ============================================
 async function cargarMascotasPerdidas() {
 
-    const { data, error } = await supabase
+    const { data } = await supabaseClient
         .from("perfiles")
         .select("*")
         .eq("esta_perdida", true);
-
-    if (error) {
-        console.error(error);
-        return;
-    }
 
     const contenedor = document.getElementById("listaRescate");
     if (!contenedor) return;
 
     contenedor.innerHTML = "";
 
-    data.forEach(pet => {
+    data?.forEach(pet => {
         contenedor.innerHTML += `
             <div class="alerta-roja">
                 <h4>${pet.nombre_mascota}</h4>
@@ -175,20 +168,3 @@ async function cargarMascotasPerdidas() {
         `;
     });
 }
-
-
-// ============================================
-// 🔄 AUTO CARGA SEGÚN PÁGINA
-// ============================================
-document.addEventListener("DOMContentLoaded", () => {
-
-    if (window.location.pathname.includes("perfil.html")) {
-        verificarSesion();
-        cargarPerfil();
-    }
-
-    if (window.location.pathname.includes("rescate.html")) {
-        cargarMascotasPerdidas();
-    }
-
-});

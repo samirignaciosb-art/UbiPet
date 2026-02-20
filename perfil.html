@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>Ubipet - Perfil de Mascota</title>
     <link rel="stylesheet" href="css/estilos.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-    <script src="js/app.js"></script>
     <style>
         body { background: #f7ede3; font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
         h1, h3 { color: #84a59e; text-align: center; }
@@ -74,22 +72,21 @@
         <label>Teléfono / WhatsApp</label>
         <input type="tel" id="telefono" placeholder="Número de contacto">
 
-           <!-- Botones -->
-    <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
-    <button onclick="generarQR()">🖼️ Generar QR</button>
+        <!-- Botones -->
+        <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
+        <button onclick="generarQR()">🖼️ Generar QR</button>
 
-    <!-- QR -->
-    <div class="qr-container hidden" id="qrSection">
-        <h3>QR para rescate</h3>
-        <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
-        <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
-        <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
+        <!-- QR -->
+        <div class="qr-container hidden" id="qrSection">
+            <h3>QR para rescate</h3>
+            <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
+            <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
+            <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
+        </div>
     </div>
-</div>
 
-<!-- ✅ Scripts -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="js/app.js"></script>
+    <!-- ✅ Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
-

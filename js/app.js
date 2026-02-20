@@ -3,7 +3,7 @@
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
-const supabaseClient = window.supabase.createClient(
+const supabaseClient = supabase.createClient(
     "https://exeeqykieytuvlzdbsnn.supabase.co",
     "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
 );

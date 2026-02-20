@@ -2,52 +2,86 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UbiPet - Perfil</title>
+    <title>Ubipet - Perfil de Mascota</title>
     <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        body { background: #f7ede3; font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        h1, h3 { color: #84a59e; text-align: center; }
+        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        input, textarea, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; font-size: 16px; }
+        button { background: #f5cac2; color: black; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { opacity: 0.85; }
+        .toggle { width: 50px; height: 25px; background: #d1d5db; border-radius: 25px; position: relative; cursor: pointer; display: inline-block; vertical-align: middle; margin-left: 10px; }
+        .toggle.active { background: #f5bd60; }
+        .toggle-circle { width: 21px; height: 21px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s; }
+        .toggle.active .toggle-circle { left: 27px; }
+        .foto-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 10px 0; }
+        .foto-grid input { padding: 0; height: 60px; }
+        .qr-container { text-align: center; margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <img src="img/gato-pin.png" alt="UbiPet" width="60">
-        </div>
-        <h1>Perfil de Mascota</h1>
+        <h1>Ubipet 🐕</h1>
+        <h3>Perfil de tu Mascota</h3>
 
-        <h3>🐕 Datos de la Mascota</h3>
-        <input type="text" id="nombreMascota" placeholder="Nombre de la mascota">
-        <input type="number" id="peso" placeholder="Peso (kg)" step="0.1">
-        <input type="number" id="edad" placeholder="Edad (años)">
+        <!-- Datos de la mascota -->
+        <label>Nombre de la mascota</label>
+        <input type="text" id="nombreMascota" placeholder="Nombre">
+
+        <label>Peso (kg)</label>
+        <input type="number" id="peso" placeholder="Peso" step="0.1">
+
+        <label>Edad (años)</label>
+        <input type="number" id="edad" placeholder="Edad">
+
+        <label>Raza</label>
         <input type="text" id="raza" placeholder="Raza">
-        <label><input type="checkbox" id="vacunas"> Vacunas al día</label>
+
+        <label>Vacunas al día</label>
+        <input type="checkbox" id="vacunas">
+
+        <label>Descripción</label>
         <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
 
-        <h4>Fotos (máx 5)</h4>
-        <input type="file" id="foto1" accept="image/*">
-        <input type="file" id="foto2" accept="image/*">
-        <input type="file" id="foto3" accept="image/*">
-        <input type="file" id="foto4" accept="image/*">
-        <input type="file" id="foto5" accept="image/*">
-
-        <div class="perdida-toggle">
-            <label>¿Está perdida?</label>
-            <div class="toggle" onclick="togglePerdida()" id="togglePerdida">
-                <div class="toggle-circle"></div>
-            </div>
-            <input type="hidden" id="estaPerdida" value="false">
+        <label>Fotos (hasta 5)</label>
+        <div class="foto-grid">
+            <input type="file" id="foto1" accept="image/*">
+            <input type="file" id="foto2" accept="image/*">
+            <input type="file" id="foto3" accept="image/*">
+            <input type="file" id="foto4" accept="image/*">
+            <input type="file" id="foto5" accept="image/*">
         </div>
 
-        <h3>👤 Datos del Dueño</h3>
+        <!-- Toggle perdida -->
+        <label>¿Está perdida?</label>
+        <div class="toggle" id="togglePerdida" onclick="togglePerdida()">
+            <div class="toggle-circle"></div>
+        </div>
+        <input type="hidden" id="estaPerdida" value="false">
+
+        <!-- Datos del dueño -->
+        <h3>Datos del dueño</h3>
+        <label>Nombre</label>
         <input type="text" id="nombreDueno" placeholder="Tu nombre">
+
+        <label>Correo electrónico</label>
         <input type="email" id="emailDueno" placeholder="Email">
+
+        <label>Teléfono / WhatsApp</label>
         <input type="tel" id="telefono" placeholder="Número de contacto">
 
+        <!-- Botones -->
         <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
         <button onclick="generarQR()">🖼️ Generar QR</button>
 
-        <div id="qrSection" class="hidden">
+        <!-- QR -->
+        <div class="qr-container hidden" id="qrSection">
             <h3>QR para rescate</h3>
-            <img id="qrImg" width="200" height="200" alt="QR">
-            <p id="urlPerfil" style="word-break: break-all;"></p>
+            <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
+            <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
+            <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
         </div>
     </div>
 

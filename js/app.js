@@ -1,5 +1,5 @@
 // ============================================
-// 🐾 UBIPET - APP.JS COMPLETO Y DEFINITIVO
+// 🐾 UBIPET - APP.JS COMPLETO
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
@@ -8,12 +8,10 @@ const supabaseClient = window.supabase.createClient(
     "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
 );
 
-
 // ============================================
 // 👤 REGISTRO
 // ============================================
 async function registrar() {
-
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
@@ -22,10 +20,9 @@ async function registrar() {
         return;
     }
 
-    // 🔥 AQUÍ FORZAMOS EL REDIRECT CORRECTO
     const { error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
+        email,
+        password,
         options: {
             emailRedirectTo: "https://samirignaciosb-art.github.io/UbiPet"
         }
@@ -38,12 +35,10 @@ async function registrar() {
     }
 }
 
-
 // ============================================
 // 🔑 LOGIN
 // ============================================
 async function login() {
-
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
@@ -52,10 +47,7 @@ async function login() {
         return;
     }
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if (error) {
         alert("Error: " + error.message);
@@ -65,27 +57,126 @@ async function login() {
     }
 }
 
-
 // ============================================
 // 🔄 DETECTAR CONFIRMACIÓN Y SESIÓN ACTIVA
 // ============================================
 window.addEventListener("load", async () => {
-
     const { data } = await supabaseClient.auth.getSession();
 
     if (data.session) {
+        console.log("Sesión activa:", data.session.user.email);
 
-        console.log("Sesión activa detectada:", data.session.user.email);
-
-        // Si viene de confirmación
         if (window.location.hash.includes("access_token")) {
             alert("Email confirmado correctamente ✅");
-
-            // Limpiar el hash
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Redirigir al perfil
-        window.location.href = "perfil.html";
+        // Si estamos en index.html, redirigir al perfil
+        if (window.location.pathname.includes("index.html")) {
+            window.location.href = "perfil.html";
+        }
+    }
+});
+
+// ============================================
+// 💾 GUARDAR PERFIL DE MASCOTA
+// ============================================
+async function guardarPerfil() {
+    const nombreMascota = document.getElementById("nombreMascota").value;
+    const peso = document.getElementById("peso").value;
+    const edad = document.getElementById("edad").value;
+    const raza = document.getElementById("raza").value;
+    const vacunas = document.getElementById("vacunas").checked;
+    const descripcion = document.getElementById("descripcion").value;
+    const nombreDueno = document.getElementById("nombreDueno").value;
+    const emailDueno = document.getElementById("emailDueno").value;
+    const telefono = document.getElementById("telefono").value;
+    const estaPerdida = document.getElementById("estaPerdida").value === "true";
+
+    const { error } = await supabaseClient
+        .from("mascotas")
+        .insert([{
+            nombre: nombreMascota,
+            peso,
+            edad,
+            raza,
+            vacunas,
+            descripcion,
+            nombre_dueno: nombreDueno,
+            email_dueno: emailDueno,
+            telefono,
+            perdida: estaPerdida
+        }]);
+
+    if (error) {
+        alert("Error al guardar: " + error.message);
+    } else {
+        alert("Perfil guardado correctamente ✅");
+    }
+}
+
+// ============================================
+// 🔄 TOGGLE PERDIDA
+// ============================================
+function togglePerdida() {
+    const toggle = document.getElementById("togglePerdida");
+    const hiddenInput = document.getElementById("estaPerdida");
+
+    toggle.classList.toggle("active");
+    hiddenInput.value = toggle.classList.contains("active") ? "true" : "false";
+}
+
+// ============================================
+// 🖼️ GENERAR QR
+// ============================================
+function generarQR() {
+    const url = window.location.href.replace("perfil.html", "rescate.html");
+    const qrImg = document.getElementById("qrImg");
+    const urlPerfil = document.getElementById("urlPerfil");
+    const qrSection = document.getElementById("qrSection");
+
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    urlPerfil.textContent = url;
+    qrSection.classList.remove("hidden");
+}
+
+function copiarURL() {
+    const url = document.getElementById("urlPerfil").textContent;
+    navigator.clipboard.writeText(url);
+    alert("URL copiada al portapapeles 📋");
+}
+
+// ============================================
+// 🚨 RESCATE - MOSTRAR DATOS
+// ============================================
+window.addEventListener("load", async () => {
+    if (window.location.pathname.includes("rescate.html")) {
+        const { data, error } = await supabaseClient
+            .from("mascotas")
+            .select("*")
+            .order("id", { ascending: false })
+            .limit(1);
+
+        if (error) {
+            document.getElementById("datosRescate").innerHTML = "Error al cargar datos";
+            return;
+        }
+
+        if (data.length > 0) {
+            const mascota = data[0];
+            document.getElementById("datosRescate").innerHTML = `
+                <div class="alerta-roja">
+                    <strong>${mascota.nombre}</strong> (${mascota.raza}, ${mascota.edad} años)<br>
+                    Descripción: ${mascota.descripcion}<br>
+                    Dueño: ${mascota.nombre_dueno}<br>
+                    Email: ${mascota.email_dueno}<br>
+                    Teléfono: ${mascota.telefono}
+                </div>
+            `;
+
+            document.getElementById("btnLlamar").href = `tel:${mascota.telefono}`;
+            document.getElementById("btnWhatsApp").href = `https://wa.me/${mascota.telefono}`;
+            document.getElementById("btnSMS").href = `sms:${mascota.telefono}`;
+        }
     }
 });

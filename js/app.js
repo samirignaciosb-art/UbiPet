@@ -77,12 +77,35 @@ function cargarPerfil() {
 window.onload = cargarPerfil;
 // GENERAR QR
 function generarQR() {
-    const perfil = JSON.parse(localStorage.getItem('perfilMascota'));
-    if (!perfil) {
+    const perfilCompleto = JSON.parse(localStorage.getItem('perfilMascota'));
+    if (!perfilCompleto) {
         alert("Primero guarda el perfil");
         return;
     }
 
+    // Solo datos esenciales para rescate (sin fotos)
+    const perfilQR = {
+        nombre: perfilCompleto.nombre,
+        raza: perfilCompleto.raza,
+        edad: perfilCompleto.edad,
+        peso: perfilCompleto.peso,
+        descripcion: perfilCompleto.descripcion,
+        estaPerdida: perfilCompleto.estaPerdida,
+        dueno: perfilCompleto.dueno
+    };
+
+    const data = btoa(JSON.stringify(perfilQR));
+    const url = `${window.location.origin}/rescate.html?data=${encodeURIComponent(data)}`;
+
+    // Mostrar QR
+    document.getElementById('qrImg').src =
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+
+    document.getElementById('urlPerfil').textContent = url;
+    document.getElementById('qrSection').classList.remove('hidden');
+
+    alert("✅ QR generado! Copia URL e imprime");
+}
     // URL relativa dentro del repositorio
     const repo = window.location.pathname.split('/')[1]; // obtiene "UbiPet"
     const url = `${window.location.origin}/${repo}/rescate.html?data=${btoa(JSON.stringify(perfil))}`;

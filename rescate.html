@@ -2,26 +2,29 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UbiPet - Rescate</title>
+    <title>Ubipet - Rescate</title>
     <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        /* Estilos rápidos específicos para rescate */
+        body { background: #f7ede3; font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        h1, h3 { color: #84a59e; }
+        .alerta-roja { background-color: #f5bd60; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        a.button { display: inline-block; padding: 12px 20px; margin: 5px 0; background: #f5cac2; color: black; text-decoration: none; border-radius: 8px; font-weight: bold; }
+        a.button:hover { opacity: 0.8; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="img/gato-pin.png" alt="UbiPet" width="60">
-        </div>
-        <h1 id="tituloRescate">🐕 Mascota Encontrada</h1>
 
-        <div id="datosRescate"></div>
+    <h1>Ubipet - Rescate</h1>
+    <h2 id="tituloRescate">Mascota encontrada</h2>
 
-        <div class="rescate-buttons">
-            <a id="btnLlamar" class="btn-contacto" href="#">📞 Llamar</a>
-            <a id="btnWhatsApp" class="btn-contacto" href="#">💬 WhatsApp</a>
-            <a id="btnSMS" class="btn-contacto" href="#">📱 SMS</a>
-            <button id="btnUbicacion" class="btn-contacto">📍 Enviar GPS</button>
-        </div>
-        <button onclick="window.location.href='index.html'" class="btn-secondary">🏠 Volver</button>
+    <div id="datosRescate"></div>
+
+    <div id="botonesRescate">
+        <a id="btnLlamar" class="button" href="#">📞 Llamar</a>
+        <a id="btnWhatsApp" class="button" href="#">💬 WhatsApp</a>
+        <a id="btnSMS" class="button" href="#">✉️ SMS</a>
+        <a id="btnUbicacion" class="button" href="javascript:void(0)">📍 Enviar mi ubicación</a>
     </div>
 
     <script src="js/app.js"></script>

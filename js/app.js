@@ -1,3 +1,9 @@
+// Verificar si el usuario está logueado
+const usuario = JSON.parse(localStorage.getItem('usuario'));
+if(!usuario){
+    alert("Debes iniciar sesión primero");
+    window.location.href = "index.html";
+}
 // LOGIN
 function login() {
     const email = document.getElementById('email').value;

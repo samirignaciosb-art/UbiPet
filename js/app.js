@@ -1,8 +1,6 @@
 // ============================================
-// 🐾 UBIPET - APP.JS COMPLETO
-// ============================================
-
 // 🔗 CONEXIÓN SUPABASE
+// ============================================
 const supabaseClient = supabase.createClient(
     "https://exeeqykieytuvlzdbsnn.supabase.co",
     "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
@@ -24,7 +22,7 @@ async function registrar() {
         email,
         password,
         options: {
-            emailRedirectTo: "https://samirignaciosb-art.github.io/UbiPet"
+            emailRedirectTo: window.location.origin + "/index.html"
         }
     });
 
@@ -58,7 +56,7 @@ async function login() {
 }
 
 // ============================================
-// 🔄 DETECTAR CONFIRMACIÓN Y SESIÓN ACTIVA
+// 🔄 DETECTAR SESIÓN ACTIVA
 // ============================================
 window.addEventListener("load", async () => {
     const { data } = await supabaseClient.auth.getSession();
@@ -76,7 +74,6 @@ window.addEventListener("load", async () => {
         }
     }
 
-    // Si estamos en perfil.html, cargar datos guardados
     if (window.location.pathname.includes("perfil.html")) {
         await cargarPerfil();
     }
@@ -186,8 +183,6 @@ function copiarURL() {
 // ============================================
 // 🚑 FUNCIONES DEL RESCATISTA
 // ============================================
-
-// 📞 Contactar dueño por WhatsApp
 function contactarDueno() {
     const telefono = document.getElementById("telefono").value;
     if (telefono) {
@@ -197,7 +192,6 @@ function contactarDueno() {
     }
 }
 
-// ✉️ Enviar correo al dueño
 function enviarCorreo() {
     const email = document.getElementById("emailDueno").value;
     if (email) {
@@ -207,7 +201,6 @@ function enviarCorreo() {
     }
 }
 
-// 📋 Copiar número de teléfono al portapapeles
 function copiarTelefono() {
     const telefono = document.getElementById("telefono").value;
     if (telefono) {
@@ -219,7 +212,6 @@ function copiarTelefono() {
     }
 }
 
-// 📍 Enviar ubicación real al WhatsApp o SMS del dueño
 function enviarUbicacion() {
     const telefono = document.getElementById("telefono").value;
     if (!telefono) {
@@ -234,15 +226,11 @@ function enviarUbicacion() {
                 const lon = position.coords.longitude;
 
                 const mensaje = `¡Encontré tu mascota!\n📍 Ubicación: https://maps.google.com/?q=${lat},${lon}`;
-
-                // Preguntar al rescatista si quiere enviar por WhatsApp o SMS
                 const opcion = confirm("¿Quieres enviar la ubicación por WhatsApp?\nSi eliges 'Cancelar', se enviará por SMS.");
 
                 if (opcion) {
-                    // WhatsApp
                     window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, "_blank");
                 } else {
-                    // SMS
                     window.location.href = `sms:${telefono}?body=${encodeURIComponent(mensaje)}`;
                 }
             },
@@ -259,4 +247,17 @@ function enviarUbicacion() {
 // 🚪 CERRAR SESIÓN
 // ============================================
 async function cerrarSesion() {
-    const { error } = await supabaseClient
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+        alert("Error al cerrar sesión: " + error.message);
+    } else {
+        alert("Sesión cerrada correctamente 👋");
+        window.location.href = "index.html";
+    }
+}
+
+// ============================================
+// 📌 LISTENERS AUTOMÁTICOS
+// ============================================
+document.addEventListener("DOMContentLoaded", () => {
+    const btnLogin = document.getElementById("btnLogin");

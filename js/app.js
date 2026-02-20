@@ -3,12 +3,12 @@
 // =======================
 
 // -----------------------
-// Inicialización al cargar la página
+// Función principal al cargar la página
 // -----------------------
 window.onload = function() {
     const path = window.location.pathname.split("/").pop();
 
-    if(path === "index.html") return; // login, nada más
+    if(path === "index.html") return; // login
     if(path === "perfil.html") {
         verificarSesion();
         cargarPerfil();
@@ -19,7 +19,7 @@ window.onload = function() {
 };
 
 // -----------------------
-// Verificar sesión
+// Verificación de sesión
 // -----------------------
 function verificarSesion() {
     const usuario = JSON.parse(localStorage.getItem('usuario'));
@@ -44,9 +44,7 @@ function login() {
     }
 }
 
-function signup() {
-    login(); // misma lógica
-}
+function signup() { login(); }
 
 // -----------------------
 // Toggle de mascota perdida
@@ -78,7 +76,7 @@ function guardarPerfil() {
         }
     };
 
-    // Leer hasta 5 fotos y guardarlas en base64
+    // Leer hasta 5 fotos en base64
     for(let i=1; i<=5; i++){
         const fileInput = document.getElementById(`foto${i}`);
         if(fileInput && fileInput.files[0]){
@@ -86,18 +84,17 @@ function guardarPerfil() {
             reader.onload = function(e){
                 perfil.fotos.push(e.target.result);
                 localStorage.setItem('perfilMascota', JSON.stringify(perfil));
-            };
+            }
             reader.readAsDataURL(fileInput.files[0]);
         }
     }
 
-    // Guardar perfil completo
     localStorage.setItem('perfilMascota', JSON.stringify(perfil));
     alert("✅ Perfil guardado");
 }
 
 // -----------------------
-// Cargar perfil en el formulario
+// Cargar perfil en formulario
 // -----------------------
 function cargarPerfil() {
     const perfil = JSON.parse(localStorage.getItem('perfilMascota'));
@@ -122,7 +119,7 @@ function cargarPerfil() {
 // -----------------------
 function generarQR() {
     const perfilCompleto = JSON.parse(localStorage.getItem('perfilMascota'));
-    if(!perfilCompleto) { alert("Primero guarda el perfil"); return; }
+    if(!perfilCompleto){ alert("Primero guarda el perfil"); return; }
 
     const perfilQR = {
         nombre: perfilCompleto.nombre,
@@ -136,24 +133,19 @@ function generarQR() {
 
     const data = btoa(JSON.stringify(perfilQR));
 
-    // Cambia "tu-usuario" y "UbiPet" por tu usuario y repo de GitHub
-    const url = `https://tu-usuario.github.io/UbiPet/rescate.html?data=${encodeURIComponent(data)}`;
+    // Detecta carpeta base automáticamente para GitHub Pages
+    const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    const url = `${window.location.origin}${base}rescate.html?data=${encodeURIComponent(data)}`;
 
     document.getElementById('qrImg').src =
         `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
 
-    const urlText = document.getElementById('urlPerfil');
-    urlText.textContent = url;
-    urlText.onclick = () => {
-        navigator.clipboard.writeText(url).then(() => alert("✅ URL copiada al portapapeles"));
-    };
-
+    document.getElementById('urlPerfil').textContent = url;
     document.getElementById('qrSection').classList.remove('hidden');
-    alert("✅ QR generado! Escanéalo para probar la página de rescate");
 }
 
 // -----------------------
-// Mostrar datos en rescate.html
+// Mostrar rescate
 // -----------------------
 function mostrarRescatador() {
     const params = new URLSearchParams(window.location.search);
@@ -173,17 +165,17 @@ function mostrarRescatador() {
             <p>🐕 Raza: ${perfil.raza || 'Desconocida'}</p>
             <p>⚖️ Peso: ${perfil.peso || 'Desconocido'}</p>
             <p>🧑 Dueño: ${perfil.dueno?.nombre || 'Sin datos'}</p>
-            <p>📞 Tel: ${perfil.dueno?.telefono || 'Sin número'}</p>
-            <p>📧 Email: ${perfil.dueno?.email || 'Sin email'}</p>
+            <p>📞 Tel: <a href="tel:${perfil.dueno?.telefono || ''}">${perfil.dueno?.telefono || 'Sin número'}</a></p>
+            <p>📧 Email: <a href="mailto:${perfil.dueno?.email || ''}">${perfil.dueno?.email || 'Sin email'}</a></p>
             <p>📝 Descripción: ${perfil.descripcion || 'Ninguna'}</p>
         `;
 
         // Botones funcionales
-        document.getElementById('btnLlamar').href = `tel:${perfil.dueno?.telefono || ''}`;
-        document.getElementById('btnWhatsApp').href = `https://wa.me/${perfil.dueno?.telefono || ''}`;
-        document.getElementById('btnSMS').href = `sms:${perfil.dueno?.telefono || ''}?body=¡Encontré tu mascota!`;
+        document.getElementById('btnLlamar').onclick = () => window.location.href = `tel:${perfil.dueno?.telefono || ''}`;
+        document.getElementById('btnWhatsApp').onclick = () => window.open(`https://wa.me/${perfil.dueno?.telefono || ''}`);
+        document.getElementById('btnSMS').onclick = () => window.location.href = `sms:${perfil.dueno?.telefono || ''}?body=¡Encontré tu mascota!`;
 
-        // Botón GPS
+        // GPS
         document.getElementById('btnUbicacion').onclick = function() {
             if(navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(pos => {

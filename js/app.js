@@ -63,35 +63,26 @@ async function login() {
 
 
 // ============================================
-// 🔄 DETECTAR CONFIRMACIÓN DE EMAIL
+// 🔄 DETECTAR CONFIRMACIÓN Y SESIÓN ACTIVA
 // ============================================
 
 window.addEventListener("load", async () => {
 
-    // Detectar si hay sesión activa
     const { data } = await supabaseClient.auth.getSession();
 
     if (data.session) {
-        console.log("Sesión activa detectada");
 
-        // Limpiar hash de la URL (#access_token...)
+        console.log("Sesión activa detectada:", data.session.user.email);
+
+        // Si viene de confirmación (tiene #access_token)
         if (window.location.hash.includes("access_token")) {
-            window.history.replaceState({}, document.title, window.location.pathname);
             alert("Email confirmado correctamente ✅");
-            // ============================================
-// 🔄 PROCESAR REDIRECCIÓN DE SUPABASE
-// ============================================
 
-async function procesarSesion() {
-    const { data, error } = await supabaseClient.auth.getSession();
-
-    if (data.session) {
-        console.log("Sesión activa:", data.session.user.email);
-        window.location.href = "perfil.html";
-    }
-}
-
-procesarSesion();
+            // Limpiar el hash de la URL
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
+
+        // Redirigir al perfil
+        window.location.href = "perfil.html";
     }
 });

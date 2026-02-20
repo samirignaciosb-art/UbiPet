@@ -25,16 +25,22 @@ function guardarPerfil() {
 // GENERAR QR
 function generarQR() {
     const perfil = JSON.parse(localStorage.getItem('perfilMascota'));
-    if(!perfil) return alert("Guarda primero el perfil");
+    if (!perfil) {
+        alert("Primero guarda el perfil");
+        return;
+    }
 
-    const data = btoa(JSON.stringify(perfil));
-    const url = `${window.location.origin}/rescate.html?data=${data}`;
+    // Generar la URL relativa
+    const url = `${window.location.origin}${window.location.pathname.replace(/index\.html$/, '')}rescate.html?data=${btoa(JSON.stringify(perfil))}`;
 
+    // Mostrar QR
     document.getElementById('qrImg').src =
         `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
 
     document.getElementById('urlPerfil').textContent = url;
     document.getElementById('qrSection').classList.remove('hidden');
+
+    alert("✅ QR generado! Copia URL e imprime");
 }
 
 // RESCATE

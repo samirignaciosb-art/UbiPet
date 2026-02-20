@@ -1,8 +1,8 @@
 // ============================================
-// 🐾 UBIPET - CONEXIÓN CORRECTA
+// 🐾 UBIPET - APP.JS COMPLETO Y ESTABLE
 // ============================================
 
-// NO usamos "supabase" como nombre de variable
+// 🔗 CONEXIÓN SUPABASE
 const supabaseClient = window.supabase.createClient(
     "https://exeeqykieytuvlzdbsnn.supabase.co",
     "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
@@ -17,6 +17,11 @@ async function registrar() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
+    if (!email || !password) {
+        alert("Completa todos los campos");
+        return;
+    }
+
     const { error } = await supabaseClient.auth.signUp({
         email: email,
         password: password
@@ -25,7 +30,7 @@ async function registrar() {
     if (error) {
         alert("Error: " + error.message);
     } else {
-        alert("Cuenta creada correctamente ✅");
+        alert("Revisa tu correo para confirmar la cuenta 📩");
     }
 }
 
@@ -37,6 +42,11 @@ async function login() {
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+        alert("Completa todos los campos");
+        return;
+    }
 
     const { error } = await supabaseClient.auth.signInWithPassword({
         email: email,
@@ -50,3 +60,24 @@ async function login() {
         window.location.href = "perfil.html";
     }
 }
+
+
+// ============================================
+// 🔄 DETECTAR CONFIRMACIÓN DE EMAIL
+// ============================================
+
+window.addEventListener("load", async () => {
+
+    // Detectar si hay sesión activa
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+        console.log("Sesión activa detectada");
+
+        // Limpiar hash de la URL (#access_token...)
+        if (window.location.hash.includes("access_token")) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            alert("Email confirmado correctamente ✅");
+        }
+    }
+});

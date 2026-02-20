@@ -1,228 +1,194 @@
-// =======================
-// Ubipet - app.js con Supabase
-// =======================
+// ============================================
+// 🐾 UBIPET - APP.JS FINAL SUPABASE
+// ============================================
 
-// -----------------------
-// Configuración Supabase
-// -----------------------
-const SUPABASE_URL = "https://exeeqykieytuvlzdbsnn.supabase.co"; // tu URL del proyecto
-const SUPABASE_ANON_KEY = "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"; // tu API key
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 🔗 CONEXIÓN SUPABASE
+const supabaseUrl = "https://exeeqykieytuvlzdbsnn.supabase.co";
+const supabaseKey = "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl";
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// -----------------------
-// Función principal al cargar la página
-// -----------------------
-window.onload = function() {
-    const path = window.location.pathname.split("/").pop();
 
-    if(path === "index.html") return; // login
-    if(path === "perfil.html") {
-        verificarSesion();
-        cargarPerfil();
-    }
-    if(path === "rescate.html") {
-        mostrarRescatador();
-    }
-};
+// ============================================
+// 👤 REGISTRO
+// ============================================
+async function registrar() {
 
-// -----------------------
-// Verificación de sesión
-// -----------------------
-async function verificarSesion() {
-    const { data: user } = await supabase.auth.getUser();
-    if(!user) {
-        alert("Debes iniciar sesión primero");
-        window.location.href = "index.html";
-    }
-}
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-// -----------------------
-// LOGIN
-// -----------------------
-async function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if(!email || !password){
+    if (!email || !password) {
         alert("Completa todos los campos");
         return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error){
-        alert("Error en login: " + error.message);
+    const { error } = await supabase.auth.signUp({
+        email,
+        password
+    });
+
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert("Cuenta creada correctamente ✅");
+    }
+}
+
+
+// ============================================
+// 🔑 LOGIN
+// ============================================
+async function login() {
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        alert("Error: " + error.message);
     } else {
         window.location.href = "perfil.html";
     }
 }
 
-// -----------------------
-// SIGNUP
-// -----------------------
-async function signup() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
 
-    if(!email || !password){
-        alert("Completa todos los campos");
+// ============================================
+// 🚪 LOGOUT
+// ============================================
+async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = "index.html";
+}
+
+
+// ============================================
+// 🔐 VERIFICAR SESIÓN
+// ============================================
+async function verificarSesion() {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) {
+        window.location.href = "index.html";
+    }
+}
+
+
+// ============================================
+// 💾 GUARDAR PERFIL
+// ============================================
+async function guardarPerfil() {
+
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
+
+    if (!user) {
+        alert("Debes iniciar sesión");
         return;
     }
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if(error){
-        alert("Error al registrarse: " + error.message);
-    } else {
-        alert("Usuario creado correctamente. Ya puedes iniciar sesión.");
-    }
-}
-
-// -----------------------
-// Toggle de mascota perdida
-// -----------------------
-function togglePerdida() {
-    const toggle = document.getElementById('togglePerdida');
-    const estaPerdida = document.getElementById('estaPerdida');
-    toggle.classList.toggle('active');
-    estaPerdida.value = toggle.classList.contains('active');
-}
-
-// -----------------------
-// Guardar perfil en Supabase
-// -----------------------
-async function guardarPerfil() {
     const perfil = {
-        nombre: document.getElementById('nombreMascota').value,
-        peso: document.getElementById('peso').value,
-        edad: document.getElementById('edad').value,
-        raza: document.getElementById('raza').value,
-        vacunas: document.getElementById('vacunas').checked,
-        descripcion: document.getElementById('descripcion').value,
-        fotos: [], // guardaremos las URLs después
-        estaPerdida: document.getElementById('estaPerdida').value,
-        dueno: {
-            nombre: document.getElementById('nombreDueno').value,
-            email: document.getElementById('emailDueno').value,
-            telefono: document.getElementById('telefono').value
-        }
+        user_id: user.id,
+        nombre_mascota: document.getElementById("nombreMascota").value,
+        raza: document.getElementById("raza").value,
+        peso: document.getElementById("peso").value,
+        edad: document.getElementById("edad").value,
+        vacunas: document.getElementById("vacunas").checked,
+        descripcion: document.getElementById("descripcion").value,
+        telefono: document.getElementById("telefono").value,
+        nombre_dueno: document.getElementById("nombreDueno").value,
+        esta_perdida: document.getElementById("estaPerdida").checked
     };
 
-    // Subir fotos a Supabase Storage
-    for(let i=1; i<=5; i++){
-        const fileInput = document.getElementById(`foto${i}`);
-        if(fileInput && fileInput.files[0]){
-            const file = fileInput.files[0];
-            const fileName = `perfil_${Date.now()}_${i}_${file.name}`;
-            const { data, error } = await supabase.storage
-                .from('fotos-mascotas')
-                .upload(fileName, file);
-            if(data) {
-                const url = supabase.storage.from('fotos-mascotas').getPublicUrl(fileName).data.publicUrl;
-                perfil.fotos.push(url);
-            }
-        }
-    }
+    const { error } = await supabase
+        .from("perfiles")
+        .upsert(perfil, { onConflict: "user_id" });
 
-    // Guardar perfil en tabla "perfiles"
-    const { error } = await supabase.from('perfiles').upsert({
-        email_dueno: perfil.dueno.email,
-        perfil_json: perfil
-    });
-    if(error) {
+    if (error) {
         alert("Error guardando perfil: " + error.message);
     } else {
-        alert("✅ Perfil guardado en Supabase");
+        alert("Perfil guardado correctamente ✅");
     }
 }
 
-// -----------------------
-// Cargar perfil desde Supabase
-// -----------------------
+
+// ============================================
+// 📥 CARGAR PERFIL
+// ============================================
 async function cargarPerfil() {
-    const email = (await supabase.auth.getUser()).data.user?.email;
-    if(!email) return;
 
-    const { data, error } = await supabase.from('perfiles').select('perfil_json').eq('email_dueno', email).single();
-    if(data){
-        const perfil = data.perfil_json;
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
 
-        document.getElementById('nombreMascota').value = perfil.nombre || '';
-        document.getElementById('peso').value = perfil.peso || '';
-        document.getElementById('edad').value = perfil.edad || '';
-        document.getElementById('raza').value = perfil.raza || '';
-        document.getElementById('vacunas').checked = perfil.vacunas || false;
-        document.getElementById('descripcion').value = perfil.descripcion || '';
-        document.getElementById('estaPerdida').value = perfil.estaPerdida || 'false';
-        if(perfil.estaPerdida === 'true') document.getElementById('togglePerdida').classList.add('active');
+    if (!user) return;
 
-        document.getElementById('nombreDueno').value = perfil.dueno?.nombre || '';
-        document.getElementById('emailDueno').value = perfil.dueno?.email || '';
-        document.getElementById('telefono').value = perfil.dueno?.telefono || '';
-    }
-}
-
-// -----------------------
-// Generar QR de rescate con datos de Supabase
-// -----------------------
-async function generarQR() {
-    const { data: user } = await supabase.auth.getUser();
-    const email = user?.email;
-    if (!email) { 
-        alert("Debes iniciar sesión primero"); 
-        return; 
-    }
-
-    // Traer perfil desde la tabla "perfiles"
-    const { data, error } = await supabase
-        .from('perfiles')
-        .select('perfil_json')
-        .eq('email_dueno', email)
+    const { data: perfil, error } = await supabase
+        .from("perfiles")
+        .select("*")
+        .eq("user_id", user.id)
         .single();
 
-    if (error || !data) {
-        alert("No se encontró tu perfil, guarda primero tu perfil.");
+    if (perfil) {
+        document.getElementById("nombreMascota").value = perfil.nombre_mascota || "";
+        document.getElementById("raza").value = perfil.raza || "";
+        document.getElementById("peso").value = perfil.peso || "";
+        document.getElementById("edad").value = perfil.edad || "";
+        document.getElementById("vacunas").checked = perfil.vacunas || false;
+        document.getElementById("descripcion").value = perfil.descripcion || "";
+        document.getElementById("telefono").value = perfil.telefono || "";
+        document.getElementById("nombreDueno").value = perfil.nombre_dueno || "";
+        document.getElementById("estaPerdida").checked = perfil.esta_perdida || false;
+    }
+}
+
+
+// ============================================
+// 🚨 LISTAR MASCOTAS PERDIDAS
+// ============================================
+async function cargarMascotasPerdidas() {
+
+    const { data, error } = await supabase
+        .from("perfiles")
+        .select("*")
+        .eq("esta_perdida", true);
+
+    if (error) {
+        console.error(error);
         return;
     }
 
-    const perfil = data.perfil_json;
+    const contenedor = document.getElementById("listaRescate");
+    if (!contenedor) return;
 
-    // Generar QR
-    const dataQR = btoa(JSON.stringify(perfil));
-    const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-    const url = `${window.location.origin}${base}rescate.html?data=${encodeURIComponent(dataQR)}`;
+    contenedor.innerHTML = "";
 
-    document.getElementById('qrImg').src =
-        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-    document.getElementById('urlPerfil').textContent = url;
-    document.getElementById('qrSection').classList.remove('hidden');
-}
-
-// -----------------------
-// Mostrar rescate
-// -----------------------
-function mostrarRescatador() {
-    const params = new URLSearchParams(window.location.search);
-    const data = params.get('data');
-    if(!data) return;
-
-    try {
-        const perfil = JSON.parse(atob(data));
-
-        if(perfil.estaPerdida === 'true'){
-            document.getElementById('tituloRescate').textContent = '🚨 MASCOTA PERDIDA 🚨';
-            document.getElementById('datosRescate').classList.add('alerta-roja');
-        }
-
-        document.getElementById('datosRescate').innerHTML = `
-            <h3>${perfil.nombre}</h3>
-            <p>🐕 Raza: ${perfil.raza || 'Desconocida'}</p>
-            <p>⚖️ Peso: ${perfil.peso || 'Desconocido'}</p>
-            <p>🧑 Dueño: ${perfil.dueno?.nombre || 'Sin datos'}</p>
-            <p>📞 Tel: <a href="tel:${perfil.dueno?.telefono || ''}">${perfil.dueno?.telefono || 'Sin número'}</a></p>
-            <p>📧 Email: <a href="mailto:${perfil.dueno?.email || ''}">${perfil.dueno?.email || 'Sin email'}</a></p>
-            <p>📝 Descripción: ${perfil.descripcion || 'Ninguna'}</p>
+    data.forEach(pet => {
+        contenedor.innerHTML += `
+            <div class="alerta-roja">
+                <h4>${pet.nombre_mascota}</h4>
+                <p><b>Raza:</b> ${pet.raza || "No especificada"}</p>
+                <p><b>Edad:</b> ${pet.edad || "No especificada"}</p>
+                <p><b>Descripción:</b> ${pet.descripcion || "Sin descripción"}</p>
+                <p><b>Contacto:</b> ${pet.telefono || "Sin teléfono"}</p>
+            </div>
         `;
-
-    } catch(e){
-        alert("Error leyendo los datos de la mascota. Contacta al dueño.");
-    }
+    });
 }
+
+
+// ============================================
+// 🔄 AUTO CARGA SEGÚN PÁGINA
+// ============================================
+document.addEventListener("DOMContentLoaded", () => {
+
+    if (window.location.pathname.includes("perfil.html")) {
+        verificarSesion();
+        cargarPerfil();
+    }
+
+    if (window.location.pathname.includes("rescate.html")) {
+        cargarMascotasPerdidas();
+    }
+
+});

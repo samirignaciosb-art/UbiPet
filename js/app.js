@@ -219,22 +219,44 @@ function copiarTelefono() {
     }
 }
 
-// 🗺️ Ver ubicación en Google Maps (ejemplo básico)
-function verMapa() {
-    const direccion = "Santiago, Chile"; // aquí podrías guardar la dirección en tu BD
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`, "_blank");
+// 📍 Enviar ubicación real al WhatsApp o SMS del dueño
+function enviarUbicacion() {
+    const telefono = document.getElementById("telefono").value;
+    if (!telefono) {
+        alert("No hay número de contacto disponible.");
+        return;
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                const mensaje = `¡Encontré tu mascota!\n📍 Ubicación: https://maps.google.com/?q=${lat},${lon}`;
+
+                // Preguntar al rescatista si quiere enviar por WhatsApp o SMS
+                const opcion = confirm("¿Quieres enviar la ubicación por WhatsApp?\nSi eliges 'Cancelar', se enviará por SMS.");
+
+                if (opcion) {
+                    // WhatsApp
+                    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, "_blank");
+                } else {
+                    // SMS
+                    window.location.href = `sms:${telefono}?body=${encodeURIComponent(mensaje)}`;
+                }
+            },
+            (error) => {
+                alert("No se pudo obtener la ubicación: " + error.message);
+            }
+        );
+    } else {
+        alert("Tu navegador no soporta geolocalización.");
+    }
 }
 
 // ============================================
 // 🚪 CERRAR SESIÓN
 // ============================================
 async function cerrarSesion() {
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-        alert("Error al cerrar sesión: " + error.message);
-    } else {
-        alert("Sesión cerrada correctamente 👋");
-        window.location.href = "index.html";
-    }
-}
+    const { error } = await supabaseClient

@@ -1,5 +1,5 @@
 // ============================================
-// 🐾 UBIPET - APP.JS COMPLETO
+// 🐾 UBIPET - APP.JS BÁSICO (SIN FOTOS)
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
@@ -75,6 +75,11 @@ window.addEventListener("load", async () => {
             window.location.href = "perfil.html";
         }
     }
+
+    // Si estamos en perfil.html, cargar datos guardados
+    if (window.location.pathname.includes("perfil.html")) {
+        await cargarPerfil();
+    }
 });
 
 // ============================================
@@ -97,7 +102,7 @@ async function guardarPerfil() {
 
     const { error } = await supabaseClient
         .from("perfiles")
-        .insert([{
+        .upsert([{
             user_id: userId,
             nombre_mascota: nombreMascota,
             peso,
@@ -108,13 +113,41 @@ async function guardarPerfil() {
             nombre_dueno: nombreDueno,
             telefono,
             esta_perdida: estaPerdida
-        }]);
+        }], { onConflict: "user_id" });
 
     if (error) {
         alert("Error al guardar: " + error.message);
     } else {
         alert("Perfil guardado correctamente ✅");
     }
+}
+
+// ============================================
+// 📥 CARGAR PERFIL EXISTENTE
+// ============================================
+async function cargarPerfil() {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const userId = sessionData.session?.user?.id;
+
+    if (!userId) return;
+
+    const { data, error } = await supabaseClient
+        .from("perfiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+    if (error || !data) return;
+
+    document.getElementById("nombreMascota").value = data.nombre_mascota || "";
+    document.getElementById("peso").value = data.peso || "";
+    document.getElementById("edad").value = data.edad || "";
+    document.getElementById("raza").value = data.raza || "";
+    document.getElementById("vacunas").checked = data.vacunas || false;
+    document.getElementById("descripcion").value = data.descripcion || "";
+    document.getElementById("nombreDueno").value = data.nombre_dueno || "";
+    document.getElementById("telefono").value = data.telefono || "";
+    document.getElementById("estaPerdida").value = data.esta_perdida ? "true" : "false";
 }
 
 // ============================================
@@ -147,37 +180,3 @@ function copiarURL() {
     navigator.clipboard.writeText(url);
     alert("URL copiada al portapapeles 📋");
 }
-
-// ============================================
-// 🚨 RESCATE - MOSTRAR DATOS
-// ============================================
-window.addEventListener("load", async () => {
-    if (window.location.pathname.includes("rescate.html")) {
-        const { data, error } = await supabaseClient
-            .from("perfiles")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(1);
-
-        if (error) {
-            document.getElementById("datosRescate").innerHTML = "Error al cargar datos";
-            return;
-        }
-
-        if (data.length > 0) {
-            const mascota = data[0];
-            document.getElementById("datosRescate").innerHTML = `
-                <div class="alerta-roja">
-                    <strong>${mascota.nombre_mascota}</strong> (${mascota.raza}, ${mascota.edad} años)<br>
-                    Descripción: ${mascota.descripcion}<br>
-                    Dueño: ${mascota.nombre_dueno}<br>
-                    Teléfono: ${mascota.telefono}
-                </div>
-            `;
-
-            document.getElementById("btnLlamar").href = `tel:${mascota.telefono}`;
-            document.getElementById("btnWhatsApp").href = `https://wa.me/${mascota.telefono}`;
-            document.getElementById("btnSMS").href = `sms:${mascota.telefono}`;
-        }
-    }
-});

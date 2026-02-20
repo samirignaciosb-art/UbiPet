@@ -1,5 +1,5 @@
 // ============================================
-// 🐾 UBIPET - APP.JS COMPLETO Y ESTABLE
+// 🐾 UBIPET - APP.JS COMPLETO Y DEFINITIVO
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
@@ -22,9 +22,13 @@ async function registrar() {
         return;
     }
 
+    // 🔥 AQUÍ FORZAMOS EL REDIRECT CORRECTO
     const { error } = await supabaseClient.auth.signUp({
         email: email,
-        password: password
+        password: password,
+        options: {
+            emailRedirectTo: "https://samirignaciosb-art.github.io/UbiPet"
+        }
     });
 
     if (error) {
@@ -65,7 +69,6 @@ async function login() {
 // ============================================
 // 🔄 DETECTAR CONFIRMACIÓN Y SESIÓN ACTIVA
 // ============================================
-
 window.addEventListener("load", async () => {
 
     const { data } = await supabaseClient.auth.getSession();
@@ -74,11 +77,11 @@ window.addEventListener("load", async () => {
 
         console.log("Sesión activa detectada:", data.session.user.email);
 
-        // Si viene de confirmación (tiene #access_token)
+        // Si viene de confirmación
         if (window.location.hash.includes("access_token")) {
             alert("Email confirmado correctamente ✅");
 
-            // Limpiar el hash de la URL
+            // Limpiar el hash
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 

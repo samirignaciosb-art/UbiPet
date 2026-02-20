@@ -1,102 +1,86 @@
-body {
-    font-family: sans-serif;
-    background: #f7ede3;
-    margin: 0;
-    padding: 20px;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ubipet - Perfil de Mascota</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Ubipet 🐕</h1>
 
-.container {
-    max-width: 400px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    text-align: center;
-}
+    <!-- Tarjeta principal -->
+    <div class="form-grid">
+      
+      <!-- Columna Mascota -->
+      <div>
+        <h3>🐾 Datos de la Mascota</h3>
+        <label>Nombre</label>
+        <input type="text" id="nombreMascota" placeholder="Nombre">
 
-h1, h3, h4 {
-    color: #84a59e;
-    margin: 15px 0;
-}
+        <label>Peso (kg)</label>
+        <input type="number" id="peso" placeholder="Peso" step="0.1">
 
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-}
+        <label>Edad (años)</label>
+        <input type="number" id="edad" placeholder="Edad">
 
-button, .btn-contacto {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    background: #f5cac2;
-    color: #333;
-    cursor: pointer;
-}
+        <label>Raza</label>
+        <input type="text" id="raza" placeholder="Raza">
 
-button:hover, .btn-contacto:hover {
-    opacity: 0.9;
-}
+        <label>Vacunas al día</label>
+        <input type="checkbox" id="vacunas">
 
-.btn-secondary {
-    background: #84a59e;
-    color: white;
-}
+        <label>Descripción</label>
+        <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
 
-.toggle {
-    width: 50px;
-    height: 25px;
-    background: #d1d5db;
-    border-radius: 25px;
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-    vertical-align: middle;
-}
+        <label>Fotos (hasta 5)</label>
+        <div class="foto-grid">
+          <input type="file" id="foto1" accept="image/*">
+          <input type="file" id="foto2" accept="image/*">
+          <input type="file" id="foto3" accept="image/*">
+          <input type="file" id="foto4" accept="image/*">
+          <input type="file" id="foto5" accept="image/*">
+        </div>
 
-.toggle-circle {
-    width: 21px;
-    height: 21px;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    transition: 0.3s;
-}
+        <!-- Toggle perdida -->
+        <h3>⚠️ Estado</h3>
+        <label>¿Está perdida?</label>
+        <div class="toggle" id="togglePerdida" onclick="togglePerdida()">
+          <div class="toggle-circle"></div>
+        </div>
+        <input type="hidden" id="estaPerdida" value="false">
+      </div>
 
-.toggle.active {
-    background: #f5bd60;
-}
+      <!-- Columna Dueño -->
+      <div>
+        <h3>👤 Datos del Dueño</h3>
+        <label>Nombre</label>
+        <input type="text" id="nombreDueno" placeholder="Tu nombre">
 
-.toggle.active .toggle-circle {
-    left: 27px;
-}
+        <label>Correo electrónico</label>
+        <input type="email" id="emailDueno" placeholder="Email">
 
-.perdida-toggle {
-    margin: 10px 0;
-}
+        <label>Teléfono / WhatsApp</label>
+        <input type="tel" id="telefono" placeholder="Número de contacto">
 
-.hidden {
-    display: none;
-}
+        <!-- Botones -->
+        <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
+        <button onclick="generarQR()">🖼️ Generar QR</button>
+        <button onclick="cerrarSesion()" class="btn-secondary">🚪 Cerrar Sesión</button>
+      </div>
+    </div>
 
-.rescate-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 15px 0;
-}
+    <!-- QR -->
+    <div class="qr-container hidden" id="qrSection">
+      <h3>QR para rescate</h3>
+      <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
+      <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
+      <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
+    </div>
+  </div>
 
-.alerta-roja {
-    background: #f5bd60;
-    padding: 10px;
-    border-radius: 8px;
-}
+  <!-- ✅ Scripts -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,86 +1,163 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Ubipet - Perfil de Mascota</title>
-  <link rel="stylesheet" href="css/estilos.css">
-</head>
-<body>
-  <div class="container">
-    <h1>Ubipet 🐕</h1>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    <!-- Tarjeta principal -->
-    <div class="form-grid">
-      
-      <!-- Columna Mascota -->
-      <div>
-        <h3>🐾 Datos de la Mascota</h3>
-        <label>Nombre</label>
-        <input type="text" id="nombreMascota" placeholder="Nombre">
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f7ede3;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
 
-        <label>Peso (kg)</label>
-        <input type="number" id="peso" placeholder="Peso" step="0.1">
+.container {
+  max-width: 900px;
+  width: 100%;
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
 
-        <label>Edad (años)</label>
-        <input type="number" id="edad" placeholder="Edad">
+h1 {
+  color: #2d6a4f;
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-        <label>Raza</label>
-        <input type="text" id="raza" placeholder="Raza">
+h3 {
+  color: #40916c;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #f5cac2;
+  padding-bottom: 5px;
+}
 
-        <label>Vacunas al día</label>
-        <input type="checkbox" id="vacunas">
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
 
-        <label>Descripción</label>
-        <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
+label {
+  font-weight: 600;
+  margin-top: 10px;
+  display: block;
+}
 
-        <label>Fotos (hasta 5)</label>
-        <div class="foto-grid">
-          <input type="file" id="foto1" accept="image/*">
-          <input type="file" id="foto2" accept="image/*">
-          <input type="file" id="foto3" accept="image/*">
-          <input type="file" id="foto4" accept="image/*">
-          <input type="file" id="foto5" accept="image/*">
-        </div>
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: border 0.3s;
+}
 
-        <!-- Toggle perdida -->
-        <h3>⚠️ Estado</h3>
-        <label>¿Está perdida?</label>
-        <div class="toggle" id="togglePerdida" onclick="togglePerdida()">
-          <div class="toggle-circle"></div>
-        </div>
-        <input type="hidden" id="estaPerdida" value="false">
-      </div>
+input:focus, textarea:focus {
+  border-color: #2d6a4f;
+  outline: none;
+}
 
-      <!-- Columna Dueño -->
-      <div>
-        <h3>👤 Datos del Dueño</h3>
-        <label>Nombre</label>
-        <input type="text" id="nombreDueno" placeholder="Tu nombre">
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(135deg, #84a59e, #f5cac2);
+  color: #fff;
+  transition: transform 0.2s, opacity 0.3s;
+}
 
-        <label>Correo electrónico</label>
-        <input type="email" id="emailDueno" placeholder="Email">
+button:hover {
+  transform: scale(1.03);
+  opacity: 0.9;
+}
 
-        <label>Teléfono / WhatsApp</label>
-        <input type="tel" id="telefono" placeholder="Número de contacto">
+.btn-secondary {
+  background: #84a59e;
+  color: #fff;
+}
 
-        <!-- Botones -->
-        <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
-        <button onclick="generarQR()">🖼️ Generar QR</button>
-        <button onclick="cerrarSesion()" class="btn-secondary">🚪 Cerrar Sesión</button>
-      </div>
-    </div>
+.toggle {
+  width: 50px;
+  height: 25px;
+  background: #d1d5db;
+  border-radius: 25px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  vertical-align: middle;
+}
 
-    <!-- QR -->
-    <div class="qr-container hidden" id="qrSection">
-      <h3>QR para rescate</h3>
-      <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
-      <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
-      <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
-    </div>
-  </div>
+.toggle-circle {
+  width: 21px;
+  height: 21px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: 0.3s;
+}
 
-  <!-- ✅ Scripts -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="js/app.js"></script>
-</body>
-</html>
+.toggle.active {
+  background: #f5bd60;
+}
+
+.toggle.active .toggle-circle {
+  left: 27px;
+}
+
+.foto-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.foto-grid input {
+  padding: 0;
+  height: 70px;
+  border: 1px dashed #ccc;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.qr-container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Responsive: en pantallas pequeñas las columnas se apilan */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .container {
+    padding: 20px;
+    border-radius: 15px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h3 {
+    font-size: 18px;
+  }
+
+  input, textarea, button {
+    font-size: 14px;
+  }
+}

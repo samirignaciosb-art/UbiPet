@@ -2,20 +2,58 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UbiPet - Login</title>
+    <title>Ubipet - Iniciar Sesión</title>
     <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        body {
+            background: #f7ede3;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 { color: #84a59e; margin-bottom: 20px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: #f5cac2;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { opacity: 0.85; }
+        .secondary-btn { background: #f5bd60; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <img src="img/gato-pin.png" alt="UbiPet" width="80">
-        </div>
-        <h1>UbiPet</h1>
-        <input type="email" id="email" placeholder="📧 Email">
-        <input type="password" id="password" placeholder="🔒 Contraseña">
+        <h1>Ubipet 🐾</h1>
+        <input type="email" id="email" placeholder="Correo electrónico">
+        <input type="password" id="password" placeholder="Contraseña">
         <button onclick="login()">Iniciar Sesión</button>
-        <button onclick="signup()" class="btn-secondary">Nuevo Usuario</button>
+        <button onclick="signup()" class="secondary-btn">Registrarse</button>
     </div>
 
     <script src="js/app.js"></script>

@@ -1,8 +1,8 @@
 // ============================================
-// 🐾 UBIPET - APP.JS CORREGIDO
+// 🐾 UBIPET - CONEXIÓN CORRECTA
 // ============================================
 
-// 🔗 CONEXIÓN SUPABASE
+// NO usamos "supabase" como nombre de variable
 const supabaseClient = window.supabase.createClient(
     "https://exeeqykieytuvlzdbsnn.supabase.co",
     "sb_publishable_ffBzZEwygXXuyMDNDWVVoA_qxExK9bl"
@@ -46,6 +46,7 @@ async function login() {
     if (error) {
         alert("Error: " + error.message);
     } else {
+        alert("Inicio de sesión correcto ✅");
         window.location.href = "perfil.html";
     }
 }

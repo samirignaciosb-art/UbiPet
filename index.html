@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>Ubipet - Iniciar Sesión</title>
     <link rel="stylesheet" href="css/estilos.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-    <script src="js/app.js"></script>
     <style>
         body {
             background: #f7ede3;
@@ -25,7 +23,10 @@
             max-width: 400px;
             text-align: center;
         }
-        h1 { color: #84a59e; margin-bottom: 20px; }
+        h1 { 
+            color: #84a59e; 
+            margin-bottom: 20px; 
+        }
         input {
             width: 100%;
             padding: 12px;
@@ -45,17 +46,30 @@
             font-size: 16px;
             cursor: pointer;
         }
-        button:hover { opacity: 0.85; }
-        .secondary-btn { background: #f5bd60; }
+        button:hover { 
+            opacity: 0.85; 
+        }
+        .secondary-btn { 
+            background: #f5bd60; 
+        }
     </style>
 </head>
+
 <body>
+
     <div class="container">
         <h1>Ubipet 🐾</h1>
+
         <input type="email" id="email" placeholder="Correo electrónico">
         <input type="password" id="password" placeholder="Contraseña">
+
         <button onclick="login()">Iniciar Sesión</button>
-        <button onclick="signup()" class="secondary-btn">Registrarse</button>
+        <button onclick="registrar()" class="secondary-btn">Registrarse</button>
     </div>
+
+    <!-- SCRIPTS SIEMPRE AL FINAL -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+    <script src="js/app.js"></script>
+
 </body>
 </html>

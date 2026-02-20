@@ -1,5 +1,5 @@
 // ============================================
-// 🐾 UBIPET - APP.JS BÁSICO (SIN FOTOS)
+// 🐾 UBIPET - APP.JS COMPLETO
 // ============================================
 
 // 🔗 CONEXIÓN SUPABASE
@@ -93,7 +93,7 @@ async function guardarPerfil() {
     const vacunas = document.getElementById("vacunas").checked;
     const descripcion = document.getElementById("descripcion").value;
     const nombreDueno = document.getElementById("nombreDueno").value;
-    const emailDueno = document.getElementById("emailDueno").value;
+    const emailDueno = document.getElementById("emailDueno").value; // ✅ capturado
     const telefono = document.getElementById("telefono").value;
     const estaPerdida = document.getElementById("estaPerdida").value === "true";
 
@@ -111,6 +111,7 @@ async function guardarPerfil() {
             vacunas,
             descripcion,
             nombre_dueno: nombreDueno,
+            email_dueno: emailDueno,   // ✅ agregado aquí
             telefono,
             esta_perdida: estaPerdida
         }], { onConflict: "user_id" });
@@ -146,6 +147,7 @@ async function cargarPerfil() {
     document.getElementById("vacunas").checked = data.vacunas || false;
     document.getElementById("descripcion").value = data.descripcion || "";
     document.getElementById("nombreDueno").value = data.nombre_dueno || "";
+    document.getElementById("emailDueno").value = data.email_dueno || ""; // ✅ agregado aquí
     document.getElementById("telefono").value = data.telefono || "";
     document.getElementById("estaPerdida").value = data.esta_perdida ? "true" : "false";
 }

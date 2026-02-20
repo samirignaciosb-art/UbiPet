@@ -125,11 +125,45 @@ window.onload = function() {
     const data = params.get('data');
 
     if(data) {
-        const perfil = JSON.parse(atob(data));
-        document.getElementById('datosRescate').innerHTML =
-            `<h3>${perfil.nombre}</h3>
-             <p>📞 ${perfil.telefono}</p>`;
+        try {
+            const perfil = JSON.parse(atob(data));
 
-        document.getElementById('btnLlamar').href = `tel:${perfil.telefono}`;
+            // Alerta de perdida
+            if(perfil.estaPerdida === 'true'){
+                document.getElementById('tituloRescate').textContent = '🚨 MASCOTA PERDIDA 🚨';
+                document.getElementById('datosRescate').classList.add('alerta-roja');
+            }
+
+            // Mostrar info de la mascota y dueño
+            document.getElementById('datosRescate').innerHTML = `
+                <h3>${perfil.nombre}</h3>
+                <p>🐕 Raza: ${perfil.raza || 'Desconocida'}</p>
+                <p>⚖️ Peso: ${perfil.peso || 'Desconocido'}</p>
+                <p>🧑 Dueño: ${perfil.dueno?.nombre || 'Sin datos'}</p>
+                <p>📞 Tel: ${perfil.dueno?.telefono || 'Sin número'}</p>
+                <p>📧 Email: ${perfil.dueno?.email || 'Sin email'}</p>
+                <p>📝 Descripción: ${perfil.descripcion || 'Ninguna'}</p>
+            `;
+
+            // Botones funcionales
+            document.getElementById('btnLlamar').href = `tel:${perfil.dueno?.telefono || ''}`;
+            document.getElementById('btnWhatsApp').href = `https://wa.me/${perfil.dueno?.telefono || ''}`;
+            document.getElementById('btnSMS').href = `sms:${perfil.dueno?.telefono || ''}?body=¡Encontré tu mascota!`;
+
+            // Botón GPS
+            document.getElementById('btnUbicacion').onclick = function() {
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        const mensaje = `¡Encontré tu mascota!\n📍 Ubicación: https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                        window.open(`https://wa.me/${perfil.dueno?.telefono || ''}?text=${encodeURIComponent(mensaje)}`);
+                    });
+                } else {
+                    alert("GPS no disponible");
+                }
+            };
+
+        } catch(e){
+            alert("Error leyendo los datos de la mascota. Contacta al dueño.");
+        }
     }
 };

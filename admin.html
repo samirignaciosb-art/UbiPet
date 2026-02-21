@@ -2,47 +2,126 @@
 <html lang="es">
 <head>
   <title>👑 Ubipet Admin $15/placa</title>
-  <link rel="stylesheet" href="css/estilos.css">
   <style>
     body { background: #f7ede3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); max-width: 900px; width: 100%; }
-    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-    button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; }
+    .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); max-width: 900px; width: 100%; text-align: center; }
+    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+    button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
     button:hover { opacity: 0.9; }
     .crear-form { background: #e8f5e8; padding: 20px; border-radius: 15px; margin: 20px 0; }
-    .cliente-row { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 10px; }
-    #clientesLista { max-height: 500px; overflow-y: auto; }
+    .cliente-row { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 10px; text-align: left; }
+    #clientesLista { max-height: 500px; overflow-y: auto; text-align: left; }
+    h1 { color: #84a59e; margin-bottom: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 style="color: #84a59e;">👑 UBIPET ADMIN</h1>
+    <h1>👑 UBIPET ADMIN</h1>
     
-    <!-- Login SuperUser -->
+    <!-- Login -->
     <div id="loginAdmin">
       <input type="email" id="adminEmail" placeholder="samirignaciosb@gmail.com">
       <input type="password" id="adminPass" placeholder="Admin123">
-      <button id="adminLoginBtn">🔐 ACCEDER ADMIN</button>
+      <button onclick="adminLogin()">🔐 ACCEDER ADMIN</button>
     </div>
     
     <!-- Dashboard -->
-    <div id="adminDash" style="display: none;">
+    <div id="adminDash" style="display:none;">
       <h2>💰 CLIENTES ACTIVOS ($15/placa)</h2>
-      
       <div class="crear-form">
-        <h3>➕ NUEVO CLIENTE (1 clic)</h3>
+        <h3>➕ NUEVO CLIENTE</h3>
         <input id="newEmail" placeholder="cliente@placa.cl">
-        <input id="newPass" value="Ubipet123" style="width: 200px;">
-        <button id="crearClienteBtn">🚀 Crear + Notificar</button>
+        <input id="newPass" value="Ubipet123" style="width:200px;">
+        <button onclick="crearCliente()">🚀 Crear + Notificar</button>
       </div>
-      
       <h3>📊 MASCOTAS REGISTRADAS</h3>
       <div id="clientesLista">Cargando...</div>
-      
-      <button id="logoutBtn" style="background: #f44336;">🚪 Salir Admin</button>
+      <button onclick="logoutAdmin()" style="background:#f44336;">🚪 Salir</button>
     </div>
   </div>
 
-  <script src="js/admin/admin.js" defer></script>
+  <script>
+    // ADMIN INLINE - 100% SIN DEPENDENCIAS
+    const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
+    
+    async function adminLogin() {
+      const email = document.getElementById('adminEmail').value;
+      const pass = document.getElementById('adminPass').value;
+      
+      if (email !== SUPERUSER.email || pass !== SUPERUSER.password) {
+        alert('❌ Solo: samirignaciosb@gmail.com / Admin123');
+        return;
+      }
+      
+      document.getElementById('loginAdmin').style.display = 'none';
+      document.getElementById('adminDash').style.display = 'block';
+      await cargarClientes();
+      alert('✅ ¡ADMIN LIVE!');
+    }
+    
+    function logoutAdmin() {
+      document.getElementById('adminDash').style.display = 'none';
+      document.getElementById('loginAdmin').style.display = 'block';
+      document.getElementById('adminEmail').value = '';
+      document.getElementById('adminPass').value = '';
+    }
+    
+    async function crearCliente() {
+      const email = document.getElementById('newEmail').value;
+      const pass = document.getElementById('newPass').value || 'Ubipet123';
+      
+      if (!email.includes('@')) {
+        alert('❌ Email inválido');
+        return;
+      }
+      
+      // Gmail TU
+      window.location.href = `mailto:samirignaciosb@gmail.com?subject=🚀%20NUEVO%20CLIENTE%20${email}&body=CREAR%20SUPABASE:%20${email}%20/%20${pass}`;
+      
+      // WhatsApp cliente
+      window.open(`https://wa.me/56979928352?text=✅%20Placa%20lista!%20${email}%20/%20${pass}`);
+      
+      document.getElementById('newEmail').value = '';
+      alert('✅ ¡Gmail + WhatsApp enviados!');
+      await cargarClientes();
+    }
+    
+    async function cargarClientes() {
+      try {
+        document.getElementById('clientesLista').innerHTML = '🔄 Cargando...';
+        
+        const response = await fetch(
+          'https://exeeqykieytuvlzdbsnn.supabase.co/rest/v1/perfiles?select=*&order=created_at.desc',
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4',
+              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4'
+            }
+          }
+        );
+        
+        const clientes = await response.json();
+        
+        if (!clientes.length) {
+          document.getElementById('clientesLista').innerHTML = '🐕 Sin clientes aún';
+          return;
+        }
+        
+        document.getElementById('clientesLista').innerHTML = clientes.map(c => `
+          <div class="cliente-row">
+            <strong>🐕 ${c.nombre_mascota || 'Sin datos'}</strong><br>
+            👤 ${c.nombre_dueno || 'Sin dueño'}<br>
+            <span style="color:${c.esta_perdida ? '#f44336' : '#4CAF50'}">
+              ${c.esta_perdida ? '🚨 PERDIDA' : '🟢 ACTIVA'}
+            </span><br>
+            <small>${c.user_id?.slice(0,8)}... | ${new Date(c.created_at).toLocaleDateString('es-CL')}</small>
+          </div>
+        `).join('');
+        
+      } catch(error) {
+        document.getElementById('clientesLista').innerHTML = `Error: ${error.message}`;
+      }
+    }
+  </script>
 </body>
 </html>

@@ -64,6 +64,27 @@
             font-size: 14px !important;
             padding: 12px !important;
         }
+        .solicitud-form {
+            background: #e8f5e8 !important;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+        .solicitud-form input {
+            background: white;
+            margin: 10px 0;
+        }
+        .solicitud-form button {
+            background: #4CAF50 !important;
+            color: white !important;
+            font-weight: bold !important;
+        }
+        .solicitud-titulo {
+            color: #2e7d32;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -85,14 +106,25 @@
         <input type="password" id="password" placeholder="tu-contraseña">
         <button onclick="login()">🚀 Iniciar Sesión</button>
 
-        <!-- ✅ WHATSAPP DIRECTO (NUEVOS) -->
+        <!-- 🔥 FORM SOLICITUD PLACA (SIN PRECIO) -->
+        <div id="formSolicitud" class="solicitud-form">
+            <h3 class="solicitud-titulo">📱 Registra tu mascota ahora</h3>
+            <input id="solicitudEmail" type="email" placeholder="tu@email.com">
+            <input id="solicitudNombre" placeholder="Tu nombre completo">
+            <input id="solicitudTelefono" placeholder="+56912345678">
+            <button onclick="solicitarPlaca()">✅ ¡WhatsApp enviado! Te activo en 2min 🐕</button>
+            <button onclick="document.getElementById('formSolicitud').style.display='none'" 
+                    style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
+        </div>
+
+        <!-- ✅ WHATSAPP DIRECTO (SIN PRECIO) -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
-            <button onclick="pedirInvitacion()" class="whatsapp-btn">
-                👋 Nuevo? Solicitar Placa $15
+            <button onclick="mostrarSolicitud()" class="whatsapp-btn">
+                👋 Nuevo? Activar mi cuenta
             </button>
             <p style="font-size: 14px; color:#666; margin-top:10px; line-height:1.4;">
-                Te creo usuario + 1ª placa GRATIS en <strong>2min</strong> por WhatsApp<br>
-                <strong>+1 placa = $15 cada una</strong>
+                Te activo el acceso en <strong>2min</strong> por WhatsApp<br>
+                <em>Para dueños de placas Ubipet</em>
             </p>
         </div>
 
@@ -104,5 +136,60 @@
 
     <!-- ✅ Scripts -->
     <script type="module" src="js/app.js"></script>
+    
+    <!-- 🔥 SCRIPT SOLICITUD (SIN PRECIO) -->
+    <script>
+        // ✅ FUNCIÓN MOSTRAR FORM
+        window.mostrarSolicitud = function() {
+            document.getElementById('formSolicitud').style.display = 'block';
+        }
+        
+        // ✅ FUNCIÓN SOLICITAR PLACA (SIN PRECIO)
+        window.solicitarPlaca = async function() {
+            const email = document.getElementById('solicitudEmail').value.trim();
+            const nombre = document.getElementById('solicitudNombre').value.trim();
+            const telefono = document.getElementById('solicitudTelefono').value.trim();
+            
+            // Validaciones
+            if (!email || !nombre || !telefono) {
+                alert('❌ Completa todos los campos');
+                return;
+            }
+            
+            if (!email.includes('@') || !telefono.startsWith('569')) {
+                alert('❌ Email o teléfono inválido (debe ser +569...)');
+                return;
+            }
+            
+            try {
+                // 🔥 GUARDAR EN SUPABASE solicitudes_placas
+                const { error } = await supabase
+                    .from('solicitudes_placas')
+                    .insert({ 
+                        email, 
+                        nombre, 
+                        telefono 
+                    });
+                
+                if (error) throw error;
+                
+                // 🔥 WHATSAPP DIRECTO A TI (SIN PRECIO PUBLICO)
+                const mensaje = `🐕 *NUEVA SOLICITUD UBIPET* 📱\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}\n\n¡Crear user NOW en admin.html!`;
+                window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`, '_blank');
+                
+                // Limpiar y ocultar
+                document.getElementById('formSolicitud').style.display = 'none';
+                document.getElementById('solicitudEmail').value = '';
+                document.getElementById('solicitudNombre').value = '';
+                document.getElementById('solicitudTelefono').value = '';
+                
+                alert('✅ ¡WhatsApp enviado! Te activo en 2min 🐕');
+                
+            } catch(error) {
+                console.error('Error:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+    </script>
 </body>
 </html>

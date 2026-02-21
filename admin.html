@@ -1,42 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <title>👑 Ubipet Admin $15/placa</title>
   <link rel="stylesheet" href="css/estilos.css">
   <style>
-    .admin-container { max-width: 800px; }
-    .cliente-row { background:#f8f9fa; padding:15px; margin:10px 0; border-radius:10px; }
-    .crear-form { background:#e8f5e8; padding:20px; border-radius:15px; margin:20px 0; }
+    body { background: #f7ede3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); max-width: 900px; width: 100%; }
+    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    .crear-form { background: #e8f5e8; padding: 20px; border-radius: 15px; margin: 20px 0; }
+    .cliente-row { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 10px; }
+    #clientesLista { max-height: 500px; overflow-y: auto; }
   </style>
 </head>
 <body>
-  <div class="container admin-container">
-    <h1>👑 UBIPET ADMIN</h1>
+  <div class="container">
+    <h1 style="color: #84a59e;">👑 UBIPET ADMIN</h1>
     
     <!-- Login SuperUser -->
     <div id="loginAdmin">
-      <input type="email" id="adminEmail" placeholder="samirignaciosb@gmail.com" style="margin:5px;">
-      <input type="password" id="adminPass" placeholder="Admin123" style="margin:5px;">
-      <button onclick="adminLogin()" style="background:#4CAF50;">🔐 ACCEDER</button>
+      <input type="email" id="adminEmail" placeholder="samirignaciosb@gmail.com">
+      <input type="password" id="adminPass" placeholder="Admin123">
+      <button id="adminLoginBtn">🔐 ACCEDER ADMIN</button>
     </div>
     
     <!-- Dashboard -->
-    <div id="adminDash" style="display:none;">
-      <h2>💰 CLIENTES ACTIVOS</h2>
+    <div id="adminDash" style="display: none;">
+      <h2>💰 CLIENTES ACTIVOS ($15/placa)</h2>
+      
       <div class="crear-form">
         <h3>➕ NUEVO CLIENTE (1 clic)</h3>
         <input id="newEmail" placeholder="cliente@placa.cl">
-        <input id="newPass" value="Ubipet123" style="width:150px;">
-        <button onclick="crearCliente()">🚀 Crear + WhatsApp</button>
+        <input id="newPass" value="Ubipet123" style="width: 200px;">
+        <button id="crearClienteBtn">🚀 Crear + Notificar</button>
       </div>
       
       <h3>📊 MASCOTAS REGISTRADAS</h3>
       <div id="clientesLista">Cargando...</div>
       
-      <button onclick="logoutAdmin()" style="background:red;color:white;">🚪 Salir</button>
+      <button id="logoutBtn" style="background: #f44336;">🚪 Salir Admin</button>
     </div>
   </div>
 
-  <script type="module" src="js/admin/admin.js"></script>
+  <script src="js/admin/admin.js" defer></script>
 </body>
 </html>

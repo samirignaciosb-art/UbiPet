@@ -40,18 +40,35 @@ export async function generarQR() {
 
   if (!perfil) throw new Error('Guarda tu perfil primero')
 
-  const qrData = { ...perfil, timestamp: Date.now() }
-  const url = `rescate.html?data=${btoa(JSON.stringify(qrData))}`
+  // ✅ URL CORTA - GitHub Pages compatible (~400 chars)
+  const qrData = {
+    nombre_mascota: perfil.nombre_mascota,
+    raza: perfil.raza,
+    peso: perfil.peso,
+    edad: perfil.edad,
+    nombre_dueno: perfil.nombre_dueno,
+    telefono: perfil.telefono,
+    email_dueno: perfil.email_dueno,
+    descripcion: perfil.descripcion || '',
+    esta_perdida: perfil.esta_perdida,
+    vacunas: perfil.vacunas
+  }
   
-  document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`
-  document.getElementById('urlPerfil').textContent = url
+  const url = `rescate.html?data=${btoa(JSON.stringify(qrData))}`
+  const fullUrl = `https://samirignaciosb-art.github.io/UbiPet/${url}`
+  
+  document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fullUrl)}`
+  document.getElementById('urlPerfil').textContent = fullUrl
   document.getElementById('qrSection').classList.remove('hidden')
 }
 
 export function copiarURL() {
   const url = document.getElementById('urlPerfil').textContent
-  navigator.clipboard.writeText(url)
+  navigator.clipboard.writeText(url).then(() => {
+    alert('📋 URL copiada al portapapeles')
+  })
 }
+
 // CARGAR perfil al iniciar sesión
 export async function cargarPerfil() {
   try {
@@ -78,15 +95,16 @@ export async function cargarPerfil() {
       
       // Toggle perdida
       const estaPerdida = perfil.esta_perdida || false
-      document.getElementById('estaPerdida').value = estaPerdida
+      document.getElementById('estaPerdida').value = estaPerdida ? 'true' : 'false'
       if (estaPerdida) {
         document.getElementById('togglePerdida').classList.add('active')
       }
       
       // Habilitar QR
-      document.querySelector('button[onclick="generarQR()"]').disabled = false
+      const qrBtn = document.querySelector('button[onclick="generarQR()"]')
+      if (qrBtn) qrBtn.disabled = false
     }
   } catch(error) {
-    console.log('No hay perfil guardado aún')
+    console.log('No hay perfil guardado aún:', error.message)
   }
 }

@@ -54,7 +54,7 @@ window.generarQR = async function() {
 }
 
 window.copiarURL = copiarURL
-window.cargarPerfil = cargarPerfil  // ← NUEVO: LÍNEA CLAVE
+window.cargarPerfil = cargarPerfil  // ← ¡ESTA LÍNEA ERA LA CLAVE!
 
 // Rescate functions
 window.cargarRescate = cargarRescate
@@ -63,14 +63,17 @@ window.enviarCorreo = enviarCorreo
 window.copiarTelefono = copiarTelefono
 window.enviarUbicacion = enviarUbicacion
 
-// Auto-ejecutar según página
+// Auto-ejecutar según página - CARGAR PERFIL AUTOMÁTICO
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.pathname.includes('rescate.html')) {
     window.cargarRescate()
   } 
   else if (window.location.pathname.includes('perfil.html')) {
-    if (typeof window.cargarPerfil === 'function') {
-      window.cargarPerfil()
-    }
+    // Esperar que modules carguen completamente
+    setTimeout(() => {
+      if (typeof window.cargarPerfil === 'function') {
+        window.cargarPerfil()
+      }
+    }, 200)
   }
 })

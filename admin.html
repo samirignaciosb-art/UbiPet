@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>👑 Ubipet Admin $15/placa</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <style>
+    .admin-container { max-width: 800px; }
+    .cliente-row { background:#f8f9fa; padding:15px; margin:10px 0; border-radius:10px; }
+    .crear-form { background:#e8f5e8; padding:20px; border-radius:15px; margin:20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container admin-container">
+    <h1>👑 UBIPET ADMIN</h1>
+    
+    <!-- Login SuperUser -->
+    <div id="loginAdmin">
+      <input type="email" id="adminEmail" placeholder="samirignaciosb@gmail.com" style="margin:5px;">
+      <input type="password" id="adminPass" placeholder="Admin123" style="margin:5px;">
+      <button onclick="adminLogin()" style="background:#4CAF50;">🔐 ACCEDER</button>
+    </div>
+    
+    <!-- Dashboard -->
+    <div id="adminDash" style="display:none;">
+      <h2>💰 CLIENTES ACTIVOS</h2>
+      <div class="crear-form">
+        <h3>➕ NUEVO CLIENTE (1 clic)</h3>
+        <input id="newEmail" placeholder="cliente@placa.cl">
+        <input id="newPass" value="Ubipet123" style="width:150px;">
+        <button onclick="crearCliente()">🚀 Crear + WhatsApp</button>
+      </div>
+      
+      <h3>📊 MASCOTAS REGISTRADAS</h3>
+      <div id="clientesLista">Cargando...</div>
+      
+      <button onclick="logoutAdmin()" style="background:red;color:white;">🚪 Salir</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/admin/admin.js"></script>
+</body>
+</html>

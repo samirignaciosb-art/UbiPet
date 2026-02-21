@@ -1,4 +1,4 @@
-import { guardarPerfil, generarQR, cerrarSesion, copiarURL } from './perfiles.js';
+import { guardarPerfil, generarQR, cerrarSesion, copiarURL } from './perfil.js';
 import { login, registrar } from './login.js';
 import './main.js';
 import './qr.js';

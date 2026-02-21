@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ubipet - Iniciar Sesión</title>
     <link rel="stylesheet" href="css/estilos.css">
     <style>
@@ -49,22 +50,55 @@
         button:hover { 
             opacity: 0.85; 
         }
+        .whatsapp-btn { 
+            background: #25D366 !important; 
+            color: white !important;
+            font-size: 18px !important;
+            padding: 18px !important;
+            border-radius: 25px !important;
+            margin: 20px 0 !important;
+        }
         .secondary-btn { 
             background: #f5bd60; 
+        }
+        .exito {
+            .container {
+                text-align: center;
+                background: #d4edda;
+                color: #155724;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+            }
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
-        <h1>Ubipet 🐾</h1>
+        <h1>🔐 Ubipet</h1>
+        <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
 
-        <input type="email" id="email" placeholder="Correo electrónico">
-        <input type="password" id="password" placeholder="Contraseña">
+        <!-- ✅ FORMULARIO LOGIN (SIEMPRE VISIBLE) -->
+        <input type="email" id="email" placeholder="test@test.com">
+        <input type="password" id="password" placeholder="123456">
+        <button onclick="login()">🚀 Iniciar Sesión</button>
 
-        <button onclick="login()">Iniciar Sesión</button>
-        <button onclick="registrar()" class="secondary-btn">Registrarse</button>
+        <!-- ✅ WHATSAPP DIRECTO (NUEVO CLIENTE) -->
+        <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
+            <button onclick="pedirInvitacion()" class="whatsapp-btn">
+                👋 Nuevo? Solicitar Placa $15
+            </button>
+            <p style="font-size: 14px; color:#666; margin-top:10px; line-height:1.4;">
+                Te creo usuario + 1ª placa GRATIS en <strong>2min</strong> por WhatsApp<br>
+                <strong>+1 placa = $15 cada una</strong>
+            </p>
+        </div>
+
+        <!-- ❌ FORMULARIO REGISTRO OCULTO -->
+        <div id="registroForm" style="display:none;">
+            <button onclick="registrar()" class="secondary-btn">Registrarse</button>
+        </div>
     </div>
 
     <!-- ✅ Scripts -->

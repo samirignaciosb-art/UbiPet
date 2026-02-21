@@ -25,3 +25,10 @@ export function togglePerdida() {
   input.value = input.value === "true" ? "false" : "true";
   alert("Estado cambiado a: " + input.value);
 }
+
+export function cargarPerfil() {
+  // Ejemplo básico: aquí podrías traer datos desde Supabase
+  // y rellenar los campos del formulario en perfil.html
+  console.log("Cargando perfil...");
+  alert("Aquí se cargaría el perfil desde Supabase.");
+}

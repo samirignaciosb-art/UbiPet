@@ -54,7 +54,18 @@
 
     <!-- ✅ Scripts -->
     <script type="module" src="js/app.js"></script>
+    <script>
+  // FIX: Cargar QR inmediatamente
+  window.addEventListener('load', function() {
+    if (window.location.search.includes('data=')) {
+      setTimeout(() => {
+        if (typeof window.cargarRescate === 'function') {
+          window.cargarRescate()
+        }
+      }, 100)
+    }
+  })
+</script>
+
 </body>
 </html>
-
-

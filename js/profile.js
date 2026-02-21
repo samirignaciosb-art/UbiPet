@@ -52,3 +52,41 @@ export function copiarURL() {
   const url = document.getElementById('urlPerfil').textContent
   navigator.clipboard.writeText(url)
 }
+// CARGAR perfil al iniciar sesión
+export async function cargarPerfil() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+
+    if (perfil) {
+      // Llenar TODOS los campos
+      document.getElementById('nombreMascota').value = perfil.nombre_mascota || ''
+      document.getElementById('peso').value = perfil.peso || ''
+      document.getElementById('edad').value = perfil.edad || ''
+      document.getElementById('raza').value = perfil.raza || ''
+      document.getElementById('descripcion').value = perfil.descripcion || ''
+      document.getElementById('nombreDueno').value = perfil.nombre_dueno || ''
+      document.getElementById('emailDueno').value = perfil.email_dueno || ''
+      document.getElementById('telefono').value = perfil.telefono || ''
+      document.getElementById('vacunas').checked = perfil.vacunas || false
+      
+      // Toggle perdida
+      const estaPerdida = perfil.esta_perdida || false
+      document.getElementById('estaPerdida').value = estaPerdida
+      if (estaPerdida) {
+        document.getElementById('togglePerdida').classList.add('active')
+      }
+      
+      // Habilitar QR
+      document.querySelector('button[onclick="generarQR()"]').disabled = false
+    }
+  } catch(error) {
+    console.log('No hay perfil guardado aún')
+  }
+}

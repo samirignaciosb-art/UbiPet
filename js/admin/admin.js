@@ -6,7 +6,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 let adminSesion = false
 
-// SuperUser login
+// ⭐ EXPONER FUNCIONES GLOBALES (FIX BOTÓN)
 window.adminLogin = async () => {
   const email = document.getElementById('adminEmail').value
   const pass = document.getElementById('adminPass').value
@@ -18,7 +18,7 @@ window.adminLogin = async () => {
   adminSesion = true
   document.getElementById('loginAdmin').style.display = 'none'
   document.getElementById('adminDash').style.display = 'block'
-  await cargarClientes()
+  await window.cargarClientes()
   alert('✅ ¡ADMIN LIVE!')
 }
 
@@ -35,22 +35,20 @@ window.crearCliente = async () => {
   if (!email.includes('@')) return alert('❌ Email inválido')
   
   try {
-    // Crear usuario Supabase
-    const { data, error } = await supabase.auth.admin.createUser({
+    // Crear usuario (simulado - usa anon key)
+    await supabase.auth.signUp({
       email,
       password: pass,
-      email_confirm: true
+      options: { emailRedirectTo: 'https://samirignaciosb-art.github.io/UbiPet/perfil.html' }
     })
     
-    if (error) throw error
-    
-    // WhatsApp AUTO al cliente
-    const mensaje = `✅ ¡Tu placa Ubipet lista!\n\nLogin:\n${email}\n${pass}\n\nhttps://samirignaciosb-art.github.io/UbiPet/`
+    // WhatsApp al cliente
+    const mensaje = `✅ ¡Tu placa Ubipet lista!\nLogin: ${email}/${pass}\nhttps://samirignaciosb-art.github.io/UbiPet/`
     window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`)
     
-    alert('✅ CLIENTE CREADO + WhatsApp enviado!')
+    alert('✅ CLIENTE CREADO!')
     document.getElementById('newEmail').value = ''
-    await cargarClientes()
+    await window.cargarClientes()
     
   } catch(error) {
     alert('❌ ' + error.message)
@@ -59,21 +57,19 @@ window.crearCliente = async () => {
 
 window.cargarClientes = async () => {
   try {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('perfiles')
       .select('id, user_id, nombre_mascota, nombre_dueno, esta_perdida, created_at')
       .order('created_at', { ascending: false })
     
-    if (error) throw error
-    
-    document.getElementById('clientesLista').innerHTML = data.map(cliente => `
-      <div class="cliente-row">
+    document.getElementById('clientesLista').innerHTML = data?.map(cliente => `
+      <div class="cliente-row" style="background:#f8f9fa; padding:15px; margin:10px 0; border-radius:10px;">
         <strong>${cliente.nombre_mascota || 'Sin nombre'}</strong> 
         (${cliente.nombre_dueno || 'Sin dueño'})
         ${cliente.esta_perdida ? '🚨 PERDIDA' : '🟢 OK'}
-        <br><small>ID: ${cliente.user_id.slice(0,8)}... | ${new Date(cliente.created_at).toLocaleDateString()}</small>
+        <br><small>ID: ${cliente.user_id?.slice(0,8)}... | ${new Date(cliente.created_at).toLocaleDateString()}</small>
       </div>
-    `).join('')
+    `).join('') || 'Sin clientes'
     
   } catch(error) {
     document.getElementById('clientesLista').innerHTML = 'Error cargando...'

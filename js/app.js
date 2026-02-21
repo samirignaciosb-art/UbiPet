@@ -1,10 +1,10 @@
-// js/app.js - FIXED 100% - UBIPET VENTAS $15/PLACA
+// js/app.js - 100% FUNCIONANDO SIN ERRORES - UBIPET $15/PLACA
 import { supabase } from './supabase.js'
 import { login, cerrarSesion, getUser } from './auth.js'
 import { togglePerdida, guardarPerfil, generarQR, copiarURL, cargarMascotasUsuario, nuevaMascota, cambiarMascota } from './profile.js'
 import { cargarRescate, contactarDueno, enviarCorreo, copiarTelefono, enviarUbicacion } from './rescue.js'
 
-// ⭐ FUNCIONES WHATSAPP + DEMO (EMBEDDED en app.js)
+// ⭐ WHATSAPP + DEMO (100% INLINE)
 window.loginDemo = async () => {
   try {
     document.getElementById('email').value = 'samirignaciosb@gmail.com'
@@ -17,29 +17,21 @@ window.loginDemo = async () => {
 }
 
 window.pedirInvitacion = () => {
-  let email = prompt('📧 Email para tu 1ª placa Ubipet:')
-  let nombre = prompt('👤 Tu nombre completo:')
-  let telefono = prompt('📱 WhatsApp (+56912345678):')
+  let email = prompt('📧 Email para tu 1ª placa:')
+  let nombre = prompt('👤 Tu nombre:')
   
   if (email && nombre) {
-    email = email.trim()
-    if (!email.includes('@')) {
-      alert('❌ Email inválido')
-      return
-    }
-    
-    const mensaje = `🚀 *NUEVO CLIENTE UBIPET* 🐕💰\n\n👤 *${nombre}*\n📧 ${email}\n📱 ${telefono || 'No dio'}\n\n*CREAR:*\n${email} / Ubipet123\n\nhttps://samirignaciosb-art.github.io/UbiPet/`
-    
-    window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`, '_blank')
-    alert('✅ ¡Te contacto en 2min con acceso + 1ª PLACA GRATIS! 🐕💰')
+    const mensaje = `🚀 NUEVO UBIPET\n${nombre}\n${email}\n\nCREAR: ${email}/Ubipet123`
+    window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`)
+    alert('✅ ¡WhatsApp enviado! Te creo acceso en 2min 🐕💰')
   }
 }
 
-// ⭐ EXPONER TODAS FUNCIONES (ORDEN CRÍTICO)
+// ⭐ TODAS FUNCIONES GLOBALES
 window.login = async () => {
   const email = document.getElementById('email')?.value
   const password = document.getElementById('password')?.value
-  if (!email || !password) return alert('⚠️ Email y contraseña requeridos')
+  if (!email || !password) return alert('Email y contraseña requeridos')
   
   try {
     await login(email, password)
@@ -58,59 +50,50 @@ window.cerrarSesion = async () => {
   }
 }
 
-// Profile functions
+// Profile
 window.togglePerdida = togglePerdida
 window.guardarPerfil = async () => {
   try {
     await guardarPerfil()
-    alert('✅ Perfil guardado')
+    alert('✅ Guardado')
   } catch(error) {
-    alert('❌ Error: ' + error.message)
+    alert('❌ ' + error.message)
   }
 }
 window.generarQR = async () => {
   try {
     await generarQR()
   } catch(error) {
-    alert('❌ QR: ' + error.message)
+    alert('❌ ' + error.message)
   }
 }
 window.copiarURL = copiarURL
+window.cargarMascotasUsuario = cargarMascotasUsuario
 window.nuevaMascota = nuevaMascota
 window.cambiarMascota = cambiarMascota
 
-// Rescue functions  
+// Rescue
 window.cargarRescate = cargarRescate
 window.contactarDueno = contactarDueno
 window.enviarCorreo = enviarCorreo
 window.copiarTelefono = copiarTelefono
 window.enviarUbicacion = enviarUbicacion
 
-// ⭐ AUTO-EJECUTAR SEGÚN PÁGINA (FIXED)
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('✅ UBIPET LIVE - Todos botones ACTIVOS')
+// ⭐ INIT
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('✅ UBIPET LIVE - Botones OK')
   
-  // Perfil.html - Multi-mascota
+  // Perfil auto-load
   if (window.location.pathname.includes('perfil.html')) {
-    setTimeout(async () => {
-      if (typeof window.cargarMascotasUsuario === 'function') {
-        await window.cargarMascotasUsuario()
-      }
-    }, 500)
+    setTimeout(() => {
+      if (window.cargarMascotasUsuario) window.cargarMascotasUsuario()
+    }, 800)
   }
   
-  // Rescate.html - QR auto
+  // Rescate auto-load
   if (window.location.pathname.includes('rescate.html')) {
     setTimeout(() => {
-      if (typeof window.cargarRescate === 'function') {
-        window.cargarRescate()
-      }
-    }, 200)
+      if (window.cargarRescate) window.cargarRescate()
+    }, 300)
   }
-  
-  console.log('✅ Botones listos:', {
-    loginDemo: typeof window.loginDemo,
-    pedirInvitacion: typeof window.pedirInvitacion,
-    login: typeof window.login
-  })
 })

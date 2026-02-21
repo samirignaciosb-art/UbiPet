@@ -1,6 +1,6 @@
 // js/app.js - MAIN que une TODO
 import { login, registrar, cerrarSesion, getUser } from './auth.js'
-import { togglePerdida, guardarPerfil, generarQR, copiarURL } from './profile.js'
+import { togglePerdida, guardarPerfil, generarQR, copiarURL, cargarPerfil } from './profile.js'
 import { cargarRescate, contactarDueno, enviarCorreo, copiarTelefono, enviarUbicacion } from './rescue.js'
 
 // Exponer TODAS las funciones globalmente para onclick HTML
@@ -54,6 +54,7 @@ window.generarQR = async function() {
 }
 
 window.copiarURL = copiarURL
+window.cargarPerfil = cargarPerfil  // ← NUEVO: LÍNEA CLAVE
 
 // Rescate functions
 window.cargarRescate = cargarRescate
@@ -67,8 +68,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.pathname.includes('rescate.html')) {
     window.cargarRescate()
   } 
-  // ← AGREGAR ESTO:
   else if (window.location.pathname.includes('perfil.html')) {
-    await window.cargarPerfil()
+    if (typeof window.cargarPerfil === 'function') {
+      window.cargarPerfil()
+    }
   }
 })

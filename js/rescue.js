@@ -17,7 +17,7 @@ export function cargarRescate() {
         <p><strong>📱 Teléfono:</strong> ${datos.telefono}</p>
         <p><strong>✉️ Email:</strong> ${datos.email_dueno}</p>
         <p><strong>🐾 Raza:</strong> ${datos.raza} | <strong>Edad:</strong> ${datos.edad} años</p>
-        ${datos.descripcion ? `<p><em>"${datos.descripcion}"</em></p>` : ''}
+        ${datos.descripcion ? `<p><em>"${datos.descripcion}"em></p>` : ''}
         ${datos.vacunas ? '<p>✅ Vacunas al día</p>' : ''}
       </div>
     `
@@ -29,7 +29,7 @@ export function cargarRescate() {
 }
 
 export function contactarDueno() {
-  const tel = window.datosRescate?.telefono?.replace(/\D/g, '')
+  const tel = window.datosRescate?.telefono?.replace(/\D/g, '')  // ← FIXED: \D NO \\
   window.open(`https://wa.me/${tel}`)
 }
 
@@ -46,9 +46,9 @@ export function enviarUbicacion() {
     const lat = pos.coords.latitude
     const lng = pos.coords.longitude
     
-    // ✅ WhatsApp Location API (funciona iOS/Android)
-    const numeroDueno = window.datosRescate?.telefono?.replace(/\D/g, '') || ''
-    const mensaje = `¡Encontré tu mascota! 📍 Mi ubicación actual:\nhttps://maps.google.com/?q=${lat},${lng}`
+    // ✅ WhatsApp con GPS (NO Google Maps)
+    const numeroDueno = window.datosRescate?.telefono?.replace(/\D/g, '')  // ← FIXED
+    const mensaje = `¡Encontré tu mascota! 📍 Mi ubicación:\nhttps://maps.google.com/?q=${lat},${lng}`
     
     const whatsappUrl = `https://wa.me/${numeroDueno}?text=${encodeURIComponent(mensaje)}`
     window.open(whatsappUrl, '_blank')

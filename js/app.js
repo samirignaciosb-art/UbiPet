@@ -63,9 +63,12 @@ window.copiarTelefono = copiarTelefono
 window.enviarUbicacion = enviarUbicacion
 
 // Auto-ejecutar según página
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.pathname.includes('rescate.html')) {
     window.cargarRescate()
+  } 
+  // ← AGREGAR ESTO:
+  else if (window.location.pathname.includes('perfil.html')) {
+    await window.cargarPerfil()
   }
 })
-

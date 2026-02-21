@@ -43,6 +43,16 @@ export function copiarTelefono() {
 
 export function enviarUbicacion() {
   navigator.geolocation.getCurrentPosition(pos => {
-    window.open(`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`)
+    const lat = pos.coords.latitude
+    const lng = pos.coords.longitude
+    
+    // ✅ WhatsApp Location API (funciona iOS/Android)
+    const numeroDueno = window.datosRescate?.telefono?.replace(/\D/g, '') || ''
+    const mensaje = `¡Encontré tu mascota! 📍 Mi ubicación actual:\nhttps://maps.google.com/?q=${lat},${lng}`
+    
+    const whatsappUrl = `https://wa.me/${numeroDueno}?text=${encodeURIComponent(mensaje)}`
+    window.open(whatsappUrl, '_blank')
+  }, error => {
+    alert('❌ Activa GPS para enviar ubicación')
   })
 }

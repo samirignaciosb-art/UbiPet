@@ -1,61 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Ubipet - Rescate</title>
-    <link rel="stylesheet" href="css/estilos.css">
-    <style>
-        body { 
-            background: #f7ede3; 
-            font-family: sans-serif; 
-            max-width: 500px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
-        h1, h3 { color: #84a59e; }
-        .alerta-roja { 
-            background-color: #f5bd60; 
-            padding: 15px; 
-            border-radius: 10px; 
-            margin-bottom: 15px; 
-        }
-        button { 
-            display: block; 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            background: #f5cac2; 
-            color: black; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-        }
-        button:hover { opacity: 0.8; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubipet - Rescate</title>
+  <link rel="stylesheet" href="css/estilos.css">
 </head>
-<body>
-
-    <h1>Ubipet - Rescate</h1>
-    <h2 id="tituloRescate">Mascota encontrada</h2>
-
+<body data-page="rescate">
+  <div class="container">
+    <h1>Mascota encontrada</h1>
     <div id="datosRescate"></div>
 
-    <!-- Datos ocultos del dueño (se deberían cargar desde Supabase) -->
-    <input type="hidden" id="telefono" value="56912345678">
-    <input type="hidden" id="emailDueno" value="dueno@correo.com">
+    <input id="telefono" type="hidden" value="">
+    <input id="emailDueno" type="hidden" value="">
 
-    <div id="botonesRescate">
-        <button onclick="contactarDueno()">📞 Llamar / WhatsApp</button>
-        <button onclick="enviarCorreo()">✉️ Enviar Correo</button>
-        <button onclick="copiarTelefono()">📋 Copiar Teléfono</button>
-        <button onclick="enviarUbicacion()">📍 Enviar mi ubicación</button>
-    </div>
+    <button id="btnContactarDueno">Llamar / WhatsApp</button>
+    <button id="btnEnviarCorreo">Enviar correo</button>
+    <button id="btnCopiarTelefono">Copiar teléfono</button>
+    <button id="btnEnviarUbicacion">Enviar mi ubicación</button>
+  </div>
 
-    <!-- ✅ Scripts -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=20260221b"></script>
 </body>
 </html>
-
-

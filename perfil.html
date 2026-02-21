@@ -2,86 +2,65 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ubipet - Perfil de Mascota</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubipet - Perfil</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
-<body>
+<body data-page="perfil">
   <div class="container">
-    <h1>Ubipet 🐕</h1>
+    <h1>Perfil de Mascota</h1>
 
-    <!-- Tarjeta principal con dos columnas -->
     <div class="form-grid">
-      
-      <!-- Columna Mascota -->
       <div>
-        <h3>🐾 Datos de la Mascota</h3>
-        <label>Nombre</label>
-        <input type="text" id="nombreMascota" placeholder="Nombre">
+        <h3>Mascota</h3>
+        <label for="nombreMascota">Nombre</label>
+        <input id="nombreMascota" type="text">
 
-        <label>Peso (kg)</label>
-        <input type="number" id="peso" placeholder="Peso" step="0.1">
+        <label for="raza">Raza</label>
+        <input id="raza" type="text">
 
-        <label>Edad (años)</label>
-        <input type="number" id="edad" placeholder="Edad">
+        <label for="edad">Edad</label>
+        <input id="edad" type="number">
 
-        <label>Raza</label>
-        <input type="text" id="raza" placeholder="Raza">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" rows="3"></textarea>
 
-        <label>Vacunas al día</label>
-        <input type="checkbox" id="vacunas">
+        <label for="vacunas">Vacunas al día</label>
+        <input id="vacunas" type="checkbox">
 
-        <label>Descripción</label>
-        <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
-
-        <label>Fotos (hasta 5)</label>
-        <div class="foto-grid">
-          <input type="file" id="foto1" accept="image/*">
-          <input type="file" id="foto2" accept="image/*">
-          <input type="file" id="foto3" accept="image/*">
-          <input type="file" id="foto4" accept="image/*">
-          <input type="file" id="foto5" accept="image/*">
-        </div>
-
-        <!-- Toggle perdida -->
-        <h3>⚠️ Estado</h3>
+        <h3>Estado</h3>
         <label>¿Está perdida?</label>
-        <div class="toggle" id="togglePerdida" onclick="togglePerdida()">
+        <div class="toggle" id="togglePerdida">
           <div class="toggle-circle"></div>
         </div>
-        <input type="hidden" id="estaPerdida" value="false">
+        <input id="estaPerdida" type="hidden" value="false">
       </div>
 
-      <!-- Columna Dueño -->
       <div>
-        <h3>👤 Datos del Dueño</h3>
-        <label>Nombre</label>
-        <input type="text" id="nombreDueno" placeholder="Tu nombre">
+        <h3>Dueño</h3>
+        <label for="nombreDueno">Nombre</label>
+        <input id="nombreDueno" type="text">
 
-        <label>Correo electrónico</label>
-        <input type="email" id="emailDueno" placeholder="Email">
+        <label for="emailDueno">Correo</label>
+        <input id="emailDueno" type="email">
 
-        <label>Teléfono / WhatsApp</label>
-        <input type="tel" id="telefono" placeholder="Número de contacto">
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" type="tel">
 
-        <!-- Botones -->
-        <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
-        <button onclick="generarQR()">🖼️ Generar QR</button>
-        <button onclick="cerrarSesion()" class="btn-secondary">🚪 Cerrar Sesión</button>
+        <button id="btnGuardarPerfil">Guardar perfil</button>
+        <button id="btnQR">Generar QR</button>
+        <button id="btnCerrarSesion" class="btn-secondary">Cerrar sesión</button>
       </div>
     </div>
 
-    <!-- QR -->
     <div class="qr-container hidden" id="qrSection">
-      <h3>QR para rescate</h3>
-      <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
-      <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
-      <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
+      <h3>QR de rescate</h3>
+      <img id="qrImg" alt="Código QR" style="width:200px;height:200px;">
+      <div id="urlPerfil"></div>
+      <button id="btnCopiarURL">Copiar URL</button>
     </div>
   </div>
 
-    <!-- ✅ Scripts -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=20260221b"></script>
 </body>
 </html>
-

@@ -2,36 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ubipet - Perfil de Mascota</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
   <div class="container">
     <h1>Ubipet 🐕</h1>
+    <p id="loading">Cargando perfil...</p>
+
+    <!-- ✅ SELECTOR MULTI-MASCOTA (NUEVO) -->
+    <div id="mascotas-section" style="display:none; margin-bottom:20px;">
+      <label>🐕 Mis Mascotas:</label>
+      <select id="selectorMascotas" onchange="cambiarMascota()">
+        <option value="">Selecciona una mascota...</option>
+      </select>
+      <button onclick="nuevaMascota()" class="btn-secondary">➕ Nueva Mascota</button>
+    </div>
 
     <!-- Tarjeta principal con dos columnas -->
-    <div class="form-grid">
+    <div class="form-grid" id="formPerfil" style="display:none;">
       
       <!-- Columna Mascota -->
       <div>
         <h3>🐾 Datos de la Mascota</h3>
-        <label>Nombre</label>
-        <input type="text" id="nombreMascota" placeholder="Nombre">
+        <label>Nombre *</label>
+        <input type="text" id="nombreMascota" placeholder="Nombre" required maxlength="50">
 
         <label>Peso (kg)</label>
-        <input type="number" id="peso" placeholder="Peso" step="0.1">
+        <input type="number" id="peso" placeholder="Peso" step="0.1" min="0.1" max="100">
 
         <label>Edad (años)</label>
-        <input type="number" id="edad" placeholder="Edad">
+        <input type="number" id="edad" placeholder="Edad" min="0" max="30">
 
         <label>Raza</label>
-        <input type="text" id="raza" placeholder="Raza">
+        <input type="text" id="raza" placeholder="Raza" maxlength="50">
 
         <label>Vacunas al día</label>
         <input type="checkbox" id="vacunas">
 
         <label>Descripción</label>
-        <textarea id="descripcion" placeholder="Descripción especial" rows="3"></textarea>
+        <textarea id="descripcion" placeholder="Rasgos especiales, personalidad..." rows="3" maxlength="500"></textarea>
 
         <label>Fotos (hasta 5)</label>
         <div class="foto-grid">
@@ -41,46 +52,65 @@
           <input type="file" id="foto4" accept="image/*">
           <input type="file" id="foto5" accept="image/*">
         </div>
+        <small id="fotos-actuales"></small>
 
-        <!-- Toggle perdida -->
+        <!-- Toggle pérdida -->
         <h3>⚠️ Estado</h3>
         <label>¿Está perdida?</label>
         <div class="toggle" id="togglePerdida" onclick="togglePerdida()">
           <div class="toggle-circle"></div>
         </div>
         <input type="hidden" id="estaPerdida" value="false">
+        <input type="hidden" id="perfilId"> <!-- UUID mascota actual -->
       </div>
 
       <!-- Columna Dueño -->
       <div>
         <h3>👤 Datos del Dueño</h3>
-        <label>Nombre</label>
-        <input type="text" id="nombreDueno" placeholder="Tu nombre">
+        <label>Nombre *</label>
+        <input type="text" id="nombreDueno" placeholder="Tu nombre completo" required maxlength="100">
 
-        <label>Correo electrónico</label>
-        <input type="email" id="emailDueno" placeholder="Email">
+        <label>Correo electrónico *</label>
+        <input type="email" id="emailDueno" placeholder="email@dominio.com" required>
 
-        <label>Teléfono / WhatsApp</label>
-        <input type="tel" id="telefono" placeholder="Número de contacto">
+        <label>Teléfono / WhatsApp * (+56)</label>
+        <input type="tel" id="telefono" placeholder="+56912345678" required pattern="\+56[9][0-9]{8}" title="Formato: +56912345678">
 
-        <!-- Botones -->
-        <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
-        <button onclick="generarQR()">🖼️ Generar QR</button>
-        <button onclick="cerrarSesion()" class="btn-secondary">🚪 Cerrar Sesión</button>
+        <!-- Botones PRINCIPALES -->
+        <button onclick="guardarPerfil()" id="btnGuardar">💾 Guardar Perfil</button>
+        <button onclick="generarQR()" id="btnQR">🖼️ Generar QR (Placa)</button>
+        
+        <!-- Botones SECUNDARIOS -->
+        <div style="margin-top:15px;">
+          <button onclick="nuevaMascota()" class="btn-secondary">➕ Nueva Mascota</button>
+          <button onclick="cerrarSesion()" class="btn-secondary">🚪 Cerrar Sesión</button>
+        </div>
       </div>
     </div>
 
-    <!-- QR -->
+    <!-- QR para PLACA FÍSICA -->
     <div class="qr-container hidden" id="qrSection">
-      <h3>QR para rescate</h3>
-      <img id="qrImg" style="width:200px; height:200px; border:2px solid #ddd; border-radius:10px;">
-      <div id="urlPerfil" style="word-break: break-all; margin: 10px 0;"></div>
-      <button onclick="copiarURL()" style="background: #f5bd60;">📋 Copiar URL</button>
+      <h3>🎯 QR para placa de RESCATE</h3>
+      <p><strong>Imprime este QR en la placa de silicona/resina</strong></p>
+      <img id="qrImg" style="width:250px; height:250px; border:3px solid #4CAF50; border-radius:15px;">
+      <div id="urlPerfil" style="word-break: break-all; margin: 15px 0; padding:10px; background:#f0f0f0; border-radius:8px;"></div>
+      <div style="display:flex; gap:10px;">
+        <button onclick="copiarURL()" style="background: #4CAF50; color:white;">📋 Copiar URL</button>
+        <button onclick="descargarQR()">⬇️ Descargar PNG</button>
+      </div>
+      <p style="font-size:14px; color:#666; margin-top:15px;">
+        <strong>Esta URL es PERMANENTE</strong> - funciona siempre
+      </p>
     </div>
+
+    <!-- Mensajes -->
+    <div id="mensaje" style="margin-top:20px; padding:15px; border-radius:10px; display:none;"></div>
   </div>
 
-    <!-- ✅ Scripts -->
-    <script type="module" src="js/app.js"></script>
+  <!-- ✅ Scripts (NO tocar orden) -->
+  <script type="module" src="js/supabase.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/profile.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
-

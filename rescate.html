@@ -5,10 +5,32 @@
     <title>Ubipet - Rescate</title>
     <link rel="stylesheet" href="css/estilos.css">
     <style>
-        body { background: #f7ede3; font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        body { 
+            background: #f7ede3; 
+            font-family: sans-serif; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
         h1, h3 { color: #84a59e; }
-        .alerta-roja { background-color: #f5bd60; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        button { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f5cac2; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .alerta-roja { 
+            background-color: #f5bd60; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+        }
+        button { 
+            display: block; 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            background: #f5cac2; 
+            color: black; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
         button:hover { opacity: 0.8; }
     </style>
 </head>
@@ -32,6 +54,7 @@
 
     <!-- ✅ Scripts -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="js/app.js"></script>
+    <!-- Importa app.js como módulo -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

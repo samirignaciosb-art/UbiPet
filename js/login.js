@@ -15,8 +15,11 @@ export async function registrar() {
     options: { emailRedirectTo: window.location.origin + "/index.html" }
   });
 
-  if (error) alert("Error: " + error.message);
-  else alert("Revisa tu correo para confirmar la cuenta 📩");
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("Revisa tu correo para confirmar la cuenta 📩");
+  }
 }
 
 export async function login() {
@@ -30,8 +33,9 @@ export async function login() {
 
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-  if (error) alert("Error: " + error.message);
-  else {
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
     alert("Inicio de sesión correcto ✅");
     window.location.href = "perfil.html";
   }

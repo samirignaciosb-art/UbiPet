@@ -106,18 +106,18 @@
         <input type="password" id="password" placeholder="tu-contraseña">
         <button onclick="login()">🚀 Iniciar Sesión</button>
 
-        <!-- 🔥 FORM SOLICITUD PLACA (SIN PRECIO) -->
+        <!-- 🔥 FORM SOLICITUD PLACA (FIXED) -->
         <div id="formSolicitud" class="solicitud-form">
             <h3 class="solicitud-titulo">📱 Registra tu mascota ahora</h3>
             <input id="solicitudEmail" type="email" placeholder="tu@email.com">
             <input id="solicitudNombre" placeholder="Tu nombre completo">
-            <input id="solicitudTelefono" placeholder="+56912345678">
+            <input id="solicitudTelefono" placeholder="56912345678 o +56912345678">
             <button onclick="solicitarPlaca()">✅ ¡WhatsApp enviado! Te activo en 2min 🐕</button>
             <button onclick="document.getElementById('formSolicitud').style.display='none'" 
                     style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
         </div>
 
-        <!-- ✅ WHATSAPP DIRECTO (SIN PRECIO) -->
+        <!-- ✅ WHATSAPP DIRECTO -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
             <button onclick="mostrarSolicitud()" class="whatsapp-btn">
                 👋 Nuevo? Activar mi cuenta
@@ -137,33 +137,46 @@
     <!-- ✅ Scripts -->
     <script type="module" src="js/app.js"></script>
     
-    <!-- 🔥 SCRIPT SOLICITUD (SIN PRECIO) -->
+    <!-- 🔥 SCRIPT SOLICITUD (FIX COMPLETO) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Supabase config (para que funcione supabase)
+        const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
+        const { createClient } = supabase;
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
         // ✅ FUNCIÓN MOSTRAR FORM
         window.mostrarSolicitud = function() {
             document.getElementById('formSolicitud').style.display = 'block';
         }
         
-        // ✅ FUNCIÓN SOLICITAR PLACA (SIN PRECIO)
+        // ✅ FUNCIÓN SOLICITAR PLACA (FIX TOTAL)
         window.solicitarPlaca = async function() {
             const email = document.getElementById('solicitudEmail').value.trim();
             const nombre = document.getElementById('solicitudNombre').value.trim();
             const telefono = document.getElementById('solicitudTelefono').value.trim();
             
-            // Validaciones
+            // Validaciones básicas
             if (!email || !nombre || !telefono) {
                 alert('❌ Completa todos los campos');
                 return;
             }
             
-            if (!email.includes('@') || !telefono.startsWith('569')) {
-                alert('❌ Email o teléfono inválido (debe ser +569...)');
+            // ✅ FIXED: Acepta +569 Y 569 (sin +)
+            if (!email.includes('@')) {
+                alert('❌ Email inválido');
+                return;
+            }
+            
+            if (!telefono.match(/^569\d{8}$/) && !telefono.match(/^\+569\d{8}$/)) {
+                alert('❌ Teléfono inválido\n📱 Usa: 56912345678 o +56912345678');
                 return;
             }
             
             try {
-                // 🔥 GUARDAR EN SUPABASE solicitudes_placas
-                const { error } = await supabase
+                // Guardar en Supabase
+                const { error } = await window.supabase
                     .from('solicitudes_placas')
                     .insert({ 
                         email, 
@@ -173,11 +186,11 @@
                 
                 if (error) throw error;
                 
-                // 🔥 WHATSAPP DIRECTO A TI (SIN PRECIO PUBLICO)
+                // WhatsApp a TI
                 const mensaje = `🐕 *NUEVA SOLICITUD UBIPET* 📱\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}\n\n¡Crear user NOW en admin.html!`;
                 window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`, '_blank');
                 
-                // Limpiar y ocultar
+                // Limpiar form
                 document.getElementById('formSolicitud').style.display = 'none';
                 document.getElementById('solicitudEmail').value = '';
                 document.getElementById('solicitudNombre').value = '';

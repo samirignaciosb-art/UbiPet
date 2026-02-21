@@ -16,6 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btnQR = document.getElementById("btnQR");
   if (btnQR) btnQR.addEventListener("click", generarQR);
+
+  // ✅ Si existe un botón o lógica para cargar el perfil
+  cargarPerfil();
 });
 
 export async function cerrarSesion() {

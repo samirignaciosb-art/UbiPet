@@ -60,15 +60,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ✅ SUPABASE - NOMBRE ÚNICO (NO choca con CDN)
     const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
     
     const sbAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
     const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
 
-    // ✅ EVENT LISTENERS (NO onclick inline)
+    // Event listeners
     document.getElementById('btnLogin').addEventListener('click', adminLogin);
     document.getElementById('btnCrearCliente').addEventListener('click', crearClienteManual);
     document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
@@ -124,7 +122,6 @@
           </div>
         `).join('');
         
-        // ✅ Event listeners para botones DENTRO del HTML dinámico
         document.querySelectorAll('.btn-procesar').forEach(btn => {
           btn.addEventListener('click', function() {
             const id = this.dataset.id;
@@ -203,7 +200,8 @@
       const pass = document.getElementById('newPass').value || 'Ubipet123';
       const telefono = document.getElementById('newPhone').value.trim();
       
-      if (!email.includes('@') || !telefono.startsWith('569')) {
+      // ✅ FIX: Validación CORREGIDA
+      if (!email.includes('@') || !telefono) {
         mostrarStatus('❌ Email o teléfono inválido', 'error');
         return;
       }
@@ -286,7 +284,7 @@
       setTimeout(() => status.innerHTML = '', 5000);
     }
 
-    console.log('✅ Ubipet Admin 100% FIXEADO - sbAdmin OK');
+    console.log('✅ Ubipet Admin 100% FIXEADO - Jorge LISTO');
   </script>
 </body>
 </html>

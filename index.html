@@ -20,15 +20,13 @@
         <h1>🔐 Ubipet</h1>
         <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
 
-        <div id="debug" class="debug"></div>
+        <div id="debugInfo" class="debug"></div>
         
-        <!-- LOGIN -->
-        <input type="email" id="email" placeholder="samirignaciosb@gmail.com">
-        <input type="password" id="password" placeholder="Ubipet2026">
+        <input type="email" id="emailInput" name="email" placeholder="samirignaciosb@gmail.com">
+        <input type="password" id="passwordInput" name="password" placeholder="Ubipet2026">
         <button onclick="login()">🚀 Iniciar Sesión</button>
         <p style="font-size:12px; color:#666;">Test: samirignaciosb@gmail.com / Ubipet2026</p>
 
-        <!-- WHATSAPP -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
             <button onclick="mostrarSolicitud()" class="whatsapp-btn">👋 Nuevo? Activar cuenta</button>
         </div>
@@ -36,72 +34,70 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        console.log('🔥 Ubipet cargado - Supabase listo');
+        console.log('🔥 Ubipet cargado OK');
         
         const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function log(msg) {
-            console.log('🐕 ' + msg);
-            document.getElementById('debug').innerHTML += '<br>' + msg;
-            document.getElementById('debug').style.display = 'block';
+        function addDebug(msg) {
+            console.log('🐕', msg);
+            const debug = document.getElementById('debugInfo');
+            debug.innerHTML += '<div>' + msg + '</div>';
+            debug.style.display = 'block';
         }
 
         window.mostrarSolicitud = function() {
             window.open('https://wa.me/56979928352?text=*NUEVA+SOLICITUD+UBIPET* samirignaciosb-art.github.io/UbiPet/', '_blank');
         }
 
-        // 🔧 LOGIN CON DEBUG COMPLETO
         window.login = async function() {
-            log('1️⃣ CLICK LOGIN DETECTADO');
+            addDebug('1️⃣ CLICK LOGIN');
             
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
             
-            log('2️⃣ Email: ' + email);
+            addDebug('2️⃣ Email: ' + email);
             
             if (!email || !password) {
                 alert('❌ Completa email y contraseña');
                 return;
             }
             
-            log('3️⃣ Supabase signInWithPassword...');
+            addDebug('3️⃣ Conectando Supabase...');
             
             try {
+                addDebug('4️⃣ Enviando credenciales...');
                 const { data, error } = await sb.auth.signInWithPassword({ 
                     email: email.toLowerCase(), 
                     password 
                 });
                 
-                log('4️⃣ Respuesta Supabase: ' + (error ? '❌ ERROR' : '✅ OK'));
-                
                 if (error) {
-                    log('❌ ERROR: ' + error.message);
+                    addDebug('❌ ERROR: ' + error.message);
                     alert('❌ ' + error.message);
                     return;
                 }
                 
-                log('✅ TOKEN: ' + data.session.access_token.substring(0,20) + '...');
+                addDebug('✅ TOKEN OK: ' + (data.session.access_token || 'null').substring(0,20) + '...');
                 localStorage.setItem('user_token', data.session.access_token);
                 localStorage.setItem('user_id', data.user.id);
                 
-                log('🎉 LOGIN EXITOSO! Ve a perfil.html');
-                alert('✅ LOGIN OK! Ve manual a: perfil.html');
+                addDebug('🎉 LOGIN EXITOSO! Ve a: perfil.html');
+                alert('✅ LOGIN OK!\n\n🔗 Ve MANUAL a:\nhttps://samirignaciosb-art.github.io/UbiPet/perfil.html');
                 
             } catch(error) {
-                log('💥 CATCH ERROR: ' + error.message);
+                addDebug('💥 ERROR TOTAL: ' + error.message);
                 alert('❌ Error: ' + error.message);
             }
         }
 
-        // Auto-test
-        log('🚀 Ubipet listo - haz click en login');
-        
         // Enter key
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') login();
         });
+
+        addDebug('🚀 Listo - Click LOGIN');
     </script>
 </body>
 </html>

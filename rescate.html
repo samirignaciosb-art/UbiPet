@@ -4,68 +4,96 @@
     <meta charset="UTF-8">
     <title>Ubipet - Rescate</title>
     <link rel="stylesheet" href="css/estilos.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { 
-            background: #f7ede3; 
-            font-family: sans-serif; 
-            max-width: 500px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
+        body { background: #f7ede3; font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
         h1, h3 { color: #84a59e; }
-        .alerta-roja { 
-            background-color: #f5bd60; 
-            padding: 15px; 
-            border-radius: 10px; 
-            margin-bottom: 15px; 
-        }
-        button { 
-            display: block; 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            background: #f5cac2; 
-            color: black; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-        }
+        .alerta-roja { background-color: #f5bd60; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        button { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f5cac2; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         button:hover { opacity: 0.8; }
+        #whatsapp { background: #25D366 !important; color: white !important; }
     </style>
 </head>
 <body>
-
     <h1>Ubipet - Rescate</h1>
-    <h2 id="tituloRescate">Mascota encontrada</h2>
-
-    <div id="datosRescate"></div>
-
-    <!-- Datos ocultos del dueño (se deberían cargar desde Supabase) -->
-    <input type="hidden" id="telefono" value="56912345678">
-    <input type="hidden" id="emailDueno" value="dueno@correo.com">
-
-    <div id="botonesRescate">
-        <button onclick="contactarDueno()">📞 Llamar / WhatsApp</button>
-        <button onclick="enviarCorreo()">✉️ Enviar Correo</button>
+    <h2 id="tituloRescate">Cargando mascota...</h2>
+    <div id="datosRescate">🔄 Buscando datos...</div>
+    
+    <div id="botonesRescate" style="display:none;">
+        <a id="btnWhatsApp" href="#" class="button whatsapp">📱 WhatsApp Dueño</a>
         <button onclick="copiarTelefono()">📋 Copiar Teléfono</button>
-        <button onclick="enviarUbicacion()">📍 Enviar mi ubicación</button>
+        <button onclick="enviarUbicacion()">📍 Mi Ubicación</button>
     </div>
 
-    <!-- ✅ Scripts -->
-    <script type="module" src="js/app.js"></script>
     <script>
-  // FIX: Cargar QR inmediatamente
-  window.addEventListener('load', function() {
-    if (window.location.search.includes('data=')) {
-      setTimeout(() => {
-        if (typeof window.cargarRescate === 'function') {
-          window.cargarRescate()
+        const sb = createClient('TU_SUPABASE_URL', 'TU_ANON_KEY');
+        
+        let mascotaData = {};
+        
+        // CARGAR MASCOTA POR ID
+        async function cargarRescate() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            if (!id) {
+                document.getElementById('datosRescate').innerHTML = '❌ ID no encontrado';
+                return;
+            }
+            
+            try {
+                const { data, error } = await sb
+                    .from('perfiles')
+                    .select('nombre, raza, telefono, color, caracteristicas')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                mascotaData = data;
+                mostrarDatos();
+            } catch(e) {
+                document.getElementById('datosRescate').innerHTML = '❌ Error: ' + e.message;
+            }
         }
-      }, 100)
-    }
-  })
-</script>
-
+        
+        function mostrarDatos() {
+            document.getElementById('tituloRescate').textContent = `${mascotaData.nombre || 'Mascota'} encontrada 🐕`;
+            document.getElementById('datosRescate').innerHTML = `
+                <div class="alerta-roja">
+                    <h3>${mascotaData.nombre || 'Sin nombre'}</h3>
+                    <p><strong>📞 Teléfono:</strong> ${mascotaData.telefono || 'No registrado'}</p>
+                    <p><strong>🐕 Raza:</strong> ${mascotaData.raza || 'No especificada'}</p>
+                    <p><strong>🎨 Color:</strong> ${mascotaData.color || 'No especificado'}</p>
+                </div>
+            `;
+            
+            // WhatsApp dinámico
+            const tel = mascotaData.telefono?.replace('+56', '').replace(/\D/g, '');
+            document.getElementById('btnWhatsApp').href = `https://wa.me/56${tel}?text=¡Encontré a ${mascotaData.nombre}! Ubipet 🐕`;
+            
+            document.getElementById('botonesRescate').style.display = 'block';
+        }
+        
+        function copiarTelefono() {
+            const tel = mascotaData.telefono || 'No registrado';
+            navigator.clipboard.writeText(tel).then(() => {
+                alert('✅ Teléfono copiado: ' + tel);
+            });
+        }
+        
+        async function enviarUbicacion() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const msg = `¡Encontré a ${mascotaData.nombre}!\n📍 Ubicación: https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    const tel = mascotaData.telefono?.replace('+56', '').replace(/\D/g, '');
+                    window.open(`https://wa.me/56${tel}?text=${encodeURIComponent(msg)}`);
+                });
+            }
+        }
+        
+        // INICIO
+        window.cargarRescate = cargarRescate;
+        cargarRescate();
+    </script>
 </body>
 </html>

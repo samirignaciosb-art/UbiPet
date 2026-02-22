@@ -200,18 +200,62 @@
     </div>
 </div>
 
-<div class="action-buttons">
+async function enviarUbicacionWhatsApp() {
+    if (!navigator.geolocation) {
+        alert('❌ GPS no disponible en tu navegador');
+        return;
+    }
 
-                <a href="#" class="btn btn-whatsapp" id="whatsappBtn">
-                    📱 WhatsApp
-                </a>
-                <button class="btn btn-copy" onclick="copiarTelefono()">
-                    📋 Copiar
-                </button>
-                <button class="btn btn-location" onclick="miUbicacion()">
-                    📍 Mi Ubicación
-                </button>
-            </div>
+    // Muestra loading
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Obteniendo GPS...';
+    btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const telefono = document.getElementById('telefono').textContent.replace(/[^0-9]/g, '');
+        const mascota = document.getElementById('mascotaNombre').textContent;
+        const dueno = document.getElementById('nombreDueno').textContent;
+
+        const mensaje = encodeURIComponent(
+            `🚨 ¡ENCONTRÉ TU MASCOTA!
+
+` +
+            `🐕 Nombre: ${mascota}
+` +
+            `👤 Dueño: ${dueno}
+` +
+            `📱 Teléfono: +569${telefono}
+
+` +
+            `📍 MI UBICACIÓN EXACTA:
+` +
+            `https://maps.app.goo.gl/?q=${lat},${lng}
+
+` +
+            `¡VEN RÁPIDO! 🐾 Ubipet`
+        );
+
+        // WhatsApp directo al dueño CON ubicación
+        window.open(`https://wa.me/569${telefono}?text=${mensaje}`, '_blank');
+        
+        // Restaurar botón
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+    }, (error) => {
+        console.error('GPS Error:', error);
+        alert('❌ Activa la ubicación/GPS para enviar coordenadas exactas');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 30000
+    });
+}
         </div>
     </div>
 

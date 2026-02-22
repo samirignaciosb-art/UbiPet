@@ -4,109 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ubipet - Iniciar Sesión</title>
-    <link rel="stylesheet" href="css/estilos.css">
     <style>
-        body {
-            background: #f7ede3;
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        h1 { 
-            color: #84a59e; 
-            margin-bottom: 20px; 
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            background: #f5cac2;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover { 
-            opacity: 0.85; 
-        }
-        .whatsapp-btn { 
-            background: #25D366 !important; 
-            color: white !important;
-            font-size: 18px !important;
-            padding: 18px !important;
-            border-radius: 25px !important;
-            margin: 20px 0 !important;
-        }
-        .demo-btn { 
-            background: #4CAF50 !important; 
-            color: white !important;
-            font-size: 14px !important;
-            padding: 12px !important;
-        }
-        .solicitud-form {
-            background: #e8f5e8 !important;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-            display: none;
-        }
-        .solicitud-form input {
-            background: white;
-            margin: 10px 0;
-        }
-        .solicitud-form button {
-            background: #4CAF50 !important;
-            color: white !important;
-            font-weight: bold !important;
-        }
-        .solicitud-titulo {
-            color: #2e7d32;
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
+        body { background: #f7ede3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #84a59e; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #f5cac2; font-weight: bold; font-size: 16px; cursor: pointer; }
+        button:hover { opacity: 0.85; }
+        .whatsapp-btn { background: #25D366 !important; color: white !important; font-size: 18px !important; padding: 18px !important; border-radius: 25px !important; margin: 20px 0 !important; }
+        .solicitud-form { background: #e8f5e8 !important; padding: 25px; border-radius: 15px; margin: 20px 0; display: none; }
+        .solicitud-form input { background: white; margin: 10px 0; }
+        .solicitud-form button { background: #4CAF50 !important; color: white !important; font-weight: bold !important; }
+        .solicitud-titulo { color: #2e7d32; font-size: 18px; margin-bottom: 20px; }
+        .success-msg { background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin: 15px 0; }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h1>🔐 Ubipet</h1>
         <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
 
-        <!-- ✅ USUARIO REAL (sofía) - CORREGIDO -->
-        <div style="background:#e8f5e8; padding:15px; border-radius:10px; margin-bottom:20px;">
-            <h3>👨‍💼 Cliente Demo</h3>
-            <p><strong>samirignaciosb@gmail.com</strong></p>
-            <p><strong>Gapo1342.</strong> 👈 <em>(punto final)</em></p>
-            <button onclick="loginDemo()" class="demo-btn">🚀 Demo Sofía</button>
-        </div>
-
-        <!-- ✅ FORMULARIO LOGIN (CLIENTES) -->
+        <!-- ✅ LOGIN CLIENTES REALES -->
         <input type="email" id="email" placeholder="tu@email.com">
         <input type="password" id="password" placeholder="tu-contraseña">
         <button onclick="login()">🚀 Iniciar Sesión</button>
 
-        <!-- 🔥 FORM SOLICITUD PLACA (FIXED) -->
+        <!-- 🔥 SOLICITUD PLACA (PRODUCTIVA) -->
         <div id="formSolicitud" class="solicitud-form">
             <h3 class="solicitud-titulo">📱 Registra tu mascota ahora</h3>
             <input id="solicitudEmail" type="email" placeholder="tu@email.com">
@@ -117,7 +40,7 @@
                     style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
         </div>
 
-        <!-- ✅ WHATSAPP DIRECTO -->
+        <!-- ✅ WHATSAPP DIRECTO (ÚNICO CALL TO ACTION) -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
             <button onclick="mostrarSolicitud()" class="whatsapp-btn">
                 👋 Nuevo? Activar mi cuenta
@@ -128,80 +51,71 @@
             </p>
         </div>
 
-        <!-- ❌ REGISTRO OCULTO -->
-        <div id="registroForm" style="display:none;">
-            <button onclick="registrar()" style="display:none;">Registrarse</button>
-        </div>
+        <div id="successMsg" class="success-msg" style="display:none;"></div>
     </div>
 
-    <!-- ✅ Scripts -->
-    <script type="module" src="js/app.js"></script>
-    
-    <!-- 🔥 SCRIPT SOLICITUD (FIX COMPLETO) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase config (para que funcione supabase)
         const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
-        const { createClient } = supabase;
-        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // ✅ FUNCIÓN MOSTRAR FORM
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         window.mostrarSolicitud = function() {
             document.getElementById('formSolicitud').style.display = 'block';
         }
-        
-        // ✅ FUNCIÓN SOLICITAR PLACA (FIX TOTAL)
+
         window.solicitarPlaca = async function() {
             const email = document.getElementById('solicitudEmail').value.trim();
             const nombre = document.getElementById('solicitudNombre').value.trim();
             const telefono = document.getElementById('solicitudTelefono').value.trim();
             
-            // Validaciones básicas
             if (!email || !nombre || !telefono) {
                 alert('❌ Completa todos los campos');
                 return;
             }
             
-            // ✅ FIXED: Acepta +569 Y 569 (sin +)
             if (!email.includes('@')) {
                 alert('❌ Email inválido');
                 return;
             }
             
-            if (!telefono.match(/^569\d{8}$/) && !telefono.match(/^\+569\d{8}$/)) {
+            const telClean = telefono.replace(/[^0-9]/g, '');
+            if (!telClean.match(/^569\d{8}$/)) {
                 alert('❌ Teléfono inválido\n📱 Usa: 56912345678 o +56912345678');
                 return;
             }
             
             try {
-                // Guardar en Supabase
-                const { error } = await window.supabase
-                    .from('solicitudes_placas')
-                    .insert({ 
-                        email, 
-                        nombre, 
-                        telefono 
-                    });
+                const { error } = await sb.from('solicitudes_placas').insert({ 
+                    email, nombre, telefono, procesado: false
+                });
                 
                 if (error) throw error;
                 
-                // WhatsApp a TI
-                const mensaje = `🐕 *NUEVA SOLICITUD UBIPET* 📱\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}\n\n¡Crear user NOW en admin.html!`;
-                window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`, '_blank');
+                const mensajeSamir = `🐕 *NUEVA SOLICITUD UBIPET* 📱\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}\n\n⚡ *admin.html → CREAR USER YA*`;
+                window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensajeSamir)}`, '_blank');
                 
-                // Limpiar form
                 document.getElementById('formSolicitud').style.display = 'none';
                 document.getElementById('solicitudEmail').value = '';
                 document.getElementById('solicitudNombre').value = '';
                 document.getElementById('solicitudTelefono').value = '';
                 
-                alert('✅ ¡WhatsApp enviado! Te activo en 2min 🐕');
+                document.getElementById('successMsg').innerHTML = `
+                    ✅ ¡Datos enviados! Recibirás WhatsApp en 2min 🐕<br>
+                    <small>Ve a admin.html para activar</small>
+                `;
+                document.getElementById('successMsg').style.display = 'block';
+                setTimeout(() => document.getElementById('successMsg').style.display = 'none', 5000);
                 
             } catch(error) {
                 console.error('Error:', error);
                 alert('❌ Error: ' + error.message);
             }
+        }
+
+        window.login = function() {
+            alert('👆 Login → perfil.html (próximo paso)');
+            // window.location.href = 'perfil.html';
         }
     </script>
 </body>

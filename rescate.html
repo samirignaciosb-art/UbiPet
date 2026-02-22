@@ -229,9 +229,11 @@
                     return;
                 }
                 
-                document.getElementById('mascotaNombre').textContent = data.nombre_mascota || 'Sin nombre';
-                document.getElementById('telefono').textContent = data.telefono || 'Sin teléfono';
-                document.getElementById('raza').textContent = data.raza || 'No especificada';
+               document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
+document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';  // ← NUEVO
+document.getElementById('telefono').textContent = data.telefono || 'Sin teléfono';
+document.getElementById('raza').textContent = data.raza || 'No especificada';
+
                 
                 const cleanTel = data.telefono?.replace(/[^0-9]/g, '') || '';
                 const mensaje = encodeURIComponent(`¡Encontré a ${data.nombre_mascota || 'tu mascota'}! Ubipet 🐕`);

@@ -19,8 +19,8 @@
         <h1>🔐 Ubipet</h1>
         <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
         
-        <input type="email" id="emailInput" name="email" placeholder="samirignaciosb@gmail.com">
-        <input type="password" id="passwordInput" name="password" placeholder="Ubipet2026">
+        <input type="email" id="emailInput" name="email" placeholder="tuemail@gmail.com">
+        <input type="password" id="passwordInput" name="password" placeholder="123456">
         <button onclick="login()">🚀 Iniciar Sesión</button>
         <p style="font-size:12px; color:#666;">Test: test@test.com / 123456</p>
 
@@ -36,8 +36,11 @@
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         window.mostrarSolicitud = function() {
-            window.open('https://wa.me/56979928352?text=*NUEVA+SOLICITUD+UBIPET* samirignaciosb-art.github.io/UbiPet/', '_blank');
-        }
+            await sb.from('solicitudes_placas').insert({
+  email: email,
+  nombre: nombre,
+  telefono: telefono
+});
 
         window.login = async function() {
             const email = document.getElementById('emailInput').value.trim();

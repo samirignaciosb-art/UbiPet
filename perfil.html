@@ -3,71 +3,117 @@
 <head>
     <title>UbiPet - Perfil</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>body{font-family:Arial;max-width:400px;margin:50px auto;padding:20px;}
-    input,button{width:100%;padding:12px;margin:10px 0;font-size:16px;}
-    #debug{color:#666;font-size:12px;}
+    <style>
+        body{font-family:Arial;max-width:400px;margin:50px auto;padding:20px;background:#f5f5f5;}
+        .container{background:white;padding:25px;border-radius:15px;box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+        input,textarea{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:16px;}
+        button{padding:12px 20px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;margin:5px;}
+        button:hover{background:#45a049;}
+        #debug{color:#666;font-size:12px;margin-top:20px;padding:10px;background:#f0f0f0;border-radius:5px;}
+        #status{text-align:center;padding:20px;color:#666;}
     </style>
 </head>
 <body>
-    <h2>🐕 Perfil Mascota</h2>
-    <div id="status">🔄 Verificando...</div>
-    <div id="form" style="display:none;">
-        <input id="nombre" placeholder="Nombre *">
-        <input id="raza" placeholder="Raza">
-        <input id="edad" type="number" placeholder="Edad">
-        <input id="peso" type="number" placeholder="Peso kg">
-        <button onclick="guardar()">💾 Guardar</button>
-        <button onclick="salir()">🚪 Salir</button>
+    <div class="container">
+        <h2>🐕 Perfil Mascota</h2>
+        <div id="status">🔄 Verificando login...</div>
+        
+        <div id="form" style="display:none;">
+            <input id="nombre" placeholder="Nombre de la mascota *" required>
+            <input id="raza" placeholder="Raza">
+            <input id="edad" type="number" placeholder="Edad (años)" min="0" max="30">
+            <input id="peso" type="number" step="0.1" placeholder="Peso (kg)" min="0.1">
+            <textarea id="descripcion" placeholder="Descripción / personalidad" rows="3"></textarea>
+            
+            <button onclick="guardarPerfil()">💾 Guardar Perfil</button>
+            <button onclick="cerrarSesion()" style="background:#666;">🚪 Cerrar Sesión</button>
+        </div>
+        
+        <div id="debug"></div>
     </div>
-    <div id="debug"></div>
 
     <script>
-        const sb = supabase.createClient('https://exeeqykieytuvlzdbsnn.supabase.co', 
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4');
+        const supabaseUrl = 'https://exeeqykieytuvlzdbsnn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        const debug = (msg) => {
+            document.getElementById('debug').innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + msg;
+            console.log('🐕', msg);
+        };
 
         async function init() {
-            document.getElementById('debug').innerHTML += '<br>1. Chequeando sesión...';
-            const {data:{session}} = await sb.auth.getSession();
-            if(!session){
-                document.getElementById('status').innerHTML = '❌ Login requerido';
-                setTimeout(()=>location.href='index.html',1500);
+            debug('1. Iniciando verificación...');
+            
+            // RECUPERAR SESIÓN SUPABASE (NO localStorage)
+            const { data: { session }, error } = await sb.auth.getSession();
+            debug('2. Session: ' + (session ? 'OK' : 'NULL'));
+            
+            if (error || !session) {
+                document.getElementById('status').innerHTML = '❌ Debes hacer login primero';
+                setTimeout(() => window.location.href = 'index.html', 2000);
                 return;
             }
-            document.getElementById('debug').innerHTML += '<br>2. User OK: '+session.user.id.substring(0,8);
             
-            // Cargar datos
-            const {data, error} = await sb.from('perfiles').select('*').eq('user_id', session.user.id).single();
-            document.getElementById('debug').innerHTML += '<br>3. Query OK, error: '+(error||'none');
+            debug('3. User ID: ' + session.user.id);
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('form').style.display = 'block';
             
-            if(data){
-                document.getElementById('nombre').value = data.nombre||'';
-                document.getElementById('raza').value = data.raza||'';
-                document.getElementById('edad').value = data.edad||'';
-                document.getElementById('peso').value = data.peso||'';
-            }
-            
-            document.getElementById('status').style.display='none';
-            document.getElementById('form').style.display='block';
+            // CARGAR PERFIL
+            await cargarPerfil(session.user.id);
         }
 
-        window.guardar = async function(){
-            const {data:{session}} = await sb.auth.getSession();
-            const perfil = {
+        async function cargarPerfil(userId) {
+            debug('4. Cargando perfil de: ' + userId.substring(0,8));
+            
+            const { data, error } = await sb
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
+                
+            debug('5. Query result: ' + (error ? 'ERROR: ' + error.message : 'OK'));
+            
+            if (data) {
+                document.getElementById('nombre').value = data.nombre || '';
+                document.getElementById('raza').value = data.raza || '';
+                document.getElementById('edad').value = data.edad || '';
+                document.getElementById('peso').value = data.peso || '';
+                document.getElementById('descripcion').value = data.descripcion || '';
+            }
+        }
+
+        window.guardarPerfil = async function() {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) return alert('❌ Login requerido');
+            
+            const perfilData = {
                 user_id: session.user.id,
                 nombre: document.getElementById('nombre').value,
                 raza: document.getElementById('raza').value,
-                edad: parseInt(document.getElementById('edad').value)||null,
-                peso: parseFloat(document.getElementById('peso').value)||null
+                edad: parseInt(document.getElementById('edad').value) || null,
+                peso: parseFloat(document.getElementById('peso').value) || null,
+                descripcion: document.getElementById('descripcion').value
             };
-            const {error} = await sb.from('perfiles').upsert(perfil);
-            alert(error ? '❌ '+error.message : '✅ ¡Guardado!');
-        }
+            
+            debug('6. Guardando: ' + perfilData.nombre);
+            const { error } = await sb.from('perfiles').upsert(perfilData);
+            
+            if (error) {
+                debug('❌ Guardar error: ' + error.message);
+                alert('❌ Error: ' + error.message);
+            } else {
+                debug('✅ Perfil guardado!');
+                alert('✅ ¡Perfil guardado correctamente!');
+            }
+        };
 
-        window.salir = function(){
-            sb.auth.signOut();
-            location.href='index.html';
-        }
+        window.cerrarSesion = async function() {
+            await sb.auth.signOut();
+            window.location.href = 'index.html';
+        };
 
+        // INICIO
         init();
     </script>
 </body>

@@ -24,23 +24,22 @@
         <h1>🔐 Ubipet</h1>
         <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
 
-        <!-- ✅ LOGIN CLIENTES REALES (SIN DEMO) -->
+        <!-- SOLO LOGIN REAL -->
         <input type="email" id="email" placeholder="tu@email.com">
         <input type="password" id="password" placeholder="tu-contraseña">
         <button onclick="login()">🚀 Iniciar Sesión</button>
 
-        <!-- 🔥 SOLICITUD PLACA -->
+        <!-- SOLICITUD PLACA -->
         <div id="formSolicitud" class="solicitud-form">
             <h3 class="solicitud-titulo">📱 Registra tu mascota ahora</h3>
             <input id="solicitudEmail" type="email" placeholder="tu@email.com">
             <input id="solicitudNombre" placeholder="Tu nombre completo">
             <input id="solicitudTelefono" placeholder="56912345678 o +56912345678">
             <button onclick="solicitarPlaca()">✅ ¡WhatsApp enviado! Te activo en 2min 🐕</button>
-            <button onclick="document.getElementById('formSolicitud').style.display='none'" 
-                    style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
+            <button onclick="document.getElementById('formSolicitud').style.display='none'" style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
         </div>
 
-        <!-- ✅ WHATSAPP DIRECTO -->
+        <!-- WHATSAPP DIRECTO -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
             <button onclick="mostrarSolicitud()" class="whatsapp-btn">
                 👋 Nuevo? Activar mi cuenta
@@ -69,27 +68,15 @@
             const nombre = document.getElementById('solicitudNombre').value.trim();
             const telefono = document.getElementById('solicitudTelefono').value.trim();
             
-            if (!email || !nombre || !telefono) {
-                alert('❌ Completa todos los campos');
-                return;
-            }
-            
-            if (!email.includes('@')) {
-                alert('❌ Email inválido');
-                return;
-            }
-            
+            if (!email || !nombre || !telefono) return alert('❌ Completa todos los campos');
+            if (!email.includes('@')) return alert('❌ Email inválido');
             const telClean = telefono.replace(/[^0-9]/g, '');
-            if (!telClean.match(/^569\d{8}$/)) {
-                alert('❌ Teléfono inválido\n📱 Usa: 56912345678 o +56912345678');
-                return;
-            }
+            if (!telClean.match(/^569\d{8}$/)) return alert('❌ Teléfono inválido\n📱 Usa: 56912345678 o +56912345678');
             
             try {
                 const { error } = await sb.from('solicitudes_placas').insert({ 
                     email, nombre, telefono, procesado: false
                 });
-                
                 if (error) throw error;
                 
                 const mensajeSamir = `🐕 *NUEVA SOLICITUD UBIPET* 📱\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}\n\n⚡ *admin.html → CREAR USER YA*`;
@@ -100,21 +87,17 @@
                 document.getElementById('solicitudNombre').value = '';
                 document.getElementById('solicitudTelefono').value = '';
                 
-                document.getElementById('successMsg').innerHTML = `
-                    ✅ ¡Datos enviados! Recibirás WhatsApp en 2min 🐕<br>
-                    <small>Ve a admin.html para activar</small>
-                `;
+                document.getElementById('successMsg').innerHTML = '✅ ¡Datos enviados! Recibirás WhatsApp en 2min 🐕';
                 document.getElementById('successMsg').style.display = 'block';
                 setTimeout(() => document.getElementById('successMsg').style.display = 'none', 5000);
                 
             } catch(error) {
-                console.error('Error:', error);
                 alert('❌ Error: ' + error.message);
             }
         }
 
         window.login = function() {
-            alert('👆 Login → perfil.html (próximo paso)');
+            alert('Próximo paso: perfil.html');
         }
     </script>
 </body>

@@ -271,7 +271,7 @@
         
         document.getElementById('clientesLista').innerHTML = clientes.map(c => `
           <div class="cliente-row">
-            <strong>🐕 ${c.nombre_mascota || 'Sin datos'}</strong><br>
+            <strong>🐕 ${c.nombre || 'Sin datos'}</strong><br>
             👤 ${c.nombre_dueno || 'Sin dueño'} | 📧 ${c.email_dueno || 'Sin email'}<br>
             <span style="color:${c.esta_perdida ? '#f44336' : '#4CAF50'}; font-weight:bold;">
               ${c.esta_perdida ? '🚨 PERDIDA' : '🟢 ACTIVA'}

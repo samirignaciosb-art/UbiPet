@@ -89,7 +89,7 @@ window.open(`https://wa.me/569${tel}?text=${encodeURIComponent(msg)}`);
                 document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
                 document.getElementById('statusBadge').textContent = `🐕 ${data.nombre || 'mascota'} encontrada`;
                 document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';
-                document.getElementById('telefono').textContent = data.telefono || 'Sin teléfono';
+                document.getElementById('telefono').textContent.replace('+', '').replace(/[^0-9]/g, '');
                 document.getElementById('raza').textContent = data.raza || 'No especificada';
                 
             } catch(e) {

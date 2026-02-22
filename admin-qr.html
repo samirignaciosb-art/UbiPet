@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UbiPet - Admin QR</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body{font-family:Arial;max-width:1200px;margin:50px auto;padding:20px;background:#f5f5f5;}
+        .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+        .qr-card{background:white;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+        canvas{border:2px solid #4CAF50;border-radius:8px;}
+        button{padding:10px 20px;background:#2196F3;color:white;border:none;border-radius:5px;cursor:pointer;margin:5px;}
+        button:hover{background:#1976D2;}
+        .print-btn{background:#FF9800;}
+        .print-btn:hover{background:#F57C00;}
+        h1{text-align:center;color:#4CAF50;margin-bottom:30px;}
+    </style>
+</head>
+<body>
+    <h1>🏷️ Ubipet - Generador QR Admin</h1>
+    
+    <div id="loading">🔄 Cargando Firulais...</div>
+    <div id="qrContainer" class="qr-grid" style="display:none;"></div>
+
+    <script>
+        const sb = supabase.createClient('https://exeeqykieytuvlzdbsnn.supabase.co', 
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4');
+
+        async function cargarPerfiles() {
+            const { data, error } = await sb.from('perfiles').select('*');
+            if (error) {
+                document.getElementById('loading').textContent = '❌ Error: ' + error.message;
+                return;
+            }
+            
+            const container = document.getElementById('qrContainer');
+            data.forEach(perfil => {
+                const qrCard = crearTarjetaQR(perfil);
+                container.appendChild(qrCard);
+            });
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('qrContainer').style.display = 'grid';
+        }
+
+        function crearTarjetaQR(perfil) {
+            const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/perfil-publico.html?id=${perfil.id}`;
+            
+            const card = document.createElement('div');
+            card.className = 'qr-card';
+            card.innerHTML = `
+                <h3>🐕 ${perfil.nombre}</h3>
+                <p><strong>${perfil.raza || 'Sin raza'}</strong></p>
+                <p>📞 ${perfil.telefono}</p>
+                <canvas id="qr_${perfil.id}" width="200" height="200"></canvas>
+                <p style="font-size:12px;word-break:break-all;">${qrUrl}</p>
+                <button onclick="generarQR('${perfil.id}')">🔄 QR</button>
+                <button class="print-btn" onclick="imprimirQR('${perfil.id}', '${perfil.nombre}')">🖨️ Imprimir</button>
+            `;
+            
+            return card;
+        }
+
+        window.generarQR = function(perfilId) {
+            const canvas = document.getElementById('qr_' + perfilId);
+            const ctx = canvas.getContext('2d');
+            const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/perfil-publico.html?id=${perfilId}`;
+            
+            // Fondo blanco
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, 200, 200);
+            
+            // QR simulado (grid)
+            ctx.fillStyle = '#000';
+            for(let i=20; i<180; i+=20) {
+                for(let j=20; j<180; j+=20) {
+                    if(Math.random() > 0.5) {
+                        ctx.fillRect(i, j, 15, 15);
+                    }
+                }
+            }
+            
+            // Texto URL
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('UBIPET', 100, 35);
+            ctx.font = '12px Arial';
+            ctx.fillText(qrUrl.substring(0,25), 100, 160);
+        }
+
+        window.imprimirQR = function(perfilId, nombre) {
+            const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/perfil-publico.html?id=${perfilId}`;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>QR ${nombre}</title>
+                <style>body{font-family:Arial;text-align:center;padding:30px;background:#f0f0f0;}
+                canvas{border:3px solid #4CAF50;border-radius:15px;}
+                .qr-container{background:white;padding:30px;border-radius:20px;display:inline-block;}
+                </style></head>
+                <body>
+                    <div class="qr-container">
+                        <h2>🏷️ Placa ${nombre}</h2>
+                        <canvas id="printQR" width="300" height="300"></canvas>
+                        <p><strong>Escanea para contacto</strong></p>
+                        <p style="font-size:14px;">${qrUrl}</p>
+                    </div>
+                    <script>
+                        const canvas = document.getElementById('printQR');
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#fff'; ctx.fillRect(0,0,300,300);
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 24px Arial'; ctx.textAlign='center';
+                        ctx.fillText('UBIPET', 150, 50);
+                        ctx.font = '18px Arial';
+                        ctx.fillText('${qrUrl}', 150, 260);
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // CARGAR
+        cargarPerfiles();
+    </script>
+</body>
+</html>

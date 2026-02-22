@@ -49,7 +49,7 @@
                     const card = document.createElement('div');
                     card.className = 'qr-card';
                     card.innerHTML = `
-                        <h3>🐕 ${perfil.nombre_mascota}</h3>
+                        <h3>🐕 ${perfil.nombre_mascota || 'Mascota'}</h3>
                         <p><strong>${perfil.raza}</strong> - ${perfil.telefono}</p>
                         <p><small>ID: ${perfil.id.slice(0,8)}...</small></p>
                         <div class="qr-visual">
@@ -61,16 +61,20 @@
                     
                     container.appendChild(card);
                     
-                    // GENERAR QR VISUAL
-                    new QRCode(document.getElementById(`qr-${perfil.id}`), {
-                        text: qrUrl,
-                        width: 200,
-                        height: 200,
-                        colorDark: '#1a1a1a',
-                        colorLight: '#ffffff',
-                    });
+                                      // GENERAR QR VISUAL (FIX TIMING)
+                    setTimeout(() => {
+                        const canvas = document.getElementById(`qr-${perfil.id}`);
+                        if (canvas) {
+                            new QRCode(canvas, {
+                                text: qrUrl,
+                                width: 200,
+                                height: 200,
+                                colorDark: '#1a1a1a',
+                                colorLight: '#ffffff'
+                            });
+                        }
+                    }, 200);
                 });
-                
             } catch (e) {
                 status.innerHTML = `❌ Error: ${e.message}`;
                 console.error(e);

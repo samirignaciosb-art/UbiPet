@@ -184,15 +184,25 @@
                     <div class="info-text" id="telefono">+56979928352</div>
                 </div>
             </div>
-            <div class="info-row">
-                <div class="info-icon raza-icon">🐕</div>
-                <div>
-                    <span class="info-label">Raza</span>
-                    <div class="info-text" id="raza">mestizo</div>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
+         
+<div class="info-row">
+    <div class="info-icon raza-icon">🐕</div>
+    <div>
+        <span class="info-label">Raza</span>
+        <div class="info-text" id="raza">mestizo</div>
+    </div>
+</div>
+
+<div class="info-row">
+    <div class="info-icon phone-icon">👤</div>
+    <div>
+        <span class="info-label">Dueño</span>
+        <div class="info-text" id="nombreDueno">Cargando...</div>
+    </div>
+</div>
+
+<div class="action-buttons">
+
                 <a href="#" class="btn btn-whatsapp" id="whatsappBtn">
                     📱 WhatsApp
                 </a>
@@ -230,14 +240,15 @@
                 }
                 
                document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
+document.getElementById('statusBadge').textContent = `🐕 ${data.nombre || 'mascota'} encontrada`;
 document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';
 document.getElementById('telefono').textContent = data.telefono || 'Sin teléfono';
 document.getElementById('raza').textContent = data.raza || 'No especificada';
 
-                
-                const cleanTel = data.telefono?.replace(/[^0-9]/g, '') || '';
-                const mensaje = encodeURIComponent(`¡Encontré a ${data.nombre_mascota || 'tu mascota'}! Ubipet 🐕`);
-                document.getElementById('whatsappBtn').href = `https://wa.me/${cleanTel}?text=${mensaje}`;
+const cleanTel = data.telefono?.replace(/[^0-9]/g, '') || '';
+const mensaje = encodeURIComponent(`¡Encontré a ${data.nombre || 'tu mascota'}! Ubipet 🐕`);  // ← FIJO
+document.getElementById('whatsappBtn').href = `https://wa.me/${cleanTel}?text=${mensaje}`;
+
                 
             } catch(e) {
                 console.error('Error:', e);

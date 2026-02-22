@@ -44,7 +44,7 @@
             try {
                 const { data, error } = await sb
                     .from('perfiles')
-                    .select('nombre, raza, telefono, color, caracteristicas')
+                    .select('nombre, raza, telefono')
                     .eq('id', id)
                     .single();
                 
@@ -64,7 +64,6 @@
                     <h3>${mascotaData.nombre || 'Sin nombre'}</h3>
                     <p><strong>📞 Teléfono:</strong> ${mascotaData.telefono || 'No registrado'}</p>
                     <p><strong>🐕 Raza:</strong> ${mascotaData.raza || 'No especificada'}</p>
-                    <p><strong>🎨 Color:</strong> ${mascotaData.color || 'No especificado'}</p>
                 </div>
             `;
             

@@ -84,29 +84,46 @@
       }
     }
 
-    window.guardarPerfil = async function() {
-      const { data: { session } } = await sb.auth.getSession();
-      const perfil = {
+window.guardarPerfil = async function() {
+  const { data: { session } } = await sb.auth.getSession();
+  
+  try {
+    const perfilData = {
+      nombre_mascota: document.getElementById('nombreMascota').value,
+      raza: document.getElementById('raza').value,
+      edad: parseInt(document.getElementById('edad').value) || null,
+      peso: parseFloat(document.getElementById('peso').value) || null,
+      vacunas: document.getElementById('vacunas').checked,
+      descripcion: document.getElementById('descripcion').value,
+      nombre_dueno: document.getElementById('nombreDueno').value,
+      email_dueno: document.getElementById('emailDueno').value,
+      telefono: document.getElementById('telefono').value
+    };
+    
+    // ✅ CHECK EXISTENTE
+    const { data: existing } = await sb
+      .from('perfiles')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    
+    if (existing) {
+      await sb.from('perfiles').update(perfilData).eq('user_id', session.user.id);
+      alert('✅ Perfil actualizado');
+    } else {
+      await sb.from('perfiles').insert({
+        id: crypto.randomUUID(),
         user_id: session.user.id,
-        nombre: document.getElementById('nombreMascota').value,
-        raza: document.getElementById('raza').value,
-        edad: parseInt(document.getElementById('edad').value) || null,
-        peso: parseFloat(document.getElementById('peso').value) || null,
-        vacunas: document.getElementById('vacunas').checked,
-        descripcion: document.getElementById('descripcion').value,
-        nombre_dueno: document.getElementById('nombreDueno').value,
-        email_dueno: document.getElementById('emailDueno').value,
-        telefono: document.getElementById('telefono').value
-      };
-      
-      const { error } = await sb.from('perfiles').upsert(perfil);
-      alert(error ? '❌ ' + error.message : '✅ ¡PERFIL COMPLETO GUARDADO!');
-    };
-
-    window.cerrarSesion = async function() {
-      await sb.auth.signOut();
-      window.location.href = 'index.html';
-    };
+        ...perfilData
+      });
+      alert('✅ Perfil creado');
+    }
+    
+    init(); // Recargar datos
+  } catch(e) {
+    alert('❌ ' + e.message);
+  }
+};
 
     init();
   </script>

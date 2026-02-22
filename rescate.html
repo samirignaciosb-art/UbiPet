@@ -63,7 +63,7 @@
                 const tel = document.getElementById('telefono').textContent.replace(/[^0-9]/g, '');
                 const msg = `🚨 MASCOTA ENCONTRADA! 🐕 ${document.getElementById('mascotaNombre').textContent} 👤 ${document.getElementById('nombreDueno').textContent} 📍 https://maps.app.goo.gl/?q=${pos.coords.latitude},${pos.coords.longitude}`;
                 
-window.open(`https://wa.me/569${tel}?text=${encodeURIComponent(msg)}`);
+window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`);
                 btn.innerHTML = '📍 Ubicación'; btn.disabled = false;
             }, () => { 
                 alert('Activa GPS'); 
@@ -85,7 +85,7 @@ window.open(`https://wa.me/569${tel}?text=${encodeURIComponent(msg)}`);
                     return;
                 }
                 
-                // ✅ FIX 5: WhatsApp LÍNEAS BORRADAS + asignaciones completas
+                
                 document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
                 document.getElementById('statusBadge').textContent = `🐕 ${data.nombre || 'mascota'} encontrada`;
                 document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';
@@ -111,7 +111,7 @@ window.open(`https://wa.me/569${tel}?text=${encodeURIComponent(msg)}`);
             });
         }
         
-        // ✅ FIX 3: miUbicacion() BORRADA COMPLETA
+        
         
         cargarPerfil();
     </script>

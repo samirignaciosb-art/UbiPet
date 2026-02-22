@@ -48,7 +48,7 @@
                     const card = document.createElement('div');
                     card.className = 'qr-card';
                     card.innerHTML = `
-                        <h3>🐕 ${perfil.nombre}</h3>
+                        <h3>🐕 ${perfil.nombre_mascota}</h3>
                         <p><strong>${perfil.raza}</strong> - ${perfil.telefono}</p>
                         <p><small>ID: ${perfil.id.slice(0,8)}...</small></p>
                         <div class="qr-visual">
@@ -67,7 +67,7 @@
                         height: 200,
                         colorDark: '#1a1a1a',
                         colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
+                        correctLevel: QRCode.ErrorCorrectLevel.H
                     });
                 });
                 

@@ -31,7 +31,7 @@
     <div id="loginAdmin">
       <input type="email" id="adminEmail" placeholder="samirignaciosb@gmail.com">
       <input type="password" id="adminPass" placeholder="Admin123">
-      <button onclick="adminLogin()">🔐 ACCEDER ADMIN</button>
+      <button id="btnLogin">🔐 ACCEDER ADMIN</button>
     </div>
     
     <div id="adminDash" style="display:none;">
@@ -47,30 +47,33 @@
         <input id="newEmail" placeholder="cliente@placa.cl">
         <input id="newPass" value="Ubipet123" style="width:200px;">
         <input id="newPhone" placeholder="+56912345678" style="width:200px;">
-        <button id="btnCrearCliente" onclick="crearClienteManual()" class="btn-manual">🚀 Crear Manual</button>
+        <button id="btnCrearCliente" class="btn-manual">🚀 Crear Manual</button>
         <div id="statusMessage"></div>
       </div>
       
       <h3>✅ CLIENTES ACTIVOS</h3>
       <div id="clientesLista">Cargando...</div>
       
-      <button onclick="logoutAdmin()" style="background:#f44336;">🚪 Salir</button>
+      <button id="btnLogout" style="background:#f44336;">🚪 Salir</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ✅ FIX TOTAL: NO usar 'supabase' para evitar conflicto CDN
+    // ✅ SUPABASE - NOMBRE ÚNICO (NO choca con CDN)
     const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
     
-    // ✅ CLIENTE con nombre DIFERENTE
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sbAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
 
-    // ✅ FUNCIONES GLOBALES (para onclick)
-    window.adminLogin = async function() {
+    // ✅ EVENT LISTENERS (NO onclick inline)
+    document.getElementById('btnLogin').addEventListener('click', adminLogin);
+    document.getElementById('btnCrearCliente').addEventListener('click', crearClienteManual);
+    document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
+
+    async function adminLogin() {
       const email = document.getElementById('adminEmail').value;
       const pass = document.getElementById('adminPass').value;
       
@@ -82,22 +85,22 @@
       document.getElementById('loginAdmin').style.display = 'none';
       document.getElementById('adminDash').style.display = 'block';
       
-      await window.cargarPendientes();
-      await window.cargarClientes();
+      await cargarPendientes();
+      await cargarClientes();
       alert('✅ ¡ADMIN LIVE!');
     }
 
-    window.logoutAdmin = function() {
+    function logoutAdmin() {
       document.getElementById('adminDash').style.display = 'none';
       document.getElementById('loginAdmin').style.display = 'block';
       document.getElementById('adminEmail').value = '';
       document.getElementById('adminPass').value = '';
     }
 
-    window.cargarPendientes = async function() {
+    async function cargarPendientes() {
       try {
         document.getElementById('pendientesLista').innerHTML = '🔄 Cargando...';
-        const { data: pendientes, error } = await sb
+        const { data: pendientes, error } = await sbAdmin
           .from('solicitudes_placas')
           .select('*')
           .eq('procesado', false)
@@ -116,25 +119,38 @@
             📧 ${p.email}<br>
             📱 ${p.telefono}<br>
             <small>${new Date(p.created_at).toLocaleString('es-CL')}</small><br>
-            <button class="btn-procesar" onclick="procesarSolicitud('${p.id}', '${p.nombre}', '${p.email}', '${p.telefono}')">
-              🚀 CREAR USER + NOTIFICAR
-            </button>
-            <button class="btn-cerrar" onclick="eliminarSolicitud('${p.id}')">
-              ❌ Eliminar
-            </button>
+            <button class="btn-procesar" data-id="${p.id}" data-nombre="${p.nombre}" data-email="${p.email}" data-telefono="${p.telefono}">🚀 CREAR USER + NOTIFICAR</button>
+            <button class="btn-cerrar" data-id="${p.id}">❌ Eliminar</button>
           </div>
         `).join('');
+        
+        // ✅ Event listeners para botones DENTRO del HTML dinámico
+        document.querySelectorAll('.btn-procesar').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const nombre = this.dataset.nombre;
+            const email = this.dataset.email;
+            const telefono = this.dataset.telefono;
+            procesarSolicitud(id, nombre, email, telefono);
+          });
+        });
+        
+        document.querySelectorAll('.btn-cerrar').forEach(btn => {
+          btn.addEventListener('click', function() {
+            eliminarSolicitud(this.dataset.id);
+          });
+        });
         
       } catch(error) {
         document.getElementById('pendientesLista').innerHTML = `❌ Error: ${error.message}`;
       }
     }
 
-    window.procesarSolicitud = async function(id, nombre, email, telefono) {
+    async function procesarSolicitud(id, nombre, email, telefono) {
       const pass = 'Ubipet' + Math.floor(Math.random() * 10000);
       
       try {
-        const { data: authData, error: authError } = await sb.auth.signUp({
+        const { data: authData, error: authError } = await sbAdmin.auth.signUp({
           email,
           password: pass,
           options: { data: { telefono, nombre } }
@@ -142,7 +158,7 @@
         
         if (authError) throw authError;
         
-        await sb.from('perfiles').insert({
+        await sbAdmin.from('perfiles').insert({
           id: crypto.randomUUID(),
           user_id: authData.user.id,
           nombre_mascota: 'Tu mascota 🐕',
@@ -156,7 +172,7 @@
           fotos: []
         });
         
-        await sb.from('solicitudes_placas').update({ 
+        await sbAdmin.from('solicitudes_placas').update({ 
           procesado: true, 
           user_id: authData.user.id 
         }).eq('id', id);
@@ -168,21 +184,21 @@
         window.open(`https://wa.me/56979928352?text=✅ CLIENTE ACTIVADO: ${nombre} / ${email} / ${pass}`, '_blank');
         
         alert(`🎉 CLIENTE CREADO!\n${email} / ${pass}`);
-        await window.cargarPendientes();
-        await window.cargarClientes();
+        await cargarPendientes();
+        await cargarClientes();
         
       } catch(error) {
         alert('❌ Error: ' + error.message);
       }
     }
 
-    window.eliminarSolicitud = async function(id) {
+    async function eliminarSolicitud(id) {
       if (!confirm('¿Eliminar esta solicitud?')) return;
-      await sb.from('solicitudes_placas').delete().eq('id', id);
-      await window.cargarPendientes();
+      await sbAdmin.from('solicitudes_placas').delete().eq('id', id);
+      await cargarPendientes();
     }
 
-    window.crearClienteManual = async function() {
+    async function crearClienteManual() {
       const email = document.getElementById('newEmail').value.trim();
       const pass = document.getElementById('newPass').value || 'Ubipet123';
       const telefono = document.getElementById('newPhone').value.trim();
@@ -198,7 +214,7 @@
       btn.disabled = true;
       
       try {
-        const { data: authData, error: authError } = await sb.auth.signUp({
+        const { data: authData, error: authError } = await sbAdmin.auth.signUp({
           email,
           password: pass,
           options: { data: { telefono } }
@@ -206,7 +222,7 @@
         
         if (authError) throw authError;
         
-        await sb.from('perfiles').insert({
+        await sbAdmin.from('perfiles').insert({
           id: crypto.randomUUID(),
           user_id: authData.user.id,
           nombre_mascota: 'Tu mascota 🐕',
@@ -223,7 +239,7 @@
         document.getElementById('newEmail').value = '';
         document.getElementById('newPhone').value = '';
         mostrarStatus(`✅ CREADO: ${email}`, 'success');
-        await window.cargarClientes();
+        await cargarClientes();
         
       } catch(error) {
         mostrarStatus(`❌ Error: ${error.message}`, 'error');
@@ -233,10 +249,10 @@
       }
     }
 
-    window.cargarClientes = async function() {
+    async function cargarClientes() {
       try {
         document.getElementById('clientesLista').innerHTML = '🔄 Cargando...';
-        const { data: clientes, error } = await sb
+        const { data: clientes, error } = await sbAdmin
           .from('perfiles')
           .select('*')
           .order('created_at', { ascending: false });
@@ -270,7 +286,7 @@
       setTimeout(() => status.innerHTML = '', 5000);
     }
 
-    console.log('✅ Ubipet Admin 100% inicializado');
+    console.log('✅ Ubipet Admin 100% FIXEADO - sbAdmin OK');
   </script>
 </body>
 </html>

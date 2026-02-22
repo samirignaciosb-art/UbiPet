@@ -35,12 +35,30 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        window.mostrarSolicitud = function() {
-            await sb.from('solicitudes_placas').insert({
-  email: email,
-  nombre: nombre,
-  telefono: telefono
-});
+        window.mostrarSolicitud = async function() {
+    const email = prompt('📧 Tu email:');
+    const nombre = prompt('👤 Tu nombre:');
+    const telefono = prompt('📱 Tu WhatsApp (+569...):');
+    
+    if (!email || !nombre || !telefono) {
+        alert('❌ Completa todos los campos');
+        return;
+    }
+    
+    // ✅ GUARDAR EN SUPABASE
+    await sb.from('solicitudes_placas').insert({
+        email: email,
+        nombre: nombre, 
+        telefono: telefono
+    });
+    
+    // ✅ WhatsApp ADMIN
+    const mensaje = `🐕 *NUEVA SOLICITUD UBIPET*\n${window.location.origin}/\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}`;
+    window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`, '_blank');
+    
+    alert('✅ Solicitud enviada! Admin te contactará.');
+}
+
 
         window.login = async function() {
             const email = document.getElementById('emailInput').value.trim();

@@ -62,23 +62,23 @@
     </div>
   </div>
 
-  <!-- ✅ FIXED: Supabase CDN + Cliente correcto -->
+  <!-- ✅ FIXED TOTAL: Supabase SIN conflicto de nombres -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ✅ SUPABASE CORREGIDO - FUNCIONA 100%
+    console.log('✅ Supabase CDN cargado');
+    
+    // ✅ NOMBRE DIFERENTE para evitar conflicto global 'supabase'
     const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
     
-    // FIXED: Destructuring correcto DESPUÉS del CDN
-    const { createClient } = supabase;
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Alias global para todas las funciones
-    const supabase = supabaseClient;
+    const supabaseAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ supabaseAdmin creado correctamente');
     
     const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
     
-    async function adminLogin() {
+    // ✅ TODAS funciones usando supabaseAdmin
+    window.adminLogin = async function() {
+      console.log('🔐 Login admin intentado');
       const email = document.getElementById('adminEmail').value;
       const pass = document.getElementById('adminPass').value;
       
@@ -89,23 +89,31 @@
       
       document.getElementById('loginAdmin').style.display = 'none';
       document.getElementById('adminDash').style.display = 'block';
-      await cargarPendientes();
-      await cargarClientes();
-      alert('✅ ¡ADMIN LIVE!');
+      
+      try {
+        await cargarPendientes();
+        await cargarClientes();
+        alert('✅ ¡ADMIN LIVE!');
+        console.log('✅ Admin dashboard cargado');
+      } catch(error) {
+        console.error('Error dashboard:', error);
+        alert('❌ Error cargando dashboard: ' + error.message);
+      }
     }
     
-    function logoutAdmin() {
+    window.logoutAdmin = function() {
       document.getElementById('adminDash').style.display = 'none';
       document.getElementById('loginAdmin').style.display = 'block';
       document.getElementById('adminEmail').value = '';
       document.getElementById('adminPass').value = '';
+      console.log('🚪 Admin logout');
     }
     
     // 🔥 Cargar pendientes
     async function cargarPendientes() {
       try {
         document.getElementById('pendientesLista').innerHTML = '🔄 Cargando...';
-        const { data: pendientes, error } = await supabase
+        const { data: pendientes, error } = await supabaseAdmin
           .from('solicitudes_placas')
           .select('*')
           .eq('procesado', false)
@@ -134,17 +142,19 @@
         `).join('');
         
       } catch(error) {
+        console.error('Error pendientes:', error);
         document.getElementById('pendientesLista').innerHTML = `❌ Error: ${error.message}`;
       }
     }
     
-    // 🔥 Procesar solicitud
+    // 🔥 Procesar solicitud (window para onclick)
     window.procesarSolicitud = async function(id, nombre, email, telefono) {
       const pass = 'Ubipet' + Math.floor(Math.random() * 10000);
+      console.log('🚀 Procesando:', email, pass);
       
       try {
         // 1. Crear usuario Supabase
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
           email,
           password: pass,
           options: { data: { telefono, nombre } }
@@ -153,7 +163,7 @@
         if (authError) throw authError;
         
         // 2. Crear perfil
-        await supabase.from('perfiles').insert({
+        await supabaseAdmin.from('perfiles').insert({
           id: crypto.randomUUID(),
           user_id: authData.user.id,
           nombre_mascota: 'Tu mascota 🐕',
@@ -168,14 +178,15 @@
         });
         
         // 3. Marcar procesado
-        await supabase.from('solicitudes_placas').update({ 
+        await supabaseAdmin.from('solicitudes_placas').update({ 
           procesado: true, 
           user_id: authData.user.id 
         }).eq('id', id);
         
         // 4. WhatsApp cliente
+        const cleanTel = telefono.replace(/[^0-9]/g, '');
         const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\n\n✅ Login:\n📧 ${email}\n🔑 ${pass}\n\n🔗 https://samirignaciosb-art.github.io/UbiPet/\n\n¡Genera tu QR ahora! 🐕`;
-        window.open(`https://wa.me/${telefono.replace('+', '')}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
+        window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
         
         // 5. WhatsApp tú
         window.open(`https://wa.me/56979928352?text=✅ CLIENTE ACTIVADO: ${nombre} / ${email} / ${pass}`, '_blank');
@@ -185,6 +196,7 @@
         await cargarClientes();
         
       } catch(error) {
+        console.error('Error procesar:', error);
         alert('❌ Error: ' + error.message);
       }
     }
@@ -192,12 +204,18 @@
     // Eliminar solicitud
     window.eliminarSolicitud = async function(id) {
       if (!confirm('¿Eliminar esta solicitud?')) return;
-      await supabase.from('solicitudes_placas').delete().eq('id', id);
-      await cargarPendientes();
+      try {
+        await supabaseAdmin.from('solicitudes_placas').delete().eq('id', id);
+        await cargarPendientes();
+        console.log('✅ Solicitud eliminada');
+      } catch(error) {
+        console.error('Error eliminar:', error);
+        alert('❌ Error: ' + error.message);
+      }
     }
     
     // ✅ Crear cliente manual
-    async function crearClienteManual() {
+    window.crearClienteManual = async function() {
       const email = document.getElementById('newEmail').value.trim();
       const pass = document.getElementById('newPass').value || 'Ubipet123';
       const telefono = document.getElementById('newPhone').value.trim();
@@ -213,7 +231,7 @@
       btn.disabled = true;
       
       try {
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
           email,
           password: pass,
           options: { data: { telefono } }
@@ -221,7 +239,7 @@
         
         if (authError) throw authError;
         
-        await supabase.from('perfiles').insert({
+        await supabaseAdmin.from('perfiles').insert({
           id: crypto.randomUUID(),
           user_id: authData.user.id,
           nombre_mascota: 'Tu mascota 🐕',
@@ -258,7 +276,7 @@
     async function cargarClientes() {
       try {
         document.getElementById('clientesLista').innerHTML = '🔄 Cargando...';
-        const { data: clientes, error } = await supabase
+        const { data: clientes, error } = await supabaseAdmin
           .from('perfiles')
           .select('*')
           .order('created_at', { ascending: false });
@@ -282,9 +300,12 @@
         `).join('');
         
       } catch(error) {
+        console.error('Error clientes:', error);
         document.getElementById('clientesLista').innerHTML = `❌ Error: ${error.message}`;
       }
     }
+    
+    console.log('✅ Ubipet Admin inicializado - Listo para $15/placa 🐕💰');
   </script>
 </body>
 </html>

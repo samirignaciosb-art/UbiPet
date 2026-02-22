@@ -96,9 +96,22 @@
             }
         }
 
-        window.login = function() {
-            alert('Próximo paso: perfil.html');
-        }
+       window.login = async function() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const { data, error } = await sb.auth.signInWithPassword({email, password});
+        if (error) throw error;
+        
+        localStorage.setItem('user_token', data.session.access_token);
+        alert('✅ LOGIN OK! perfil.html pronto');
+        
+    } catch(error) {
+        alert('❌ ' + error.message);
+    }
+}
+
     </script>
 </body>
 </html>

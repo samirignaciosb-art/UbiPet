@@ -12,11 +12,7 @@
         button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #f5cac2; font-weight: bold; font-size: 16px; cursor: pointer; }
         button:hover { opacity: 0.85; }
         .whatsapp-btn { background: #25D366 !important; color: white !important; font-size: 18px !important; padding: 18px !important; border-radius: 25px !important; margin: 20px 0 !important; }
-        .solicitud-form { background: #e8f5e8 !important; padding: 25px; border-radius: 15px; margin: 20px 0; display: none; }
-        .solicitud-form input { background: white; margin: 10px 0; }
-        .solicitud-form button { background: #4CAF50 !important; color: white !important; font-weight: bold !important; }
-        .solicitud-titulo { color: #2e7d32; font-size: 18px; margin-bottom: 20px; }
-        .success-msg { background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin: 15px 0; }
+        .debug { background: #fff3cd; padding: 10px; border-radius: 5px; font-size: 12px; margin: 10px 0; display: none; }
     </style>
 </head>
 <body>
@@ -24,94 +20,88 @@
         <h1>🔐 Ubipet</h1>
         <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
 
-        <!-- SOLO LOGIN REAL -->
-        <input type="email" id="email" placeholder="tu@email.com">
-        <input type="password" id="password" placeholder="tu-contraseña">
+        <div id="debug" class="debug"></div>
+        
+        <!-- LOGIN -->
+        <input type="email" id="email" placeholder="samirignaciosb@gmail.com">
+        <input type="password" id="password" placeholder="Ubipet2026">
         <button onclick="login()">🚀 Iniciar Sesión</button>
+        <p style="font-size:12px; color:#666;">Test: samirignaciosb@gmail.com / Ubipet2026</p>
 
-        <!-- SOLICITUD PLACA -->
-        <div id="formSolicitud" class="solicitud-form">
-            <h3 class="solicitud-titulo">📱 Registra tu mascota ahora</h3>
-            <input id="solicitudEmail" type="email" placeholder="tu@email.com">
-            <input id="solicitudNombre" placeholder="Tu nombre completo">
-            <input id="solicitudTelefono" placeholder="56912345678 o +56912345678">
-            <button onclick="solicitarPlaca()">✅ ¡WhatsApp enviado! Te activo en 2min 🐕</button>
-            <button onclick="document.getElementById('formSolicitud').style.display='none'" style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
-        </div>
-
-        <!-- WHATSAPP DIRECTO -->
+        <!-- WHATSAPP -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
-            <button onclick="mostrarSolicitud()" class="whatsapp-btn">
-                👋 Nuevo? Activar mi cuenta
-            </button>
-            <p style="font-size: 14px; color:#666; margin-top:10px; line-height:1.4;">
-                Te activo el acceso en <strong>2min</strong> por WhatsApp<br>
-                <em>Para dueños de placas Ubipet</em>
-            </p>
+            <button onclick="mostrarSolicitud()" class="whatsapp-btn">👋 Nuevo? Activar cuenta</button>
         </div>
-
-        <div id="successMsg" class="success-msg" style="display:none;"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        console.log('🔥 Ubipet cargado - Supabase listo');
+        
         const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        window.mostrarSolicitud = function() {
-            document.getElementById('formSolicitud').style.display = 'block';
+        function log(msg) {
+            console.log('🐕 ' + msg);
+            document.getElementById('debug').innerHTML += '<br>' + msg;
+            document.getElementById('debug').style.display = 'block';
         }
 
-        window.solicitarPlaca = async function() {
-            const email = document.getElementById('solicitudEmail').value.trim();
-            const nombre = document.getElementById('solicitudNombre').value.trim();
-            const telefono = document.getElementById('solicitudTelefono').value.trim();
+        window.mostrarSolicitud = function() {
+            window.open('https://wa.me/56979928352?text=*NUEVA+SOLICITUD+UBIPET* samirignaciosb-art.github.io/UbiPet/', '_blank');
+        }
+
+        // 🔧 LOGIN CON DEBUG COMPLETO
+        window.login = async function() {
+            log('1️⃣ CLICK LOGIN DETECTADO');
             
-            if (!email || !nombre || !telefono) return alert('❌ Completa todos los campos');
-            if (!email.includes('@')) return alert('❌ Email inválido');
-            const telClean = telefono.replace(/[^0-9]/g, '');
-            if (!telClean.match(/^569\d{8}$/)) return alert('❌ Teléfono inválido\n📱 Usa: 56912345678 o +56912345678');
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            log('2️⃣ Email: ' + email);
+            
+            if (!email || !password) {
+                alert('❌ Completa email y contraseña');
+                return;
+            }
+            
+            log('3️⃣ Supabase signInWithPassword...');
             
             try {
-                const { error } = await sb.from('solicitudes_placas').insert({ 
-                    email, nombre, telefono, procesado: false
+                const { data, error } = await sb.auth.signInWithPassword({ 
+                    email: email.toLowerCase(), 
+                    password 
                 });
-                if (error) throw error;
                 
-                const mensajeSamir = `🐕 *NUEVA SOLICITUD UBIPET* 📱\n\n👤 ${nombre}\n📧 ${email}\n📱 ${telefono}\n\n⚡ *admin.html → CREAR USER YA*`;
-                window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensajeSamir)}`, '_blank');
+                log('4️⃣ Respuesta Supabase: ' + (error ? '❌ ERROR' : '✅ OK'));
                 
-                document.getElementById('formSolicitud').style.display = 'none';
-                document.getElementById('solicitudEmail').value = '';
-                document.getElementById('solicitudNombre').value = '';
-                document.getElementById('solicitudTelefono').value = '';
+                if (error) {
+                    log('❌ ERROR: ' + error.message);
+                    alert('❌ ' + error.message);
+                    return;
+                }
                 
-                document.getElementById('successMsg').innerHTML = '✅ ¡Datos enviados! Recibirás WhatsApp en 2min 🐕';
-                document.getElementById('successMsg').style.display = 'block';
-                setTimeout(() => document.getElementById('successMsg').style.display = 'none', 5000);
+                log('✅ TOKEN: ' + data.session.access_token.substring(0,20) + '...');
+                localStorage.setItem('user_token', data.session.access_token);
+                localStorage.setItem('user_id', data.user.id);
+                
+                log('🎉 LOGIN EXITOSO! Ve a perfil.html');
+                alert('✅ LOGIN OK! Ve manual a: perfil.html');
                 
             } catch(error) {
+                log('💥 CATCH ERROR: ' + error.message);
                 alert('❌ Error: ' + error.message);
             }
         }
 
-       window.login = async function() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    try {
-        const { data, error } = await sb.auth.signInWithPassword({email, password});
-        if (error) throw error;
+        // Auto-test
+        log('🚀 Ubipet listo - haz click en login');
         
-        localStorage.setItem('user_token', data.session.access_token);
-        alert('✅ LOGIN OK! perfil.html pronto');
-        
-    } catch(error) {
-        alert('❌ ' + error.message);
-    }
-}
-
+        // Enter key
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
     </script>
 </body>
 </html>

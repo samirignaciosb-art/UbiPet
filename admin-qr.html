@@ -1,184 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>UbiPet - Admin QR</title>
+    <title>UbiPet Admin QR</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body{font-family:Arial;max-width:1200px;margin:50px auto;padding:20px;background:#f5f5f5;}
-        .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
-        .qr-card{background:white;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-        canvas{border:2px solid #4CAF50;border-radius:8px;}
-        button{padding:10px 20px;background:#2196F3;color:white;border:none;border-radius:5px;cursor:pointer;margin:5px;}
-        button:hover{background:#1976D2;}
-        .print-btn{background:#FF9800;}
-        .print-btn:hover{background:#F57C00;}
-        h1{text-align:center;color:#4CAF50;margin-bottom:30px;}
-        #loading{text-align:center;font-size:18px;padding:40px;color:#666;}
-        .empty-state{text-align:center;padding:60px;color:#999;}
-    </style>
 </head>
 <body>
-    <h1>🏷️ Ubipet - Generador QR Admin</h1>
+    <h1>🏷️ Ubipet QR Admin</h1>
+    <div id="status">Cargando...</div>
     
-    <div id="loading">🔄 Cargando perfiles...</div>
-    <div id="qrContainer" class="qr-grid" style="display:none;"></div>
-
     <script>
-        const sb = supabase.createClient('https://exeeqykieytuvlzdbsnn.supabase.co', 
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4');
-
-        async function cargarPerfiles() {
-            const loading = document.getElementById('loading');
-            loading.textContent = '🔄 Conectando Supabase...';
+        const supabaseUrl = 'https://exeeqykieytuvlzdbsnn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
+        
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function testConnection() {
+            const status = document.getElementById('status');
+            status.innerHTML = '🔍 Probando conexión...';
+            
+            try {
+                const { data, error } = await sb.from('perfiles').select('count').limit(1);
+                
+                if (error) {
+                    status.innerHTML = `❌ Error: ${error.message}`;
+                    console.error('ERROR:', error);
+                    return;
+                }
+                
+                status.innerHTML = `✅ Conexión OK. Perfiles encontrados: ${data?.length || 0}`;
+                
+                if (data?.length > 0) {
+                    cargarTodosPerfiles();
+                } else {
+                    status.innerHTML += '<br>ℹ️ <a href="perfil.html">Guarda tu mascota primero</a>';
+                }
+                
+            } catch (e) {
+                status.innerHTML = `💥 Error total: ${e.message}`;
+                console.error('Error:', e);
+            }
+        }
+        
+        async function cargarTodosPerfiles() {
+            const status = document.getElementById('status');
+            status.innerHTML = '📱 Cargando perfiles...';
             
             try {
                 const { data, error } = await sb.from('perfiles').select('*');
                 
-                if (error) {
-                    loading.textContent = '❌ Error Supabase: ' + error.message;
-                    console.error('Error:', error);
-                    return;
-                }
+                if (error) throw error;
                 
-                if (!data || data.length === 0) {
-                    loading.innerHTML = `
-                        ℹ️ <strong>No hay perfiles</strong><br>
-                        1. Ve a <a href="index.html" style="color:#4CAF50;">index.html</a> → Login<br>
-                        2. <a href="perfil.html" style="color:#4CAF50;">perfil.html</a> → Guarda tu mascota<br>
-                        3. Vuelve aquí 👈
-                    `;
-                    return;
-                }
+                status.innerHTML = `✅ ${data.length} mascotas listas`;
                 
-                loading.textContent = `✅ ${data.length} perfiles encontrados`;
-                
-                const container = document.getElementById('qrContainer');
                 data.forEach(perfil => {
-                    const qrCard = crearTarjetaQR(perfil);
-                    container.appendChild(qrCard);
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <h3>${perfil.nombre}</h3>
+                        <p>${perfil.raza} - ${perfil.telefono}</p>
+                        <p>ID: ${perfil.id}</p>
+                        <a href="perfil-publico.html?id=${perfil.id}" target="_blank">Ver perfil público</a>
+                        <hr>
+                    `;
+                    document.body.appendChild(div);
                 });
                 
-                // Generar QR automáticamente
-                data.forEach(perfil => generarQR(perfil.id));
-                
-                setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('qrContainer').style.display = 'grid';
-                }, 1500);
-                
-            } catch (error) {
-                loading.textContent = '💥 Error conexión: ' + error.message;
-                console.error('Error total:', error);
+            } catch (e) {
+                status.innerHTML = `Error: ${e.message}`;
             }
         }
-
-        function crearTarjetaQR(perfil) {
-            const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/perfil-publico.html?id=${perfil.id}`;
-            
-            const card = document.createElement('div');
-            card.className = 'qr-card';
-            card.innerHTML = `
-                <h3>🐕 ${perfil.nombre || 'Sin nombre'}</h3>
-                <p><strong>${perfil.raza || 'Sin raza'}</strong></p>
-                ${perfil.telefono ? `<p>📞 ${perfil.telefono}</p>` : ''}
-                <canvas id="qr_${perfil.id}" width="200" height="200"></canvas>
-                <p style="font-size:12px;word-break:break-all;">${qrUrl}</p>
-                <button onclick="generarQR('${perfil.id}')">🔄 QR</button>
-                <button class="print-btn" onclick="imprimirQR('${perfil.id}', '${perfil.nombre || 'Mascota'}')">🖨️ Imprimir</button>
-            `;
-            
-            return card;
-        }
-
-        window.generarQR = function(perfilId) {
-            const canvas = document.getElementById('qr_' + perfilId);
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/perfil-publico.html?id=${perfilId}`;
-            
-            // Fondo blanco
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, 200, 200);
-            ctx.strokeStyle = '#ddd';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(0, 0, 200, 200);
-            
-            // QR simulado (patrón realista)
-            ctx.fillStyle = '#000';
-            for(let i=25; i<175; i+=18) {
-                for(let j=25; j<175; j+=18) {
-                    if(Math.random() > 0.4) {
-                        ctx.fillRect(i, j, 14, 14);
-                    }
-                }
-            }
-            
-            // Logo UBIPET
-            ctx.fillStyle = '#4CAF50';
-            ctx.fillRect(80, 80, 40, 40);
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('UBI', 100, 102);
-            
-            // Texto URL corta
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText('ESCANEA', 100, 25);
-            ctx.font = '12px Arial';
-            ctx.fillText(qrUrl.substring(0,20)+'...', 100, 185);
-        }
-
-        window.imprimirQR = function(perfilId, nombre) {
-            const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/perfil-publico.html?id=${perfilId}`;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head><title>QR ${nombre}</title>
-                <style>
-                    body{font-family:Arial;text-align:center;padding:30px;background:#f0f0f0;}
-                    canvas{border:3px solid #4CAF50;border-radius:15px;}
-                    .qr-container{background:white;padding:30px;border-radius:20px;display:inline-block;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
-                    h2{color:#4CAF50;}
-                </style></head>
-                <body>
-                    <div class="qr-container">
-                        <h2>🏷️ Placa ${nombre}</h2>
-                        <canvas id="printQR" width="300" height="300"></canvas>
-                        <p><strong>Escanea para contacto</strong></p>
-                        <p style="font-size:14px;word-break:break-all;">${qrUrl}</p>
-                    </div>
-                    <script>
-                        const canvas = document.getElementById('printQR');
-                        const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = '#fff'; ctx.fillRect(0,0,300,300);
-                        ctx.strokeStyle = '#ddd'; ctx.lineWidth = 3; ctx.strokeRect(0,0,300,300);
-                        ctx.fillStyle = '#000';
-                        for(let i=30; i<270; i+=22) {
-                            for(let j=30; j<270; j+=22) {
-                                if(Math.random() > 0.4) ctx.fillRect(i,j,18,18);
-                            }
-                        }
-                        ctx.fillStyle = '#4CAF50'; ctx.fillRect(120,120,60,60);
-                        ctx.fillStyle = '#fff'; ctx.font = 'bold 24px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-                        ctx.fillText('UBI', 150, 153);
-                        ctx.fillStyle = '#000'; ctx.font = 'bold 20px Arial'; ctx.textBaseline='top';
-                        ctx.fillText('ESCANEA', 150, 35);
-                        ctx.font = '16px Arial'; ctx.fillText('${qrUrl.substring(0,25)}...', 150, 285);
-                    </script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
+        
         // INICIO
-        cargarPerfiles();
+        testConnection();
     </script>
 </body>
 </html>

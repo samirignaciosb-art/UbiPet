@@ -62,7 +62,8 @@
             navigator.geolocation.getCurrentPosition(pos => {
                 const tel = document.getElementById('telefono').textContent.replace(/[^0-9]/g, '');
                 const msg = `🚨 MASCOTA ENCONTRADA! 🐕 ${document.getElementById('mascotaNombre').textContent} 👤 ${document.getElementById('nombreDueno').textContent} 📍 https://maps.app.goo.gl/?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                window.open(`https://wa.me/569${tel}?text=${encodeURIComponent(msg)}`);
+                
+window.open(`https://wa.me/569${tel}?text=${encodeURIComponent(msg)}`);
                 btn.innerHTML = '📍 Ubicación'; btn.disabled = false;
             }, () => { 
                 alert('Activa GPS'); 

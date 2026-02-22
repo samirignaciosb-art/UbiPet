@@ -70,10 +70,9 @@
       document.getElementById('formPerfil').style.display = 'grid';
       
       try {
-        // Cargar datos - CAMBIADO nombre → nombre_mascota
         const { data } = await sb.from('perfiles').select('*').eq('user_id', session.user.id).maybeSingle();
         if (data) {
-          document.getElementById('nombreMascota').value = data.nombre_mascota || '';
+          document.getElementById('nombreMascota').value = data.nombre || '';
           document.getElementById('raza').value = data.raza || '';
           document.getElementById('edad').value = data.edad || '';
           document.getElementById('peso').value = data.peso || '';
@@ -93,7 +92,7 @@
       
       const perfilData = {
         user_id: session.user.id,  // ← CLAVE ÚNICA
-        nombre_mascota: document.getElementById('nombreMascota').value,
+       nombre: document.getElementById('nombreMascota').value,
         raza: document.getElementById('raza').value,
         edad: parseInt(document.getElementById('edad').value) || null,
         peso: parseFloat(document.getElementById('peso').value) || null,
@@ -105,7 +104,6 @@
       };
       
       try {
-        // ✅ UPSERT DEFINITIVO con onConflict
         const { error } = await sb
           .from('perfiles')
           .upsert(perfilData, { 

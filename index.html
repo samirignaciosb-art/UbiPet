@@ -24,12 +24,12 @@
         <h1>🔐 Ubipet</h1>
         <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
 
-        <!-- ✅ LOGIN CLIENTES REALES -->
+        <!-- ✅ LOGIN CLIENTES REALES (SIN DEMO) -->
         <input type="email" id="email" placeholder="tu@email.com">
         <input type="password" id="password" placeholder="tu-contraseña">
         <button onclick="login()">🚀 Iniciar Sesión</button>
 
-        <!-- 🔥 SOLICITUD PLACA (PRODUCTIVA) -->
+        <!-- 🔥 SOLICITUD PLACA -->
         <div id="formSolicitud" class="solicitud-form">
             <h3 class="solicitud-titulo">📱 Registra tu mascota ahora</h3>
             <input id="solicitudEmail" type="email" placeholder="tu@email.com">
@@ -40,7 +40,7 @@
                     style="background:#ff9800; margin-top:10px;">❌ Cancelar</button>
         </div>
 
-        <!-- ✅ WHATSAPP DIRECTO (ÚNICO CALL TO ACTION) -->
+        <!-- ✅ WHATSAPP DIRECTO -->
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
             <button onclick="mostrarSolicitud()" class="whatsapp-btn">
                 👋 Nuevo? Activar mi cuenta
@@ -115,7 +115,6 @@
 
         window.login = function() {
             alert('👆 Login → perfil.html (próximo paso)');
-            // window.location.href = 'perfil.html';
         }
     </script>
 </body>

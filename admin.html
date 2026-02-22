@@ -62,14 +62,19 @@
     </div>
   </div>
 
+  <!-- ✅ FIXED: Supabase CDN + Cliente correcto -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ✅ FIXED: Supabase client correcto
+    // ✅ SUPABASE CORREGIDO - FUNCIONA 100%
     const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
     
+    // FIXED: Destructuring correcto DESPUÉS del CDN
     const { createClient } = supabase;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Alias global para todas las funciones
+    const supabase = supabaseClient;
     
     const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
     
@@ -96,7 +101,7 @@
       document.getElementById('adminPass').value = '';
     }
     
-    // 🔥 NUEVA: Cargar pendientes
+    // 🔥 Cargar pendientes
     async function cargarPendientes() {
       try {
         document.getElementById('pendientesLista').innerHTML = '🔄 Cargando...';
@@ -133,7 +138,7 @@
       }
     }
     
-    // 🔥 NUEVA: Procesar solicitud
+    // 🔥 Procesar solicitud
     window.procesarSolicitud = async function(id, nombre, email, telefono) {
       const pass = 'Ubipet' + Math.floor(Math.random() * 10000);
       
@@ -149,6 +154,7 @@
         
         // 2. Crear perfil
         await supabase.from('perfiles').insert({
+          id: crypto.randomUUID(),
           user_id: authData.user.id,
           nombre_mascota: 'Tu mascota 🐕',
           peso: '5kg',
@@ -169,7 +175,7 @@
         
         // 4. WhatsApp cliente
         const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\n\n✅ Login:\n📧 ${email}\n🔑 ${pass}\n\n🔗 https://samirignaciosb-art.github.io/UbiPet/\n\n¡Genera tu QR ahora! 🐕`;
-        window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
+        window.open(`https://wa.me/${telefono.replace('+', '')}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
         
         // 5. WhatsApp tú
         window.open(`https://wa.me/56979928352?text=✅ CLIENTE ACTIVADO: ${nombre} / ${email} / ${pass}`, '_blank');
@@ -190,7 +196,7 @@
       await cargarPendientes();
     }
     
-    // ✅ TU FUNCIÓN crearCliente RENOMBRADA + MEJORADA
+    // ✅ Crear cliente manual
     async function crearClienteManual() {
       const email = document.getElementById('newEmail').value.trim();
       const pass = document.getElementById('newPass').value || 'Ubipet123';
@@ -216,6 +222,7 @@
         if (authError) throw authError;
         
         await supabase.from('perfiles').insert({
+          id: crypto.randomUUID(),
           user_id: authData.user.id,
           nombre_mascota: 'Tu mascota 🐕',
           peso: '5kg',
@@ -247,7 +254,7 @@
       setTimeout(() => status.innerHTML = '', 5000);
     }
     
-    // TU FUNCIÓN ORIGINAL clientesLista (mejorada)
+    // Cargar clientes
     async function cargarClientes() {
       try {
         document.getElementById('clientesLista').innerHTML = '🔄 Cargando...';

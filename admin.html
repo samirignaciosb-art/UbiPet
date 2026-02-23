@@ -62,10 +62,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
-    
-    const sbAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTYwNDUyMywiZXhwIjoyMDg3MTgwNTIzfQ.YLI0hmWB8BLKZEl1Wn6dlzqYolCEJKwpxnmUo-AKtUo';
+      
+const sbAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+  auth: { autoRefreshToken: false, persistSession: false }
+});
+      const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
 
     // Event listeners
     document.getElementById('btnLogin').addEventListener('click', adminLogin);

@@ -73,46 +73,29 @@ window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`);
         }
         
         async function cargarPerfil() {
-            try {
-                const { data, error } = await sb
-                    .from('perfiles')
-                    .select('*')
-                    .eq('id', perfilId)
-                    .single();
-                
-                if (error || !data) {
-                    document.getElementById('vcard').innerHTML = '<div style="padding:40px;text-align:center;color:#666;">Mascota no encontrada 🐕</div>';
-                    return;
-                }
-                
-                
-                document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
-                document.getElementById('statusBadge').textContent = `🐕 ${data.nombre || 'mascota'} encontrada`;
-                document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';
-                document.getElementById('telefono').textContent.replace('+', '').replace(/[^0-9]/g, '');
-                document.getElementById('raza').textContent = data.raza || 'No especificada';
-                
-            } catch(e) {
-                console.error('Error:', e);
-            }
+    try {
+        const { data, error } = await sb
+            .from('perfiles')
+            .select('*')
+            .eq('id', perfilId)
+            .single();
+        
+        if (error || !data) {
+            document.getElementById('vcard').innerHTML = '<div style="padding:40px;text-align:center;color:#666;">Mascota no encontrada 🐕</div>';
+            return;
         }
         
-        function copiarTelefono() {
-            const telefono = document.getElementById('telefono').textContent;
-            navigator.clipboard.writeText(telefono).then(() => {
-                const btn = event.target;
-                const original = btn.innerHTML;
-                btn.innerHTML = '✅ Copiado!';
-                btn.style.background = '#4CAF50';
-                setTimeout(() => {
-                    btn.innerHTML = original;
-                    btn.style.background = '';
-                }, 2000);
-            });
-        }
+        document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
+        document.getElementById('statusBadge').textContent = `🐕 ${data.nombre || 'mascota'} encontrada`;
+        document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';
+        document.getElementById('telefono').textContent = data.telefono || '+56979928352';  // ← ¡FIX AQUÍ!
+        document.getElementById('raza').textContent = data.raza || 'No especificada';
         
-        
-        
+    } catch(e) {
+        console.error('Error:', e);
+    }
+}
+ 
         cargarPerfil();
     </script>
 </body>

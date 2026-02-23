@@ -1,20 +1,8 @@
-// js/app.js - 100% FUNCIONANDO SIN ERRORES - UBIPET $15/PLACA
+// js/app.js - UBIPET/PLACA
 import { supabase } from './supabase.js'
 import { login, cerrarSesion, getUser } from './auth.js'
 import { togglePerdida, guardarPerfil, generarQR, copiarURL, cargarMascotasUsuario, nuevaMascota, cambiarMascota } from './profile.js'
 import { cargarRescate, contactarDueno, enviarCorreo, copiarTelefono, enviarUbicacion } from './rescue.js'
-
-// ⭐ WHATSAPP + DEMO (100% INLINE)
-window.loginDemo = async () => {
-  try {
-    document.getElementById('email').value = 'samirignaciosb@gmail.com'
-    document.getElementById('password').value = 'Gapo1342.'
-    await login('samirignaciosb@gmail.com', 'Gapo1342.')
-    window.location.href = 'perfil.html'
-  } catch(error) {
-    alert('❌ Demo Sofía: ' + error.message)
-  }
-}
 
 window.pedirInvitacion = () => {
   let email = prompt('📧 Email para tu 1ª placa:')

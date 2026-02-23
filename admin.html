@@ -142,10 +142,10 @@ window.generarPlacaIndividual = async function() {
     const { data: placaDisponible } = await sbAdmin
       .from('perfiles_preset')
       .select('id, qr_uuid')
-      .eq('cliente_email', null)
+      .is('cliente_email', null)
       .eq('status', 'lista_venta')
       .limit(1)
-      .single();
+      .maybeSingle();
     
     if (!placaDisponible) {
       alert('❌ Sin placas disponibles');

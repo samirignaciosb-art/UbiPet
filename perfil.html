@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ubipet - Perfil Mascota</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: Arial; max-width: 600px; margin: 20px auto; padding: 20px; }
-    .container { background: #f9f9f9; padding: 25px; border-radius: 15px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-    input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
-    button { width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 5px 0; }
-    h3 { color: #4CAF50; margin: 20px 0 10px 0; }
-    label { font-weight: bold; color: #555; }
-    #loading { text-align: center; padding: 40px; font-size: 18px; color: #666; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐕 Ubipet - Perfil Mascota</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/estilos.css?v=2">
+    
+    <style>
+        /* ESTILOS ESPECÍFICOS perfil.html */
+        #loading { 
+            text-align: center; 
+            padding: 40px; 
+            font-size: 18px; 
+            color: var(--pet-blue);
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+    </style>
 </head>
+
 <body>
   <div class="container">
     <h1>🐕 Ubipet - Perfil</h1>

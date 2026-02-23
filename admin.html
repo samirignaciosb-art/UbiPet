@@ -106,7 +106,7 @@ window.listarPlacasPreset = async function() {
     const { data: placas, error } = await sbAdmin
       .from('perfiles_preset')
       .select('*')
-      .eq('cliente_email', null)
+      .is('cliente_email', null)
       .eq('status', 'lista_venta')
       .order('created_at', { ascending: false });
     

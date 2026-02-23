@@ -73,21 +73,29 @@
     document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
 
     async function adminLogin() {
-      const email = document.getElementById('adminEmail').value;
-      const pass = document.getElementById('adminPass').value;
-      
-      if (email !== SUPERUSER.email || pass !== SUPERUSER.password) {
-        alert('❌ Solo: samirignaciosb@gmail.com / Admin123');
-        return;
-      }
-      
-      document.getElementById('loginAdmin').style.display = 'none';
-      document.getElementById('adminDash').style.display = 'block';
-      
-      await cargarPendientes();
-      await cargarClientes();
-      alert('✅ ¡ADMIN LIVE!');
+  const email = document.getElementById('adminEmail').value;
+  const pass = document.getElementById('adminPass').value;
+  
+  if (email !== SUPERUSER.email || pass !== SUPERUSER.password) {
+    alert('❌ Solo: samirignaciosb@gmail.com / Admin123');
+    return;
+  }
+  
+  document.getElementById('loginAdmin').style.display = 'none';
+  document.getElementById('adminDash').style.display = 'block';
+  
+  await cargarPendientes();
+  await cargarClientes();
+  alert('✅ ¡ADMIN LIVE!');
+  
+  // ⭐ AUTO-LOAD PLACAS UBP - AGREGAR ESTAS 4 LÍNEAS
+  setTimeout(() => {
+    if (window.listarPlacasPreset) {
+      window.listarPlacasPreset();
+      console.log('🔍 Placas UBP cargadas');
     }
+  }, 1500);
+}
 
     function logoutAdmin() {
       document.getElementById('adminDash').style.display = 'none';

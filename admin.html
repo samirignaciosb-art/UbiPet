@@ -155,46 +155,33 @@
   
   try {
     const { data: authData, error: authError } = await sbAdmin.auth.signUp({
-      email,
-      password: pass,
-      options: { data: { telefono, nombre } }
+      email, password: pass, options: { data: { telefono, nombre } }
     });
-    
     if (authError) throw authError;
     
-    // ✅ Perfil cliente
     await sbAdmin.from('perfiles').insert({
-      user_id: authData.user.id,
-      nombre: 'Tu mascota 🐕',
-      nombre_dueno: nombre,
-      email_dueno: email,
-      telefono: telefono,
-      raza: 'Mixta'
+      user_id: authData.user.id, nombre: 'Tu mascota 🐕',
+      nombre_dueno: nombre, email_dueno: email,
+      telefono: telefono, raza: 'Mixta'
     });
     
-    // ✅ Marcar procesado
     await sbAdmin.from('solicitudes_placas').update({ 
-      procesado: true, 
-      user_id: authData.user.id 
+      procesado: true, user_id: authData.user.id 
     }).eq('id', id);
     
-    // ✅ WhatsApp AL CLIENTE (NO TU número)
+    // 🔥 FIX: Activar cuenta para login inmediato
+    await sbAdmin.auth.signInWithPassword({ email, password: pass });
+    
     const cleanTel = telefono.replace(/[^0-9]/g, '');
-    const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\n\n✅ Login:\n📧 ${email}\n🔑 ${pass}\n\n🔗 https://samirignaciosb-art.github.io/UbiPet/\n\n¡Genera tu QR ahora! 🐕💰`;
-    
+    const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\\n\\n✅ Login:\\n📧 ${email}\\n🔑 ${pass}\\n\\n🔗 https://samirignaciosb-art.github.io/UbiPet/\\n\\n¡Genera tu QR ahora! 🐕💰`;
     window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
+    window.open(`https://wa.me/56979928352?text=✅ CLIENTE CREADO: ${email}/${pass}`, '_blank');
     
-    // ✅ WhatsApp TU (NOTIFICACIÓN interna)
-    window.open(`https://wa.me/56979928352?text=✅ CLIENTE CREADO: ${email} / ${pass}`, '_blank');
-    
-    alert(`🎉 CLIENTE CREADO!\n📱 Enviado a ${telefono}`);
-    await cargarPendientes();
-    await cargarClientes();
-    
-  } catch(error) {
-    alert('❌ Error: ' + error.message);
-  }
+    alert(`🎉 CLIENTE ACTIVO! ${email}/${pass}`);
+    await cargarPendientes(); await cargarClientes();
+  } catch(error) { alert('❌ ' + error.message); }
 }
+
 
 
     async function eliminarSolicitud(id) {

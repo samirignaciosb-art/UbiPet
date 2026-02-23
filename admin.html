@@ -1,29 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <title>👑 Ubipet Admin</title>
-  <style>
-    body { background: #f7ede3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); max-width: 1000px; width: 100%; text-align: center; }
-    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-    button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-    button:hover { opacity: 0.9; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    .crear-form { background: #e8f5e8; padding: 20px; border-radius: 15px; margin: 20px 0; }
-    .pendiente-row { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 10px; text-align: left; border-left: 5px solid #ffc107; }
-    .cliente-row { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 10px; text-align: left; }
-    .btn-procesar, .btn-cerrar, .btn-manual { background: #4CAF50; padding: 8px 15px; width: auto; display: inline-block; margin: 5px; border-radius: 5px; font-size: 14px; }
-    .btn-cerrar { background: #ff9800 !important; }
-    .btn-manual { background: #2196F3 !important; }
-    #pendientesLista, #clientesLista { max-height: 400px; overflow-y: auto; text-align: left; }
-    h1 { color: #84a59e; margin-bottom: 20px; }
-    .loading, .success, .error { padding: 10px; border-radius: 5px; margin: 10px 0; }
-    .loading { background: #fff3cd; }
-    .success { background: #d4edda; color: #155724; }
-    .error { background: #f8d7da; color: #721c24; }
-    .section { margin: 20px 0; }
-  </style>
+    <title>👑 Ubipet Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/estilos.css?v=2">
+    <style>
+        /* ESTILOS ESPECÍFICOS admin.html - NO TOCAR resto */
+        .crear-form { background: rgba(232,245,232,0.8); padding: 20px; border-radius: 20px; margin: 20px 0; backdrop-filter: blur(10px); }
+        .pendiente-row { background: rgba(255,243,205,0.9); padding: 15px; margin: 10px 0; border-radius: 15px; border-left: 5px solid #ffd93d; }
+        .cliente-row { background: rgba(248,249,250,0.9); padding: 15px; margin: 10px 0; border-radius: 15px; }
+        .btn-procesar, .btn-cerrar, .btn-manual { background: var(--pet-green); padding: 10px 20px; border-radius: 12px; font-weight: 600; margin: 5px; }
+        .btn-cerrar { background: var(--pet-orange) !important; }
+        .btn-manual { background: var(--pet-blue) !important; }
+        #pendientesLista, #clientesLista { max-height: 400px; overflow-y: auto; border-radius: 15px; }
+        .loading, .success, .error { padding: 15px; border-radius: 15px; margin: 15px 0; backdrop-filter: blur(10px); }
+    </style>
 </head>
+
 <body>
   <div class="container">
     <h1>👑 UBIPET ADMIN</h1>

@@ -27,6 +27,40 @@
         <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
             <button onclick="mostrarSolicitud()" class="whatsapp-btn">👋 Nuevo? Activar cuenta</button>
         </div>
+        <div style="margin: 20px 0; padding: 20px; background: #e8f5e8; border-radius: 10px;">
+  <h3 style="color:#2e7d32;">🔍 ¿Ya enviaste solicitud?</h3>
+  <input id="checkEmail" placeholder="sa.sotob@duocuc.cl" style="width:70%;padding:12px;margin:10px;">
+  <button onclick="checkEstadoSolicitud()" style="background:#4CAF50;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;">🔍 VER ESTADO</button>
+  <div id="estadoSolicitud" style="margin-top:15px;padding:10px;"></div>
+</div>
+
+<script>
+async function checkEstadoSolicitud() {
+  const email = document.getElementById('checkEmail').value.trim();
+  if (!email.includes('@')) return alert('❌ Email inválido');
+  
+  try {
+    const { data, error } = await sb.from('solicitudes_placas').select('aprobado').eq('email', email).single();
+    
+    const estado = document.getElementById('estadoSolicitud');
+    if (error || !data) {
+      estado.innerHTML = '<span style="color:orange;">⏳ No encontramos tu solicitud</span>';
+    } else if (!data.aprobado) {
+      estado.innerHTML = '<span style="color:orange;">⏳ Solicitud recibida - Esperando aprobación</span>';
+    } else {
+      estado.innerHTML = '<span style="color:green;font-size:18px;">✅ ¡APROBADO! <strong>CREA TU CUENTA</strong></span><br><br>';
+      estado.innerHTML += '<button onclick="mostrarCrearCuenta()" style="background:#2196F3;color:white;padding:15px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">🔐 CREAR CUENTA UBIPET</button>';
+    }
+  } catch(error) {
+    document.getElementById('estadoSolicitud').innerHTML = '❌ Error';
+  }
+}
+
+function mostrarCrearCuenta() {
+  alert('🎉 ¡CREA TU CUENTA CON EL LOGIN ARRIBA!');
+}
+</script>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

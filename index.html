@@ -57,7 +57,7 @@ async function checkEstadoSolicitud() {
 // 2. CREAR CUENTA (PASO 4)
 async function mostrarCrearCuenta() {
   const email = document.getElementById('emailInput').value.trim() || prompt('📧 Tu email:');
-  const password = prompt('🔑 Crea contraseña:') || 'Ubipet123';
+  const password = prompt('🔑 Crea contraseña:') || '123456';
   
   if (!email || !password || password.length < 6) {
     return alert('❌ Email + contraseña 6+ caracteres');

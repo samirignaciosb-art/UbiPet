@@ -65,24 +65,37 @@ async function checkEstadoSolicitud() {
 // 2. CREAR CUENTA (PASO 4)
 async function mostrarCrearCuenta() {
   const email = document.getElementById('emailInput').value.trim() || prompt('📧 Tu email:');
-  const password = prompt('🔑 Crea contraseña (mínimo 6 caracteres):') || 'Ubipet123';
+  const password = prompt('🔑 Crea contraseña:') || 'Ubipet123';
   
   if (!email || !password || password.length < 6) {
-    return alert('❌ Email y contraseña mínima 6 caracteres');
+    return alert('❌ Email + contraseña 6+ caracteres');
   }
   
   try {
-    const { data, error } = await sb.auth.signUp({
+    // 1️⃣ CREAR CUENTA
+    const { data: signUpData, error: signUpError } = await sb.auth.signUp({
       email: email.toLowerCase(),
       password,
       options: { data: { email, nombre: 'Cliente Ubipet' } }
     });
     
-    if (error) throw error;
+    if (signUpError) throw signUpError;
     
-    alert('✅ ¡CUENTA CREADA! Ahora inicia sesión arriba.');
-    document.getElementById('emailInput').value = email;
-    document.getElementById('estadoSolicitud').innerHTML = '✅ Cuenta creada. Inicia sesión.';
+    // 2️⃣ LOGIN AUTOMÁTICO INMEDIATO
+    const { data: loginData, error: loginError } = await sb.auth.signInWithPassword({
+      email: email.toLowerCase(),
+      password
+    });
+    
+    if (loginError?.message.includes('confirmed')) {
+      alert('✅ ¡CUENTA CREADA! Revisa tu email.');
+    } else if (loginData) {
+      // ✅ LOGIN EXITOSO
+      localStorage.setItem('user_token', loginData.session.access_token);
+      localStorage.setItem('user_id', loginData.user.id);
+      alert('✅ ¡CUENTA CREADA + LOGIN OK!');
+      window.location.href = 'perfil.html';
+    }
     
   } catch(error) {
     alert('❌ ' + error.message);

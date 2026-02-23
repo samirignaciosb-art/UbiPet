@@ -173,8 +173,7 @@
     await sbAdmin.auth.signInWithPassword({ email, password: pass });
     
     const cleanTel = telefono.replace(/[^0-9]/g, '');
-    const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\\n\\n✅ Login:\\n📧 ${email}\\n🔑 ${pass}\\n\\n🔗 https://samirignaciosb-art.github.io/UbiPet/\\n\\n¡Genera tu QR ahora! 🐕💰`;
-    window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
+const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\\n\\n✅ Login:\\n📧 ${email}\\n🔑 ${pass}\\n\\n🔗 https://samirignaciosb-art.github.io/UbiPet/\\n\\n¡Genera tu QR ahora! 🐕💰`;    window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
     window.open(`https://wa.me/56979928352?text=✅ CLIENTE CREADO: ${email}/${pass}`, '_blank');
     
     alert(`🎉 CLIENTE ACTIVO! ${email}/${pass}`);
@@ -207,12 +206,12 @@ async function crearClienteManual() {
   
   try {
     const { data: authData, error: authError } = await sbAdmin.auth.signUp({
-      email,
-      password: pass,
-      options: { data: { telefono } }
+      email, password: pass, options: { data: { telefono } }
     });
     
     if (authError) throw authError;
+    
+    await sbAdmin.auth.signInWithPassword({ email, password: pass });
     
     await sbAdmin.from('perfiles').insert({
       user_id: authData.user.id,
@@ -266,7 +265,6 @@ async function crearClienteManual() {
         document.getElementById('clientesLista').innerHTML = `❌ Error: ${error.message}`;
       }
     }
-
     function mostrarStatus(mensaje, tipo) {
       const status = document.getElementById('statusMessage');
       status.innerHTML = `<div class="${tipo}">${mensaje}</div>`;

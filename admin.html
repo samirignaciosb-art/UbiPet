@@ -29,7 +29,7 @@
     <h1>👑 UBIPET ADMIN</h1>
     
     <div id="loginAdmin">
-      <input type="email" id="adminEmail" placeholder="samirignaciosb@gmail.com">
+      <input type="email" id="adminEmail" placeholder="Admin@ubipet.cl">
       <input type="password" id="adminPass" placeholder="Admin123">
       <button id="btnLogin">🔐 ACCEDER ADMIN</button>
     </div>
@@ -150,51 +150,52 @@
       }
     }
 
-    async function procesarSolicitud(id, nombre, email, telefono) {
-      const pass = 'Ubipet' + Math.floor(Math.random() * 10000);
-      
-      try {
-        const { data: authData, error: authError } = await sbAdmin.auth.signUp({
-          email,
-          password: pass,
-          options: { data: { telefono, nombre } }
-        });
-        
-        if (authError) throw authError;
-        
-        await sbAdmin.from('perfiles').insert({
-          id: crypto.randomUUID(),
-          user_id: authData.user.id,
-          nombre_mascota: 'Tu mascota 🐕',
-          peso: '5kg',
-          edad: '2 años',
-          raza: 'Mixta',
-          nombre_dueno: nombre,
-          telefono: telefono,
-          email_dueno: email,
-          esta_perdida: false,
-          fotos: []
-        });
-        
-        await sbAdmin.from('solicitudes_placas').update({ 
-          procesado: true, 
-          user_id: authData.user.id 
-        }).eq('id', id);
-        
-        const cleanTel = telefono.replace(/[^0-9]/g, '');
-        const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\n\n✅ Login:\n📧 ${email}\n🔑 ${pass}\n\n🔗 https://samirignaciosb-art.github.io/UbiPet/\n\n¡Genera tu QR ahora! 🐕`;
-        window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
-        
-        window.open(`https://wa.me/56979928352?text=✅ CLIENTE ACTIVADO: ${nombre} / ${email} / ${pass}`, '_blank');
-        
-        alert(`🎉 CLIENTE CREADO!\n${email} / ${pass}`);
-        await cargarPendientes();
-        await cargarClientes();
-        
-      } catch(error) {
-        alert('❌ Error: ' + error.message);
-      }
-    }
+   async function procesarSolicitud(id, nombre, email, telefono) {
+  const pass = 'Ubipet' + Math.floor(Math.random() * 10000);
+  
+  try {
+    const { data: authData, error: authError } = await sbAdmin.auth.signUp({
+      email,
+      password: pass,
+      options: { data: { telefono, nombre } }
+    });
+    
+    if (authError) throw authError;
+    
+    // ✅ Perfil cliente
+    await sbAdmin.from('perfiles').insert({
+      user_id: authData.user.id,
+      nombre: 'Tu mascota 🐕',
+      nombre_dueno: nombre,
+      email_dueno: email,
+      telefono: telefono,
+      raza: 'Mixta'
+    });
+    
+    // ✅ Marcar procesado
+    await sbAdmin.from('solicitudes_placas').update({ 
+      procesado: true, 
+      user_id: authData.user.id 
+    }).eq('id', id);
+    
+    // ✅ WhatsApp AL CLIENTE (NO TU número)
+    const cleanTel = telefono.replace(/[^0-9]/g, '');
+    const mensajeCliente = `🐕 *¡UBIPET ACTIVADO!* ${nombre}\n\n✅ Login:\n📧 ${email}\n🔑 ${pass}\n\n🔗 https://samirignaciosb-art.github.io/UbiPet/\n\n¡Genera tu QR ahora! 🐕💰`;
+    
+    window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
+    
+    // ✅ WhatsApp TU (NOTIFICACIÓN interna)
+    window.open(`https://wa.me/56979928352?text=✅ CLIENTE CREADO: ${email} / ${pass}`, '_blank');
+    
+    alert(`🎉 CLIENTE CREADO!\n📱 Enviado a ${telefono}`);
+    await cargarPendientes();
+    await cargarClientes();
+    
+  } catch(error) {
+    alert('❌ Error: ' + error.message);
+  }
+}
+
 
     async function eliminarSolicitud(id) {
       if (!confirm('¿Eliminar esta solicitud?')) return;
@@ -202,57 +203,51 @@
       await cargarPendientes();
     }
 
-    async function crearClienteManual() {
-      const email = document.getElementById('newEmail').value.trim();
-      const pass = document.getElementById('newPass').value || 'Ubipet123';
-      const telefono = document.getElementById('newPhone').value.trim();
-      
-      // ✅ FIX: Validación CORREGIDA
-      if (!email.includes('@') || !telefono) {
-        mostrarStatus('❌ Email o teléfono inválido', 'error');
-        return;
-      }
-      
-      const btn = document.getElementById('btnCrearCliente');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '⏳ Creando...';
-      btn.disabled = true;
-      
-      try {
-        const { data: authData, error: authError } = await sbAdmin.auth.signUp({
-          email,
-          password: pass,
-          options: { data: { telefono } }
-        });
-        
-        if (authError) throw authError;
-        
-        await sbAdmin.from('perfiles').insert({
-          id: crypto.randomUUID(),
-          user_id: authData.user.id,
-          nombre_mascota: 'Tu mascota 🐕',
-          peso: '5kg',
-          edad: '2 años',
-          raza: 'Mixta',
-          nombre_dueno: 'Dueño',
-          telefono: telefono,
-          email_dueno: email,
-          esta_perdida: false,
-          fotos: []
-        });
-        
-        document.getElementById('newEmail').value = '';
-        document.getElementById('newPhone').value = '';
-        mostrarStatus(`✅ CREADO: ${email}`, 'success');
-        await cargarClientes();
-        
-      } catch(error) {
-        mostrarStatus(`❌ Error: ${error.message}`, 'error');
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
-    }
+async function crearClienteManual() {
+  const email = document.getElementById('newEmail').value.trim();
+  const pass = document.getElementById('newPass').value || 'Ubipet123';
+  const telefono = document.getElementById('newPhone').value.trim();
+  
+  if (!email.includes('@') || !telefono) {
+    mostrarStatus('❌ Email o teléfono inválido', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('btnCrearCliente');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Creando...';
+  btn.disabled = true;
+  
+  try {
+    const { data: authData, error: authError } = await sbAdmin.auth.signUp({
+      email,
+      password: pass,
+      options: { data: { telefono } }
+    });
+    
+    if (authError) throw authError;
+    
+    await sbAdmin.from('perfiles').insert({
+      user_id: authData.user.id,
+      nombre: 'Tu mascota 🐕',
+      nombre_dueno: 'Dueño',
+      email_dueno: email,
+      telefono: telefono,
+      raza: 'Mixta'
+    });
+    
+    document.getElementById('newEmail').value = '';
+    document.getElementById('newPhone').value = '';
+    mostrarStatus(`✅ CREADO: ${email}`, 'success');
+    await cargarClientes();
+    
+  } catch(error) {
+    mostrarStatus(`❌ Error: ${error.message}`, 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
 
     async function cargarClientes() {
       try {

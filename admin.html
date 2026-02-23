@@ -98,7 +98,95 @@ const sbAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     }
   }, 1500);
 }
+// ⭐ FUNCION LISTAR PLACAS PRESET UBP - FALTABA ESTA
+window.listarPlacasPreset = async function() {
+  try {
+    document.getElementById('placas-preset-lista').innerHTML = '🔄 Cargando placas...';
+    
+    const { data: placas, error } = await sbAdmin
+      .from('perfiles_preset')
+      .select('*')
+      .eq('cliente_email', null)
+      .eq('status', 'lista_venta')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    if (!placas?.length) {
+      document.getElementById('placas-preset-lista').innerHTML = '🎉 ¡Sin placas disponibles!';
+      return;
+    }
+    
+    document.getElementById('placas-preset-lista').innerHTML = placas.map(p => `
+      <div class="pendiente-row">
+        <strong>🆕 ${p.id}</strong> | QR: ${p.qr_uuid?.slice(0,8)}...
+        <br><small>${new Date(p.created_at).toLocaleString('es-CL')}</small>
+      </div>
+    `).join('');
+    
+  } catch(error) {
+    document.getElementById('placas-preset-lista').innerHTML = `❌ Error: ${error.message}`;
+  }
+};
 
+// ⭐ FUNCION GENERAR PLACA INDIVIDUAL UBP - FALTABA ESTA
+window.generarPlacaIndividual = async function() {
+  const email = document.getElementById('cliente-email-preset').value.trim();
+  if (!email.includes('@')) {
+    alert('❌ Email inválido');
+    return;
+  }
+  
+  try {
+    // 1. Buscar placa disponible
+    const { data: placaDisponible } = await sbAdmin
+      .from('perfiles_preset')
+      .select('id, qr_uuid')
+      .eq('cliente_email', null)
+      .eq('status', 'lista_venta')
+      .limit(1)
+      .single();
+    
+    if (!placaDisponible) {
+      alert('❌ Sin placas disponibles');
+      return;
+    }
+    
+    // 2. Generar NUEVA placa secuencial UBP00126+
+    const ultimoId = await sbAdmin
+      .from('perfiles_preset')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+    
+    const nextNum = parseInt(ultimoId.data?.[0]?.id.slice(3)) + 1 || 126;
+    const nuevaPlacaId = `UBP${nextNum.toString().padStart(5, '0')}`;
+    const nuevoQrUuid = crypto.randomUUID();
+    
+    // 3. INSERT nueva placa
+    await sbAdmin.from('perfiles_preset').insert({
+      id: nuevaPlacaId,
+      qr_uuid: nuevoQrUuid,
+      status: 'lista_venta',
+      cliente_email: null,
+      created_at: new Date().toISOString()
+    });
+    
+    // 4. Alert QR
+    alert(`✅ PLACA CREADA: ubipet.cl/qr/${nuevaPlacaId}`);
+    
+    // 5. Limpiar campo
+    document.getElementById('cliente-email-preset').value = '';
+    
+    // 6. Refresh lista
+    await window.listarPlacasPreset();
+    
+  } catch(error) {
+    alert('❌ Error: ' + error.message);
+  }
+};
+
+      
     function logoutAdmin() {
       document.getElementById('adminDash').style.display = 'none';
       document.getElementById('loginAdmin').style.display = 'block';

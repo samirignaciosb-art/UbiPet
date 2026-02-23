@@ -44,14 +44,14 @@
         <button id="btnCrearCliente" class="btn-manual">🚀 Crear Manual</button>
         <div id="statusMessage"></div>
       </div>
-      
-      <h3>✅ CLIENTES ACTIVOS</h3>
-      <div class="section crear-form">
-  <h3>🏷️ GENERAR PLACAS QR</h3>
-  <a href="admin-qr.html" style="background: linear-gradient(45deg, #4ecdc4, #44a08d); color: white; padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block;">
-    🖨️ VER TODAS LAS PLACAS QR
-  </a>
+     
+<div class="section crear-form">
+  <h3>🆕 Generar Placa Individual UBP</h3>
+  <input id="cliente-email-preset" placeholder="cliente@ejemplo.com" style="width:300px; padding:12px; border-radius:8px; border:1px solid #ddd; margin-right:10px;">
+  <button onclick="generarPlacaIndividual()" class="btn-procesar" style="padding:12px 24px;">🆕 Crear Placa UBP</button>
+  <div id="placas-preset-lista" style="margin-top:20px; max-height:200px; overflow-y:auto;"></div>
 </div>
+
 
       <div id="clientesLista">Cargando...</div>
       

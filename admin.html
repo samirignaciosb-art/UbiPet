@@ -108,7 +108,7 @@
         const { data: pendientes, error } = await sbAdmin
           .from('solicitudes_placas')
           .select('*')
-          .eq('procesado', false)
+          .eq('aprobado', false)
           .order('created_at', { ascending: false });
         
         if (error) throw error;
@@ -157,7 +157,7 @@
     
     // ✅ WhatsApp CLIENTE
     const cleanTel = telefono.replace(/[^0-9]/g, '');
-    const mensajeCliente = `🐕 *¡UBIPET APROBADO!* ${nombre}\\n\\n✅ Ya puedes crear tu cuenta:\\n📧 ${email}\\n\\n🔗 https://samirignaciosb-art.github.io/UbiPet/\\n¡Haz login y completa tu perfil! 🐕💰`;
+    const mensajeCliente = `🐕 *¡UBIPET APROBADO!* ${nombre}✅ Ya puedes crear tu cuenta:📧 ${email}🔗 https://samirignaciosb-art.github.io/UbiPet/¡Haz login y completa tu perfil! 🐕💰`;
     
     window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
     window.open(`https://wa.me/56979928352?text=✅ APROBADO: ${email}`, '_blank');

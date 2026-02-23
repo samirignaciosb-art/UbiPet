@@ -27,6 +27,33 @@
                     <div class="info-text" id="raza">mestizo</div>
                 </div>
             </div>
+           
+<div class="info-row">
+    <div class="info-icon">🎂</div>
+    <div><span class="info-label">Edad</span><div class="info-text" id="edad">Cargando...</div></div>
+</div>
+
+<div class="info-row">
+    <div class="info-icon">⚖️</div>
+    <div><span class="info-label">Peso</span><div class="info-text" id="peso">0 kg</div></div>
+</div>
+
+<div class="info-row">
+    <div class="info-icon">💉</div>
+    <div><span class="info-label">Vacunas</span><div class="info-text" id="vacunas">Cargando...</div></div>
+</div>
+
+<div class="info-row">
+    <div class="info-icon">📧</div>
+    <div><span class="info-label">Email</span><div class="info-text" id="emailDueno">Cargando...</div></div>
+</div>
+
+<!-- ANTES botones -->
+<div class="info-row">
+    <div class="info-icon">📝</div>
+    <div><span class="info-label">Descripción</span><div class="info-text" id="descripcion">Cargando...</div></div>
+</div>
+
 
             <div class="info-row">
                 <div class="info-icon phone-icon">👤</div>
@@ -85,16 +112,23 @@ window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`);
             return;
         }
         
+        // ✅ TODOS los 9 campos UBIPET
         document.getElementById('mascotaNombre').textContent = data.nombre || 'Sin nombre';
         document.getElementById('statusBadge').textContent = `🐕 ${data.nombre || 'mascota'} encontrada`;
         document.getElementById('nombreDueno').textContent = data.nombre_dueno || 'Sin nombre';
-        document.getElementById('telefono').textContent = data.telefono || '+56979928352';  // ← ¡FIX AQUÍ!
+        document.getElementById('telefono').textContent = data.telefono || '+56 9 0000 0000';
         document.getElementById('raza').textContent = data.raza || 'No especificada';
+        document.getElementById('edad').textContent = data.edad ? `${data.edad} años` : 'No especificada';
+        document.getElementById('peso').textContent = data.peso ? `${data.peso} kg` : 'No especificado';
+        document.getElementById('vacunas').textContent = data.vacunas ? '✅ Al día' : '❌ Pendientes';
+        document.getElementById('emailDueno').textContent = data.email_dueno || 'Sin email';
+        document.getElementById('descripcion').textContent = data.descripcion || 'Sin descripción';
         
     } catch(e) {
         console.error('Error:', e);
     }
 }
+
  
         cargarPerfil();
     </script>

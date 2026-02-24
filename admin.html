@@ -359,8 +359,8 @@ async function crearClienteManual() {
 function generarQrImagen() {
   const placaId = document.getElementById('input-placa-qr').value.trim();
   if(!placaId) return alert('❌ Escribe: UBP00011');
-  
-  const url = `https://ubipet.cl/qr/${placaId}`;
+
+    const url = `https://samirignaciosb-art.github.io/UbiPet/qr.html?id=${placaId}`;
   const qrDiv = document.getElementById('qr-imagen');
   
   qrDiv.innerHTML = `

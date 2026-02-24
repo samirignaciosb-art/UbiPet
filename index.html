@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubipet - Iniciar Sesión</title>
+    <style>
+        body { background: #f7ede3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #84a59e; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #f5cac2; font-weight: bold; font-size: 16px; cursor: pointer; }
+        button:hover { opacity: 0.85; }
+        .whatsapp-btn { background: #25D366 !important; color: white !important; font-size: 18px !important; padding: 18px !important; border-radius: 25px !important; margin: 20px 0 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Ubipet</h1>
+        <p style="color:#666; margin-bottom:20px;">Acceso para dueños de placas</p>
+        
+        <input type="email" id="emailInput" name="email" placeholder="tuemail@gmail.com">
+        <input type="password" id="passwordInput" name="password" placeholder="123456">
+        <button onclick="login()">🚀 Iniciar Sesión</button>
+        <p style="font-size:12px; color:#666;">Test: test@test.com / 123456</p>
+
+        <div style="border-top: 2px solid #eee; padding-top: 25px; margin-top: 25px;">
+            <button onclick="mostrarSolicitud()" class="whatsapp-btn">👋 Nuevo? Activar cuenta</button>
+        </div>
+        <div style="margin: 20px 0; padding: 20px; background: #e8f5e8; border-radius: 10px;">
+  <h3 style="color:#2e7d32;">🔍 ¿Ya enviaste solicitud?</h3>
+  <input id="checkEmail" placeholder="sa.sotob@duocuc.cl" style="width:70%;padding:12px;margin:10px;">
+  <button onclick="checkEstadoSolicitud()" style="background:#4CAF50;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;">🔍 VER ESTADO</button>
+  <div id="estadoSolicitud" style="margin-top:15px;padding:10px;"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 1. CHECK ESTADO
+async function checkEstadoSolicitud() {
+  const email = document.getElementById('checkEmail').value.trim();
+  if (!email.includes('@')) return alert('❌ Email inválido');
+  
+  try {
+    const { data, error } = await sb.from('solicitudes_placas').select('aprobado').eq('email', email).single();
+    const estado = document.getElementById('estadoSolicitud');
+    
+    if (error || !data) {
+      estado.innerHTML = '<span style="color:orange;">⏳ No encontramos tu solicitud</span>';
+    } else if (!data.aprobado) {
+      estado.innerHTML = '<span style="color:orange;">⏳ Solicitud recibida - Esperando aprobación</span>';
+    } else {
+      estado.innerHTML = '<span style="color:green;font-size:18px;">✅ ¡APROBADO! <strong>CREA TU CUENTA</strong></span><br><br>';
+      estado.innerHTML += '<button onclick="mostrarCrearCuenta()" style="background:#2196F3;color:white;padding:15px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">🔐 CREAR CUENTA UBIPET</button>';
+    }
+  } catch(error) {
+    document.getElementById('estadoSolicitud').innerHTML = '❌ Error';
+  }
+}
+
+// 2. CREAR CUENTA (PASO 4)
+async function mostrarCrearCuenta() {
+  const email = document.getElementById('emailInput').value.trim() || prompt('📧 Tu email:');
+  const password = prompt('🔑 Crea contraseña:') || 'Ubipet123';
+  
+  if (!email || !password || password.length < 6) {
+    return alert('❌ Email + contraseña 6+ caracteres');
+  }
+  
+  try {
+    // 1️⃣ CREAR CUENTA
+    const { data: signUpData, error: signUpError } = await sb.auth.signUp({
+      email: email.toLowerCase(),
+      password,
+      options: { data: { email, nombre: 'Cliente Ubipet' } }
+    });
+    
+    if (signUpError) throw signUpError;
+    
+    // 2️⃣ LOGIN AUTOMÁTICO INMEDIATO
+    const { data: loginData, error: loginError } = await sb.auth.signInWithPassword({
+      email: email.toLowerCase(),
+      password
+    });
+    
+    if (loginError?.message.includes('confirmed')) {
+      alert('✅ ¡CUENTA CREADA! Revisa tu email.');
+    } else if (loginData) {
+      // ✅ LOGIN EXITOSO
+      localStorage.setItem('user_token', loginData.session.access_token);
+      localStorage.setItem('user_id', loginData.user.id);
+      alert('✅ ¡CUENTA CREADA + LOGIN OK!');
+      window.location.href = 'perfil.html';
+    }
+    
+  } catch(error) {
+    alert('❌ ' + error.message);
+  }
+}
+
+// 3. SOLICITUD NUEVA
+window.mostrarSolicitud = async function() {
+  const email = prompt('📧 Tu email:');
+  const nombre = prompt('👤 Tu nombre:');
+  const telefono = prompt('📱 Tu WhatsApp (+569...):');
+  
+  if (!email || !nombre || !telefono) {
+    alert('❌ Completa todos los campos');
+    return;
+  }
+  
+  try {
+    await sb.from('solicitudes_placas').insert({
+      email: email.toLowerCase(), nombre, telefono
+    });
+    
+    const mensaje = `🐕 *NUEVA SOLICITUD UBIPET*\\n👤 ${nombre}\\n📧 ${email}\\n📱 ${telefono}`;
+    window.open(`https://wa.me/56979928352?text=${encodeURIComponent(mensaje)}`, '_blank');
+    alert('✅ Solicitud enviada! Te contactamos por WhatsApp.');
+    
+  } catch(error) {
+    alert('❌ Error: ' + error.message);
+  }
+}
+
+// 4. LOGIN
+window.login = async function() {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  
+  if (!email || !password) {
+    alert('❌ Completa email y contraseña');
+    return;
+  }
+  
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ 
+      email: email.toLowerCase(), password 
+    });
+    
+    if (error) throw error;
+    
+    localStorage.setItem('user_token', data.session.access_token);
+    localStorage.setItem('user_id', data.user.id);
+    alert('✅ ¡LOGIN OK! Redirigiendo...');
+    window.location.href = 'perfil.html';
+    
+  } catch(error) {
+    alert('❌ ' + error.message);
+  }
+}
+
+// Enter key
+document.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') login();
+});
+</script>
+
+</body>
+</html>

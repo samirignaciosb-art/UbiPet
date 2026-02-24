@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>👑 Ubipet Admin</title>
+  <style>
+    body { background: #f7ede3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); max-width: 1000px; width: 100%; text-align: center; }
+    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+    button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+    button:hover { opacity: 0.9; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .crear-form { background: #e8f5e8; padding: 20px; border-radius: 15px; margin: 20px 0; }
+    .pendiente-row { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 10px; text-align: left; border-left: 5px solid #ffc107; }
+    .cliente-row { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 10px; text-align: left; }
+    .btn-procesar, .btn-cerrar, .btn-manual { background: #4CAF50; padding: 8px 15px; width: auto; display: inline-block; margin: 5px; border-radius: 5px; font-size: 14px; }
+    .btn-cerrar { background: #ff9800 !important; }
+    .btn-manual { background: #2196F3 !important; }
+    #pendientesLista, #clientesLista { max-height: 400px; overflow-y: auto; text-align: left; }
+    h1 { color: #84a59e; margin-bottom: 20px; }
+    .loading, .success, .error { padding: 10px; border-radius: 5px; margin: 10px 0; }
+    .loading { background: #fff3cd; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .section { margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>👑 UBIPET ADMIN</h1>
+    
+    <div id="loginAdmin">
+      <input type="email" id="adminEmail" placeholder="Admin@ubipet.cl">
+      <input type="password" id="adminPass" placeholder="Admin123">
+      <button id="btnLogin">🔐 ACCEDER ADMIN</button>
+    </div>
+    
+    <div id="adminDash" style="display:none;">
+      <h2>📊 DASHBOARD COMPLETO</h2>
+      
+      <div class="section">
+        <h3>⏳ SOLICITUDES PENDIENTES</h3>
+        <div id="pendientesLista">Cargando...</div>
+      </div>
+      
+      <div class="crear-form section">
+        <h3>➕ NUEVO CLIENTE MANUAL</h3>
+        <input id="newEmail" placeholder="cliente@placa.cl">
+        <input id="newPass" value="Ubipet123" style="width:200px;">
+        <input id="newPhone" placeholder="+56912345678" style="width:200px;">
+        <button id="btnCrearCliente" class="btn-manual">🚀 Crear Manual</button>
+        <div id="statusMessage"></div>
+      </div>
+      
+      <h3>✅ CLIENTES ACTIVOS</h3>
+      <div class="section crear-form">
+  <h3>🏷️ GENERAR PLACAS QR</h3>
+  <a href="admin-qr.html" style="background: linear-gradient(45deg, #4ecdc4, #44a08d); color: white; padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block;">
+    🖨️ VER TODAS LAS PLACAS QR
+  </a>
+</div>
+
+      <div id="clientesLista">Cargando...</div>
+      
+      <button id="btnLogout" style="background:#f44336;">🚪 Salir</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://exeeqykieytuvlzdbsnn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
+    
+    const sbAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPERUSER = { email: 'samirignaciosb@gmail.com', password: 'Admin123' };
+
+    // Event listeners
+    document.getElementById('btnLogin').addEventListener('click', adminLogin);
+    document.getElementById('btnCrearCliente').addEventListener('click', crearClienteManual);
+    document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
+
+    async function adminLogin() {
+      const email = document.getElementById('adminEmail').value;
+      const pass = document.getElementById('adminPass').value;
+      
+      if (email !== SUPERUSER.email || pass !== SUPERUSER.password) {
+        alert('❌ Solo: samirignaciosb@gmail.com / Admin123');
+        return;
+      }
+      
+      document.getElementById('loginAdmin').style.display = 'none';
+      document.getElementById('adminDash').style.display = 'block';
+      
+      await cargarPendientes();
+      await cargarClientes();
+      alert('✅ ¡ADMIN LIVE!');
+    }
+
+    function logoutAdmin() {
+      document.getElementById('adminDash').style.display = 'none';
+      document.getElementById('loginAdmin').style.display = 'block';
+      document.getElementById('adminEmail').value = '';
+      document.getElementById('adminPass').value = '';
+    }
+
+    async function cargarPendientes() {
+      try {
+        document.getElementById('pendientesLista').innerHTML = '🔄 Cargando...';
+        const { data: pendientes, error } = await sbAdmin
+          .from('solicitudes_placas')
+          .select('*')
+          .eq('aprobado', false)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!pendientes?.length) {
+          document.getElementById('pendientesLista').innerHTML = '🎉 ¡Sin pendientes! 👍';
+          return;
+        }
+        
+        document.getElementById('pendientesLista').innerHTML = pendientes.map(p => `
+          <div class="pendiente-row">
+            <strong>👤 ${p.nombre}</strong><br>
+            📧 ${p.email}<br>
+            📱 ${p.telefono}<br>
+            <small>${new Date(p.created_at).toLocaleString('es-CL')}</small><br>
+            <button class="btn-procesar" data-id="${p.id}" data-nombre="${p.nombre}" data-email="${p.email}" data-telefono="${p.telefono}">🚀 CREAR USER + NOTIFICAR</button>
+            <button class="btn-cerrar" data-id="${p.id}">❌ Eliminar</button>
+          </div>
+        `).join('');
+        
+        document.querySelectorAll('.btn-procesar').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const nombre = this.dataset.nombre;
+            const email = this.dataset.email;
+            const telefono = this.dataset.telefono;
+            procesarSolicitud(id, nombre, email, telefono);
+          });
+        });
+        
+        document.querySelectorAll('.btn-cerrar').forEach(btn => {
+          btn.addEventListener('click', function() {
+            eliminarSolicitud(this.dataset.id);
+          });
+        });
+        
+      } catch(error) {
+        document.getElementById('pendientesLista').innerHTML = `❌ Error: ${error.message}`;
+      }
+    }
+
+ async function procesarSolicitud(id, nombre, email, telefono) {
+  try {
+    // ✅ SOLO APROBAR
+    await sbAdmin.from('solicitudes_placas').update({ aprobado: true }).eq('id', id);
+    
+    // ✅ WhatsApp CLIENTE
+    const cleanTel = telefono.replace(/[^0-9]/g, '');
+    const mensajeCliente = `🐕 *¡UBIPET APROBADO!* ${nombre}✅ Ya puedes crear tu cuenta:📧 ${email}🔗 https://samirignaciosb-art.github.io/UbiPet/¡Haz login y completa tu perfil! 🐕💰`;
+    
+    window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
+    window.open(`https://wa.me/56979928352?text=✅ APROBADO: ${email}`, '_blank');
+    
+    alert(`🎉 CLIENTE APROBADO! ${email}`);
+    await cargarPendientes();
+  } catch(error) {
+    alert('❌ ' + error.message);
+  }
+}
+
+
+
+    async function eliminarSolicitud(id) {
+      if (!confirm('¿Eliminar esta solicitud?')) return;
+      await sbAdmin.from('solicitudes_placas').delete().eq('id', id);
+      await cargarPendientes();
+    }
+
+async function crearClienteManual() {
+  const email = document.getElementById('newEmail').value.trim();
+  const pass = document.getElementById('newPass').value || 'Ubipet123';
+  const telefono = document.getElementById('newPhone').value.trim();
+  
+  if (!email.includes('@') || !telefono) {
+    mostrarStatus('❌ Email o teléfono inválido', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('btnCrearCliente');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Creando...';
+  btn.disabled = true;
+  
+  try {
+    const { data: authData, error: authError } = await sbAdmin.auth.signUp({
+      email, password: pass, options: { data: { telefono } }
+    });
+    
+    if (authError) throw authError;
+    
+    await sbAdmin.auth.signInWithPassword({ email, password: pass });
+    
+    await sbAdmin.from('perfiles').insert({
+      user_id: authData.user.id,
+      nombre: 'Tu mascota 🐕',
+      nombre_dueno: 'Dueño',
+      email_dueno: email,
+      telefono: telefono,
+      raza: 'Mixta'
+    });
+    
+    document.getElementById('newEmail').value = '';
+    document.getElementById('newPhone').value = '';
+    mostrarStatus(`✅ CREADO: ${email}`, 'success');
+    await cargarClientes();
+    
+  } catch(error) {
+    mostrarStatus(`❌ Error: ${error.message}`, 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+    async function cargarClientes() {
+      try {
+        document.getElementById('clientesLista').innerHTML = '🔄 Cargando...';
+        const { data: clientes, error } = await sbAdmin
+          .from('perfiles')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!clientes?.length) {
+          document.getElementById('clientesLista').innerHTML = '🐕 Sin clientes aún';
+          return;
+        }
+        
+        document.getElementById('clientesLista').innerHTML = clientes.map(c => `
+          <div class="cliente-row">
+            <strong>🐕 ${c.nombre || 'Sin datos'}</strong><br>
+            👤 ${c.nombre_dueno || 'Sin dueño'} | 📧 ${c.email_dueno || 'Sin email'}<br>
+            <span style="color:${c.esta_perdida ? '#f44336' : '#4CAF50'}; font-weight:bold;">
+              ${c.esta_perdida ? '🚨 PERDIDA' : '🟢 ACTIVA'}
+            </span><br>
+            <small>ID: ${c.user_id?.slice(0,8)}... | ${new Date(c.created_at).toLocaleDateString('es-CL')}</small>
+          </div>
+        `).join('');
+        
+      } catch(error) {
+        document.getElementById('clientesLista').innerHTML = `❌ Error: ${error.message}`;
+      }
+    }
+    function mostrarStatus(mensaje, tipo) {
+      const status = document.getElementById('statusMessage');
+      status.innerHTML = `<div class="${tipo}">${mensaje}</div>`;
+      setTimeout(() => status.innerHTML = '', 5000);
+    }
+
+    console.log('✅ Ubipet Admin 100% FIXEADO - Jorge LISTO');
+  </script>
+</body>
+</html>

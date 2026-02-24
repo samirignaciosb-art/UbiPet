@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UbiPet Admin QR 🖨️</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body { font-family: Arial; max-width: 1200px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin-top: 20px; }
+        .qr-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .qr-card h3 { color: #2c5aa0; margin: 0 0 10px 0; }
+        .qr-card p { margin: 5px 0; color: #666; }
+        .qr-visual { text-align: center; background: white; padding: 15px; border-radius: 10px; margin: 15px 0; }
+        button { background: #4ecdc4; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #45b7d1; }
+        #status { background: #e8f5e8; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        @media print { .qr-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); } button { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>🏷️ Ubipet QR Admin <button onclick="window.print()">🖨️ Imprimir Todos</button></h1>
+    <div id="status">🔍 Conectando Supabase...</div>
+    <div id="qrContainer" class="qr-grid"></div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const supabaseUrl = 'https://exeeqykieytuvlzdbsnn.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZWVxeWtpZXl0dXZsemRic25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDQ1MjMsImV4cCI6MjA4NzE4MDUyM30.874QQz_xUpJW7tT_iHWyiaeKELmK4reYYOzzlieMJq4';
+    
+    const sb = supabase.createClient(supabaseUrl, supabaseKey);
+    
+    async function cargarPerfilesQR() {
+        const status = document.getElementById('status');
+        const container = document.getElementById('qrContainer');
+        
+        status.innerHTML = '📱 Cargando mascotas...';
+        
+        try {
+            const { data, error } = await sb.from('perfiles').select('*');
+            
+            if (error) throw error;
+            
+            status.innerHTML = `✅ ${data.length} placas QR listas para imprimir 🖨️`;
+            
+            container.innerHTML = '';
+            data.forEach(perfil => {
+                const qrUrl = `https://samirignaciosb-art.github.io/UbiPet/rescate.html?id=${perfil.id}`;
+                
+                const card = document.createElement('div');
+                card.className = 'qr-card';
+                card.innerHTML = `
+                    <h3>🐕 ${perfil.nombre_mascota || 'Mascota'}</h3>
+                    <p><strong>${perfil.raza || 'No especificada'}</strong> - ${perfil.telefono}</p>
+                    <p><small>ID: ${perfil.id.slice(0,8)}...</small></p>
+                    <div class="qr-visual">
+                        <div id="qr-${perfil.id}" style="width:200px;height:200px;"></div>
+                        <br><small>Escanea → WhatsApp</small>
+                    </div>
+                    <a href="${qrUrl}" target="_blank" style="background:#ff9a9e;color:white;padding:8px 16px;border-radius:5px;text-decoration:none;">👀 Test QR</a>
+                `;
+                
+                container.appendChild(card);
+                
+                // QR DESPUÉS de DOM
+                setTimeout(() => {
+                    new QRCode(document.getElementById(`qr-${perfil.id}`), {
+                        text: qrUrl,
+                        width: 200,
+                        height: 200,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff"
+                    });
+                }, 500);
+            });
+            
+        } catch (e) {
+            status.innerHTML = `❌ Error: ${e.message}`;
+            console.error(e);
+        }
+    }
+    
+    cargarPerfilesQR();
+});
+</script>
+
+</body>
+</html>

@@ -255,10 +255,9 @@ window.generarPlacaIndividual = async function() {
     
     // ✅ WhatsApp CLIENTE
     const cleanTel = telefono.replace(/[^0-9]/g, '');
-    const mensajeCliente = `🐕 *¡UBIPET APROBADO!* ${nombre}✅ Ya puedes crear tu cuenta:📧 ${email}🔗 https://samirignaciosb-art.github.io/UbiPet/¡Haz login y completa tu perfil! 🐕💰`;
+    const mensajeCliente = `🐕 *¡UBIPET APROBADO!* ${nombre}✅ Ya puedes crear tu cuenta:📧 ${email}🔗 https://samirignaciosb-art.github.io/UbiPet/ ¡Haz login y completa tu perfil! 🐕💰`;
     
     window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeCliente)}`, '_blank');
-    window.open(`https://wa.me/56979928352?text=✅ APROBADO: ${email}`, '_blank');
     
     alert(`🎉 CLIENTE APROBADO! ${email}`);
     await cargarPendientes();
@@ -356,8 +355,29 @@ async function crearClienteManual() {
       status.innerHTML = `<div class="${tipo}">${mensaje}</div>`;
       setTimeout(() => status.innerHTML = '', 5000);
     }
+// ⭐ PEGAR AQUÍ (ANTES console.log)
+function generarQrImagen() {
+  const placaId = document.getElementById('input-placa-qr').value.trim();
+  if(!placaId) return alert('❌ Escribe: UBP00011');
+  
+  const url = `https://ubipet.cl/qr/${placaId}`;
+  const qrDiv = document.getElementById('qr-imagen');
+  
+  qrDiv.innerHTML = `
+    <div style="text-align:center; padding:20px; background:#f8f9fa; border-radius:15px; border:2px solid #4CAF50;">
+      <h4 style="color:#2e7d32;">🖨️ QR para ${placaId}</h4>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}" 
+           style="border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.15);" alt="QR">
+      <br><small style="color:#666;">${url}</small><br>
+      <button onclick="window.open('${url}')" style="background:#4CAF50;color:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+        🔗 Test QR
+      </button>
+    </div>
+  `;
+}
+// ⭐ FIN PEGAR
 
-    console.log('✅ Ubipet Admin 100% FIXEADO - Jorge LISTO');
+    console.log('✅ Ubipet Admin 100% FIXEADO - LISTO');
   </script>
 </body>
 </html>

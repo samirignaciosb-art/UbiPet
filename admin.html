@@ -45,12 +45,18 @@
         <div id="statusMessage"></div>
       </div>
      
-<div class="section crear-form">
-  <h3>🆕 Generar Placa Individual UBP</h3>
-  <input id="cliente-email-preset" placeholder="cliente@ejemplo.com" style="width:300px; padding:12px; border-radius:8px; border:1px solid #ddd; margin-right:10px;">
-  <button onclick="generarPlacaIndividual()" class="btn-procesar" style="padding:12px 24px;">🆕 Crear Placa UBP</button>
-  <div id="placas-preset-lista" style="margin-top:20px; max-height:200px; overflow-y:auto;"></div>
+<h3>🆕 Generar Placa Individual UBP</h3>
+<input id="cliente-email-preset" placeholder="cliente@ejemplo.com"...>
+<button onclick="generarPlacaIndividual()">🆕 Crear Placa UBP</button>
+
+<div style="margin-top:10px;">
+  <input id="input-placa-qr" placeholder="UBP00011"...>
+  <button onclick="generarQrImagen()">🖨️ Generar QR Impresión</button>
+  <div id="qr-imagen"></div>
 </div>
+
+<div id="placas-preset-lista"...
+
 
 
       <div id="clientesLista">Cargando...</div>

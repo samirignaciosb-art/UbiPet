@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UbiPet — Iniciar sesión</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--cream);
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .hero-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--clay);
+      line-height: 1;
+    }
+    .hero-logo span { color: var(--sage); }
+    .hero p {
+      color: var(--ink-soft);
+      margin-top: 8px;
+      font-size: 15px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--sand);
+    }
+    .register-box {
+      background: var(--sand);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .register-box p {
+      font-size: 14px;
+      color: var(--ink-soft);
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div class="hero-logo">Ubi<span>Pet</span> 🐾</div>
+      <p>La placa inteligente para tu mascota</p>
+    </div>
+
+    <div class="card">
+      <div id="alert" class="alert"></div>
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="tu@email.com">
+      </div>
+      <div class="input-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+
+      <button class="btn btn-primary btn-full" id="btnLogin">
+        🚀 Iniciar sesión
+      </button>
+
+      <div class="divider">¿Primera vez?</div>
+
+      <div class="register-box">
+        <p>Si compraste una placa UbiPet, creá tu cuenta aquí:</p>
+        <button class="btn btn-success btn-full" id="btnRegister">
+          ✨ Crear cuenta nueva
+        </button>
+      </div>
+    </div>
+
+    <!-- PANEL REGISTRO (oculto) -->
+    <div class="card" id="registerPanel" style="display:none; margin-top:20px;">
+      <h3 style="margin-bottom:20px; font-family:'Fraunces',serif; color:var(--clay);">
+        Crear cuenta
+      </h3>
+      <div id="alertReg" class="alert"></div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="tu@email.com">
+      </div>
+      <div class="input-group">
+        <label>Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="regPass" placeholder="••••••••">
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button class="btn btn-success" style="flex:1" id="btnDoRegister">Crear cuenta</button>
+        <button class="btn btn-ghost" id="btnCancelRegister">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    // ─── helpers ────────────────────────────────
+    function showAlert(id, msg, type = 'err') {
+      const el = document.getElementById(id)
+      el.textContent = msg
+      el.className = `alert alert-${type} show`
+    }
+    function setLoading(btn, loading, text) {
+      btn.disabled = loading
+      btn.textContent = loading ? '⏳ Espera...' : text
+    }
+
+    // ─── si ya está logueado, redirigir ─────────
+    // ─── leer placa de URL (QR pre-impreso) ──────
+    const params     = new URLSearchParams(window.location.search)
+    const placaParam = params.get('placa')
+    if (placaParam) {
+      sessionStorage.setItem('placa_pendiente', placaParam)
+      showAlert('alert', `🏷️ Placa ${placaParam} detectada. Iniciá sesión o creá tu cuenta para asociarla.`, 'info')
+    }
+
+    // ─── si ya está logueado, redirigir ─────────
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) window.location.href = 'perfil.html'
+
+    // ─── LOGIN ───────────────────────────────────
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const email    = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value
+      if (!email || !password) return showAlert('alert', 'Completá email y contraseña')
+
+      const btn = document.getElementById('btnLogin')
+      setLoading(btn, true, '🚀 Iniciar sesión')
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      setLoading(btn, false, '🚀 Iniciar sesión')
+
+      if (error) return showAlert('alert', '❌ ' + error.message)
+      window.location.href = 'perfil.html'
+    })
+
+    // Enter key en login
+    document.getElementById('password').addEventListener('keypress', e => {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click()
+    })
+
+    // ─── MOSTRAR REGISTRO ─────────────────────────
+    document.getElementById('btnRegister').addEventListener('click', () => {
+      document.getElementById('registerPanel').style.display = 'block'
+      document.getElementById('btnRegister').style.display = 'none'
+    })
+    document.getElementById('btnCancelRegister').addEventListener('click', () => {
+      document.getElementById('registerPanel').style.display = 'none'
+      document.getElementById('btnRegister').style.display = 'block'
+    })
+
+    // ─── CREAR CUENTA ─────────────────────────────
+    document.getElementById('btnDoRegister').addEventListener('click', async () => {
+      const email = document.getElementById('regEmail').value.trim()
+      const pass  = document.getElementById('regPass').value
+
+      if (!email || !pass) return showAlert('alertReg', 'Completá todos los campos')
+      if (pass.length < 6)  return showAlert('alertReg', 'La contraseña debe tener al menos 6 caracteres')
+
+      const btn = document.getElementById('btnDoRegister')
+      setLoading(btn, true, 'Crear cuenta')
+
+      const { error } = await supabase.auth.signUp({ email, password: pass })
+      setLoading(btn, false, 'Crear cuenta')
+
+      if (error) return showAlert('alertReg', '❌ ' + error.message)
+
+      // Login automático después del registro
+      const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pass })
+      if (loginErr) {
+        showAlert('alertReg', '✅ Cuenta creada. Revisá tu email para confirmar.', 'ok')
+        return
+      }
+      window.location.href = 'perfil.html'
+    })
+  </script>
+</body>
+</html>

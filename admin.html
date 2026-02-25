@@ -223,18 +223,17 @@
           <input type="text" id="prefijo" value="UBI" placeholder="UBI" style="width:100px;">
         </div>
         <div class="input-group">
-          <label>Desde N°</label>
-          <input type="number" id="desde" value="1" min="1" style="width:100px;">
-        </div>
-        <div class="input-group">
-          <label>Hasta N°</label>
-          <input type="number" id="hasta" value="10" min="1" style="width:100px;">
+          <label>Cantidad</label>
+          <input type="number" id="hasta" value="10" min="1" max="100" style="width:100px;">
         </div>
         <button class="btn btn-primary" id="btnGenerar">⚡ Generar</button>
-        <button class="btn btn-ghost" id="btnVerQRs" onclick="window.location.href='admin-qr.html'">
+        <button class="btn btn-ghost" onclick="window.location.href='admin-qr.html'">
           🖨️ Ver QRs
         </button>
       </div>
+      <p style="color:#8a7060; font-size:13px; margin-top:10px;">
+        Los códigos se generan aleatoriamente. Ejemplo: <strong style="color:var(--clay);">UBI-K7X2M9</strong>
+      </p>
       <div id="alertGenerar" class="alert-admin"></div>
     </div>
 
@@ -403,15 +402,23 @@
     }
 
     // ─── GENERAR PLACAS ───────────────────────────
-    document.getElementById('btnGenerar').addEventListener('click', async () => {
-      const prefijo = document.getElementById('prefijo').value.trim().toUpperCase() || 'UBI'
-      const desde   = parseInt(document.getElementById('desde').value)
-      const hasta   = parseInt(document.getElementById('hasta').value)
-
-      if (isNaN(desde) || isNaN(hasta) || desde > hasta) {
-        return showAlert('alertGenerar', '❌ Rango inválido')
+    function codigoAleatorio(prefijo) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sin O,0,I,1 para evitar confusión
+      let codigo = ''
+      for (let i = 0; i < 6; i++) {
+        codigo += chars[Math.floor(Math.random() * chars.length)]
       }
-      if (hasta - desde > 99) {
+      return `${prefijo}-${codigo}`
+    }
+
+    document.getElementById('btnGenerar').addEventListener('click', async () => {
+      const prefijo   = document.getElementById('prefijo').value.trim().toUpperCase() || 'UBI'
+      const cantidad  = parseInt(document.getElementById('hasta').value)
+
+      if (isNaN(cantidad) || cantidad < 1) {
+        return showAlert('alertGenerar', '❌ Cantidad inválida')
+      }
+      if (cantidad > 100) {
         return showAlert('alertGenerar', '❌ Máximo 100 placas por vez')
       }
 
@@ -419,24 +426,22 @@
       btn.disabled = true
       btn.textContent = '⏳ Generando...'
 
-      const placas = []
-      for (let i = desde; i <= hasta; i++) {
-        placas.push({ codigo: `${prefijo}-${String(i).padStart(3, '0')}` })
+      // generar códigos únicos localmente
+      const codigos = new Set()
+      while (codigos.size < cantidad) {
+        codigos.add(codigoAleatorio(prefijo))
       }
 
+      const placas = Array.from(codigos).map(codigo => ({ codigo }))
       const { error } = await supabase.from('placas').insert(placas)
 
       btn.disabled = false
       btn.textContent = '⚡ Generar'
 
       if (error) {
-        showAlert('alertGenerar',
-          error.message.includes('unique')
-            ? '⚠️ Algunos códigos ya existen. Ajustá el rango.'
-            : '❌ Error: ' + error.message
-        )
+        showAlert('alertGenerar', '❌ Error: ' + error.message)
       } else {
-        showAlert('alertGenerar', `✅ ${placas.length} placas generadas`, 'ok')
+        showAlert('alertGenerar', `✅ ${placas.length} placas generadas con códigos aleatorios`, 'ok')
         await cargarDashboard()
       }
     })

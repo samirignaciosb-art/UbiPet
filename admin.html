@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UbiPet — Admin</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body { background: #1a1208; min-height: 100vh; }
+
+    .admin-nav {
+      background: #2c1f0e;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--clay);
+    }
+    .admin-nav .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      color: var(--clay);
+    }
+    .admin-nav .logo span { color: var(--sage); }
+
+    /* LOGIN */
+    .login-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: 32px 16px;
+    }
+    .login-card {
+      background: #2c1f0e;
+      border: 1px solid #4a3520;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-card h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      color: var(--clay);
+      margin-bottom: 8px;
+    }
+    .login-card p { color: #8a7060; font-size: 14px; margin-bottom: 28px; }
+    .login-card input {
+      background: #1a1208;
+      border-color: #4a3520;
+      color: var(--cream);
+      margin-bottom: 12px;
+    }
+    .login-card input:focus { border-color: var(--clay); background: #221508; }
+
+    /* DASHBOARD */
+    .dash-wrap { padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: #2c1f0e;
+      border: 1px solid #4a3520;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .stat-num {
+      font-family: 'Fraunces', serif;
+      font-size: 36px;
+      color: var(--clay);
+      font-weight: 700;
+    }
+    .stat-card .stat-label { font-size: 13px; color: #8a7060; margin-top: 4px; }
+
+    .panel {
+      background: #2c1f0e;
+      border: 1px solid #4a3520;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .panel h2 {
+      font-family: 'Fraunces', serif;
+      color: var(--clay);
+      font-size: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #4a3520;
+    }
+
+    /* Generar placas */
+    .gen-form { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .gen-form .input-group { margin: 0; }
+    .gen-form input {
+      background: #1a1208;
+      border-color: #4a3520;
+      color: var(--cream);
+      width: 180px;
+    }
+    .gen-form input:focus { border-color: var(--clay); }
+    .gen-form label { color: #8a7060; }
+
+    /* Tabla placas */
+    .tabla { width: 100%; border-collapse: collapse; }
+    .tabla th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #8a7060;
+      border-bottom: 1px solid #4a3520;
+    }
+    .tabla td {
+      padding: 12px;
+      color: var(--cream);
+      border-bottom: 1px solid #2a1a08;
+      font-size: 14px;
+    }
+    .tabla tr:hover td { background: #3a2a18; }
+
+    .code-badge {
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--clay);
+    }
+
+    /* Clientes */
+    .cliente-row {
+      padding: 14px;
+      border-radius: 10px;
+      background: #1a1208;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cliente-info { font-size: 14px; color: var(--cream); }
+    .cliente-info strong { color: var(--clay); }
+
+    .alert-admin {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin: 12px 0;
+      display: none;
+    }
+    .alert-admin.show { display: block; }
+    .alert-admin.ok  { background: #1a3a1a; color: #6fcf6f; }
+    .alert-admin.err { background: #3a1a1a; color: #ef8080; }
+  </style>
+</head>
+<body>
+
+  <nav class="admin-nav">
+    <div class="logo">Ubi<span>Pet</span> 🐾 <small style="font-size:13px; color:#8a7060;">Admin</small></div>
+    <button class="btn btn-ghost" id="btnLogout" style="display:none; font-size:13px; padding:8px 16px;">
+      Salir
+    </button>
+  </nav>
+
+  <!-- LOGIN -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-card">
+      <h1>👑 Admin</h1>
+      <p>Acceso restringido</p>
+      <div class="input-group">
+        <label style="color:#8a7060;">Email</label>
+        <input type="email" id="adminEmail" placeholder="admin@ubipet.cl">
+      </div>
+      <div class="input-group">
+        <label style="color:#8a7060;">Contraseña</label>
+        <input type="password" id="adminPass" placeholder="••••••••">
+      </div>
+      <div id="loginAlert" class="alert-admin"></div>
+      <button class="btn btn-primary btn-full" id="btnAdminLogin" style="margin-top:8px;">
+        🔐 Acceder
+      </button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dash-wrap" id="dashWrap" style="display:none;">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-label">Placas totales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statActivas">—</div>
+        <div class="stat-label">Placas activas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statDisponibles">—</div>
+        <div class="stat-label">Disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statPerdidas">—</div>
+        <div class="stat-label">Mascotas perdidas ahora</div>
+      </div>
+    </div>
+
+    <!-- Generar placas -->
+    <div class="panel">
+      <h2>🏷️ Generar placas nuevas</h2>
+      <div class="gen-form">
+        <div class="input-group">
+          <label>Prefijo</label>
+          <input type="text" id="prefijo" value="UBI" placeholder="UBI" style="width:100px;">
+        </div>
+        <div class="input-group">
+          <label>Cantidad</label>
+          <input type="number" id="hasta" value="10" min="1" max="100" style="width:100px;">
+        </div>
+        <button class="btn btn-primary" id="btnGenerar">⚡ Generar</button>
+        <button class="btn btn-ghost" onclick="window.location.href='admin-qr.html'">
+          🖨️ Ver QRs
+        </button>
+      </div>
+      <p style="color:#8a7060; font-size:13px; margin-top:10px;">
+        Los códigos se generan aleatoriamente. Ejemplo: <strong style="color:var(--clay);">UBI-K7X2M9</strong>
+      </p>
+      <div id="alertGenerar" class="alert-admin"></div>
+    </div>
+
+    <!-- Lista placas -->
+    <div class="panel">
+      <h2>📋 Placas</h2>
+      <div id="placasLista">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- Clientes -->
+    <div class="panel">
+      <h2>🐾 Mascotas registradas</h2>
+      <div id="clientesLista">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    // ─── credenciales admin (hardcoded solo en frontend = OK para MVP) ─
+    const ADMIN_EMAIL = 'samirignaciosb@gmail.com'
+    const ADMIN_PASS  = 'Admin123'
+
+    // ─── helpers ──────────────────────────────────
+    function showAlert(id, msg, type = 'err') {
+      const el = document.getElementById(id)
+      el.textContent = msg
+      el.className = `alert-admin ${type} show`
+    }
+
+    // ─── LOGIN ────────────────────────────────────
+    document.getElementById('btnAdminLogin').addEventListener('click', async () => {
+      const email = document.getElementById('adminEmail').value.trim()
+      const pass  = document.getElementById('adminPass').value
+
+      if (email !== ADMIN_EMAIL || pass !== ADMIN_PASS) {
+        return showAlert('loginAlert', '❌ Credenciales incorrectas')
+      }
+
+      document.getElementById('loginWrap').style.display = 'none'
+      document.getElementById('dashWrap').style.display  = 'block'
+      document.getElementById('btnLogout').style.display = 'block'
+      await cargarDashboard()
+    })
+
+    document.getElementById('adminPass').addEventListener('keypress', e => {
+      if (e.key === 'Enter') document.getElementById('btnAdminLogin').click()
+    })
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      document.getElementById('loginWrap').style.display = 'flex'
+      document.getElementById('dashWrap').style.display  = 'none'
+      document.getElementById('btnLogout').style.display = 'none'
+      document.getElementById('adminEmail').value = ''
+      document.getElementById('adminPass').value  = ''
+    })
+
+    // ─── dashboard ────────────────────────────────
+    async function cargarDashboard() {
+      await Promise.all([cargarStats(), cargarPlacas(), cargarClientes()])
+    }
+
+    async function cargarStats() {
+      const [{ data: placas }, { data: perdidas }] = await Promise.all([
+        supabase.from('placas').select('estado'),
+        supabase.from('perfiles').select('id').eq('esta_perdida', true)
+      ])
+
+      const total      = placas?.length || 0
+      const activas    = placas?.filter(p => p.estado === 'activa').length || 0
+      const disponibles= total - activas
+
+      document.getElementById('statTotal').textContent      = total
+      document.getElementById('statActivas').textContent    = activas
+      document.getElementById('statDisponibles').textContent= disponibles
+      document.getElementById('statPerdidas').textContent   = perdidas?.length || 0
+    }
+
+    async function cargarPlacas() {
+      const { data, error } = await supabase
+        .from('placas')
+        .select('*, perfiles(nombre_mascota, nombre_dueno, telefono)')
+        .order('codigo')
+
+      if (error || !data?.length) {
+        document.getElementById('placasLista').innerHTML =
+          '<p style="color:#8a7060;">Sin placas aún. Generá la primera lote.</p>'
+        return
+      }
+
+      document.getElementById('placasLista').innerHTML = `
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Estado</th>
+              <th>Mascota</th>
+              <th>Dueño</th>
+              <th>QR</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(p => {
+              const perfil = p.perfiles?.[0] || p.perfiles || null
+              const qrUrl  = `${window.location.origin}/rescate.html?id=${p.id}`
+              return `
+                <tr>
+                  <td><span class="code-badge">${p.codigo}</span></td>
+                  <td>
+                    <span class="badge ${p.estado === 'activa' ? 'badge-ok' : 'badge-warn'}">
+                      ${p.estado === 'activa' ? '✅ Activa' : '⏳ Disponible'}
+                    </span>
+                  </td>
+                  <td style="color:#c8b8a0;">${perfil?.nombre_mascota || '—'}</td>
+                  <td style="color:#c8b8a0;">${perfil?.nombre_dueno || '—'}</td>
+                  <td>
+                    <a href="${qrUrl}" target="_blank" style="color:var(--clay); font-size:12px;">🔗 Ver</a>
+                  </td>
+                </tr>
+              `
+            }).join('')}
+          </tbody>
+        </table>
+      `
+    }
+
+    async function cargarClientes() {
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*, placas(codigo)')
+        .order('created_at', { ascending: false })
+
+      if (error || !data?.length) {
+        document.getElementById('clientesLista').innerHTML =
+          '<p style="color:#8a7060;">Sin mascotas registradas aún.</p>'
+        return
+      }
+
+      document.getElementById('clientesLista').innerHTML = data.map(c => `
+        <div class="cliente-row">
+          <div class="cliente-info">
+            <strong>${c.nombre_mascota || '—'}</strong>
+            ${c.esta_perdida ? '<span style="color:#ef8080; font-weight:800;"> 🚨 PERDIDA</span>' : ''}
+            <br>
+            👤 ${c.nombre_dueno || '—'} &nbsp;|&nbsp; 📱 ${c.telefono || '—'}
+            <br>
+            <span style="color:#8a7060; font-size:12px;">
+              Placa: ${c.placas?.codigo || 'Sin placa'} &nbsp;|&nbsp;
+              ${new Date(c.created_at).toLocaleDateString('es-CL')}
+            </span>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            ${c.telefono ? `
+              <a href="https://wa.me/${c.telefono.replace(/[^0-9]/g,'')}"
+                 target="_blank" class="btn btn-success" style="font-size:12px; padding:6px 12px;">
+                WhatsApp
+              </a>` : ''}
+          </div>
+        </div>
+      `).join('')
+    }
+
+    // ─── GENERAR PLACAS ───────────────────────────
+    function codigoAleatorio(prefijo) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sin O,0,I,1 para evitar confusión
+      let codigo = ''
+      for (let i = 0; i < 6; i++) {
+        codigo += chars[Math.floor(Math.random() * chars.length)]
+      }
+      return `${prefijo}-${codigo}`
+    }
+
+    document.getElementById('btnGenerar').addEventListener('click', async () => {
+      const prefijo   = document.getElementById('prefijo').value.trim().toUpperCase() || 'UBI'
+      const cantidad  = parseInt(document.getElementById('hasta').value)
+
+      if (isNaN(cantidad) || cantidad < 1) {
+        return showAlert('alertGenerar', '❌ Cantidad inválida')
+      }
+      if (cantidad > 100) {
+        return showAlert('alertGenerar', '❌ Máximo 100 placas por vez')
+      }
+
+      const btn = document.getElementById('btnGenerar')
+      btn.disabled = true
+      btn.textContent = '⏳ Generando...'
+
+      // generar códigos únicos localmente
+      const codigos = new Set()
+      while (codigos.size < cantidad) {
+        codigos.add(codigoAleatorio(prefijo))
+      }
+
+      const placas = Array.from(codigos).map(codigo => ({ codigo }))
+      const { error } = await supabase.from('placas').insert(placas)
+
+      btn.disabled = false
+      btn.textContent = '⚡ Generar'
+
+      if (error) {
+        showAlert('alertGenerar', '❌ Error: ' + error.message)
+      } else {
+        showAlert('alertGenerar', `✅ ${placas.length} placas generadas con códigos aleatorios`, 'ok')
+        await cargarDashboard()
+      }
+    })
+  </script>
+</body>
+</html>

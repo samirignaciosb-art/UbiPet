@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UbiPet — Imprimir QRs</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { background: var(--cream); }
+
+    /* ─── filtros ─ */
+    .toolbar {
+      background: var(--white);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 12px rgba(44,32,22,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .toolbar .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      color: var(--clay);
+      margin-right: 8px;
+    }
+    .toolbar .logo span { color: var(--sage); }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid var(--sand);
+      background: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--ink-soft);
+    }
+    .filter-btn.active {
+      background: var(--clay);
+      border-color: var(--clay);
+      color: white;
+    }
+
+    /* ─── grid ─ */
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ─── card ─ */
+    .qr-card {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      gap: 12px;
+    }
+    .qr-card .code {
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--clay);
+    }
+    .qr-card .estado-badge {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .qr-card .qr-wrap {
+      width: 180px;
+      height: 180px;
+    }
+    .qr-card .mascota-info {
+      text-align: center;
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .qr-card .mascota-info strong { color: var(--ink); font-size: 15px; }
+    .qr-card .url-small {
+      font-size: 10px;
+      color: #aaa;
+      word-break: break-all;
+      text-align: center;
+    }
+
+    /* ─── PRINT ─ */
+    @media print {
+      .toolbar { display: none !important; }
+      body { background: white; }
+      .qr-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 0;
+      }
+      .qr-card {
+        box-shadow: none;
+        border: 1px solid #eee;
+        page-break-inside: avoid;
+      }
+    }
+
+    .empty { text-align: center; padding: 80px 20px; color: var(--ink-soft); }
+    .empty .icon { font-size: 56px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <span class="logo">Ubi<span>Pet</span> 🐾</span>
+
+    <button class="filter-btn active" data-filter="todas">Todas</button>
+    <button class="filter-btn" data-filter="disponible">⏳ Disponibles</button>
+    <button class="filter-btn" data-filter="activa">✅ Activas</button>
+
+    <div style="margin-left:auto; display:flex; gap:10px;">
+      <a href="admin.html" class="btn btn-ghost" style="font-size:13px; padding:8px 16px;">← Admin</a>
+      <button class="btn btn-primary" onclick="window.print()" style="font-size:13px; padding:8px 16px;">
+        🖨️ Imprimir
+      </button>
+    </div>
+  </div>
+
+  <div id="status" style="text-align:center; padding:20px; color:var(--ink-soft); font-weight:600;">
+    🔍 Cargando placas...
+  </div>
+
+  <div class="qr-grid" id="qrGrid"></div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    let todasLasPlacas = []
+    let filtroActual   = 'todas'
+
+    // ─── cargar ──────────────────────────────────
+    async function cargar() {
+      const { data, error } = await supabase
+        .from('placas')
+        .select('*, perfiles(nombre_mascota, nombre_dueno, id)')
+        .order('codigo')
+
+      if (error) {
+        document.getElementById('status').textContent = '❌ Error: ' + error.message
+        return
+      }
+
+      todasLasPlacas = data || []
+      renderizar()
+    }
+
+    // ─── renderizar ───────────────────────────────
+    function renderizar() {
+      const filtradas = filtroActual === 'todas'
+        ? todasLasPlacas
+        : todasLasPlacas.filter(p => p.estado === filtroActual)
+
+      const grid = document.getElementById('qrGrid')
+      document.getElementById('status').textContent =
+        `${filtradas.length} placas${filtroActual !== 'todas' ? ' ' + filtroActual + 's' : ''}`
+
+      if (!filtradas.length) {
+        grid.innerHTML = `
+          <div class="empty" style="grid-column:1/-1;">
+            <div class="icon">🏷️</div>
+            <p>No hay placas en esta categoría</p>
+          </div>
+        `
+        return
+      }
+
+      grid.innerHTML = ''
+      filtradas.forEach((placa, i) => {
+        const perfil   = Array.isArray(placa.perfiles) ? placa.perfiles[0] : placa.perfiles
+        const perfilId = perfil?.id
+        // Placa activa → rescate | Placa disponible → registro con código pre-cargado
+        const qrUrl    = perfilId
+          ? `${window.location.origin}/rescate.html?id=${perfilId}`
+          : `${window.location.origin}/index.html?placa=${encodeURIComponent(placa.codigo)}`
+
+        const card = document.createElement('div')
+        card.className = 'qr-card'
+
+        const estadoColor = placa.estado === 'activa'
+          ? 'background:#e8f5e8; color:#2e7d32;'
+          : 'background:#fff3e0; color:#e65100;'
+
+        card.innerHTML = `
+          <div class="code">${placa.codigo}</div>
+          <span class="estado-badge" style="${estadoColor}">
+            ${placa.estado === 'activa' ? '✅ Activa' : '⏳ Disponible'}
+          </span>
+          <div class="qr-wrap" id="qr-${placa.id}"></div>
+          ${perfil ? `
+            <div class="mascota-info">
+              <strong>${perfil.nombre_mascota}</strong><br>
+              ${perfil.nombre_dueno || ''}
+            </div>
+          ` : '<div class="mascota-info" style="color:#bbb;">Sin mascota aún</div>'}
+          <div class="url-small">${qrUrl}</div>
+        `
+
+        grid.appendChild(card)
+
+        // generar QR después del DOM
+        setTimeout(() => {
+          new QRCode(document.getElementById(`qr-${placa.id}`), {
+            text: qrUrl,
+            width: 180,
+            height: 180,
+            colorDark: '#2c2016',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          })
+        }, i * 50) // stagger para no bloquear el hilo
+      })
+    }
+
+    // ─── filtros ──────────────────────────────────
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+        this.classList.add('active')
+        filtroActual = this.dataset.filter
+        renderizar()
+      })
+    })
+
+    cargar()
+  </script>
+</body>
+</html>

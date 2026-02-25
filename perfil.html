@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UbiPet — Mi perfil</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .mascotas-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .mascota-tab {
+      padding: 8px 18px;
+      border-radius: 30px;
+      border: 2px solid var(--sand);
+      background: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--ink-soft);
+    }
+    .mascota-tab.active {
+      background: var(--clay);
+      border-color: var(--clay);
+      color: var(--white);
+    }
+    .mascota-tab.nueva {
+      border-style: dashed;
+      color: var(--clay);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 24px;
+    }
+    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      color: var(--clay);
+      margin: 24px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--sand);
+    }
+
+    /* Toggle perdida */
+    .toggle-wrap { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; }
+    .toggle {
+      width: 52px; height: 28px;
+      background: var(--sand);
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: none;
+      flex-shrink: 0;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 4px; left: 4px;
+      transition: left 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle.on { background: var(--coral); }
+    .toggle.on::after { left: 28px; }
+    .toggle-label { font-weight: 700; font-size: 14px; color: var(--ink-soft); }
+
+    /* QR section */
+    .qr-box {
+      background: var(--sand);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .qr-box img { border-radius: 8px; box-shadow: var(--shadow); }
+    .qr-url {
+      font-size: 11px;
+      color: var(--ink-soft);
+      word-break: break-all;
+      margin: 10px 0;
+      padding: 8px;
+      background: var(--white);
+      border-radius: 6px;
+    }
+
+    /* Placa association */
+    .placa-box {
+      background: #fff8f0;
+      border: 2px dashed var(--clay);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      text-align: center;
+    }
+    .placa-activa {
+      background: #e8f5e8;
+      border: 2px solid var(--sage);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--ink-soft);
+    }
+    .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+
+    /* Foto de perfil */
+    .foto-upload-area {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: var(--sand);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+    .foto-preview {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--white);
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+      background: var(--cream);
+    }
+    .foto-placeholder {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 3px dashed var(--clay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .foto-upload-info { flex: 1; }
+    .foto-upload-info p { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="perfil.html" class="nav-logo">Ubi<span>Pet</span> 🐾</a>
+    <button class="btn btn-ghost" id="btnLogout" style="padding:8px 16px; font-size:13px;">
+      Salir
+    </button>
+  </nav>
+
+  <div class="page-wide" style="max-width:680px;">
+
+    <!-- LOADING -->
+    <div id="loading"><div class="spinner"></div></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div id="mainContent" style="display:none;">
+
+      <!-- Tabs de mascotas -->
+      <div id="mascotasTabs" class="mascotas-nav"></div>
+
+      <!-- Estado vacío -->
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="icon">🐾</div>
+        <h2 style="font-family:'Fraunces',serif; color:var(--clay); margin-bottom:8px;">
+          ¡Bienvenido a UbiPet!
+        </h2>
+        <p style="margin-bottom:24px;">Agregá tu primera mascota para empezar</p>
+        <button class="btn btn-primary" id="btnPrimeraMascota">➕ Agregar mascota</button>
+      </div>
+
+      <!-- FORMULARIO -->
+      <div id="formContainer" class="card" style="display:none;">
+        <div id="alert" class="alert"></div>
+
+        <!-- ASOCIAR PLACA -->
+        <div id="placaSection">
+          <!-- se llena dinámicamente -->
+        </div>
+
+        <!-- FOTO DE PERFIL -->
+        <div class="section-title">📸 Foto de la mascota</div>
+        <div class="foto-upload-area">
+          <div id="fotoPlaceholder" class="foto-placeholder" onclick="document.getElementById('fotoInput').click()">🐾</div>
+          <img id="fotoPreview" class="foto-preview" src="" alt="Foto" style="display:none;" onclick="document.getElementById('fotoInput').click()">
+          <div class="foto-upload-info">
+            <button class="btn btn-ghost" type="button" onclick="document.getElementById('fotoInput').click()">
+              📷 Subir foto
+            </button>
+            <p>JPG o PNG. Máx 5MB.<br>Aparecerá cuando alguien escanee el QR.</p>
+            <input type="file" id="fotoInput" accept="image/*" style="display:none;">
+          </div>
+        </div>
+
+        <div class="section-title">🐾 Datos de la mascota</div>
+        <div class="form-grid">
+          <div>
+            <div class="input-group">
+              <label>Nombre *</label>
+              <input type="text" id="nombreMascota" placeholder="Firulais">
+            </div>
+            <div class="input-group">
+              <label>Raza</label>
+              <input type="text" id="raza" placeholder="Labrador, mestizo...">
+            </div>
+            <div class="input-group">
+              <label>Edad (años)</label>
+              <input type="number" id="edad" min="0" max="30" placeholder="3">
+            </div>
+          </div>
+          <div>
+            <div class="input-group">
+              <label>Peso (kg)</label>
+              <input type="number" id="peso" step="0.1" placeholder="12.5">
+            </div>
+            <div class="input-group">
+              <label>Descripción</label>
+              <textarea id="descripcion" placeholder="Color, señas particulares..."></textarea>
+            </div>
+            <div class="toggle-wrap">
+              <button class="toggle" id="togglePerdida" type="button"></button>
+              <span class="toggle-label" id="toggleLabel">Está en casa ✅</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">👤 Datos del dueño</div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Tu nombre *</label>
+            <input type="text" id="nombreDueno" placeholder="Juan Pérez">
+          </div>
+          <div class="input-group">
+            <label>WhatsApp * (+569...)</label>
+            <input type="tel" id="telefono" placeholder="+56912345678">
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary" style="flex:1; min-width:160px;" id="btnGuardar">
+            💾 Guardar
+          </button>
+          <button class="btn btn-ghost" id="btnCancelar">Cancelar</button>
+        </div>
+
+        <!-- QR -->
+        <div id="qrSection" style="display:none;" class="qr-box">
+          <p style="font-weight:800; margin-bottom:12px; color:var(--clay);">📲 QR de tu placa</p>
+          <img id="qrImg" src="" alt="QR" width="200" height="200">
+          <div class="qr-url" id="qrUrl"></div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="copiarUrl()">📋 Copiar URL</button>
+            <a class="btn btn-primary" id="qrDownload" download="ubipet-qr.png">⬇️ Descargar QR</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    // ─── subir foto a Supabase Storage ───────────
+    async function subirFoto(file, mascotaId) {
+      const ext      = file.name.split('.').pop()
+      const fileName = `${mascotaId}.${ext}`
+      
+      // eliminar foto anterior si existe
+      await supabase.storage.from('fotos-mascotas').remove([fileName])
+
+      const { error } = await supabase.storage
+        .from('fotos-mascotas')
+        .upload(fileName, file, { upsert: true })
+
+      if (error) throw new Error('Error subiendo foto: ' + error.message)
+
+      const { data } = supabase.storage
+        .from('fotos-mascotas')
+        .getPublicUrl(fileName)
+
+      return data.publicUrl
+    }
+
+    // ─── preview local de foto ────────────────────
+    function setupFotoPreview() {
+      document.getElementById('fotoInput').addEventListener('change', function() {
+        const file = this.files[0]
+        if (!file) return
+        if (file.size > 5 * 1024 * 1024) {
+          showAlert('La foto no puede superar 5MB')
+          return
+        }
+        const reader = new FileReader()
+        reader.onload = e => mostrarFotoPreview(e.target.result)
+        reader.readAsDataURL(file)
+      })
+    }
+
+    function mostrarFotoPreview(url) {
+      const preview     = document.getElementById('fotoPreview')
+      const placeholder = document.getElementById('fotoPlaceholder')
+      preview.src = url
+      preview.style.display = 'block'
+      placeholder.style.display = 'none'
+    }
+
+    function limpiarFotoPreview() {
+      document.getElementById('fotoPreview').style.display = 'none'
+      document.getElementById('fotoPreview').src = ''
+      document.getElementById('fotoPlaceholder').style.display = 'flex'
+      document.getElementById('fotoInput').value = ''
+    }
+
+    // ─── estado ──────────────────────────────────
+    let user = null
+    let mascotas = []
+    let mascotaActual = null
+    let modoNueva = false
+
+    // ─── helpers ─────────────────────────────────
+    function showAlert(msg, type = 'err') {
+      const el = document.getElementById('alert')
+      el.textContent = msg
+      el.className = `alert alert-${type} show`
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+    function hideAlert() {
+      document.getElementById('alert').className = 'alert'
+    }
+
+    // ─── auth guard ──────────────────────────────
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { window.location.href = 'index.html' }
+    user = session.user
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.href = 'index.html'
+    })
+
+    // ─── cargar mascotas ─────────────────────────
+    async function cargarMascotas() {
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*, placas(codigo)')
+        .eq('user_id', user.id)
+        .order('created_at')
+
+      if (error) { console.error(error); return }
+      mascotas = data || []
+      renderTabs()
+    }
+
+    // ─── tabs ────────────────────────────────────
+    function renderTabs() {
+      document.getElementById('loading').style.display = 'none'
+      document.getElementById('mainContent').style.display = 'block'
+
+      const tabs = document.getElementById('mascotasTabs')
+      tabs.innerHTML = ''
+
+      if (mascotas.length === 0) {
+        document.getElementById('emptyState').style.display = 'block'
+        document.getElementById('formContainer').style.display = 'none'
+        return
+      }
+
+      document.getElementById('emptyState').style.display = 'none'
+
+      mascotas.forEach((m, i) => {
+        const tab = document.createElement('button')
+        tab.className = 'mascota-tab' + (mascotaActual?.id === m.id ? ' active' : '')
+        tab.textContent = (m.esta_perdida ? '🚨 ' : '🐾 ') + m.nombre_mascota
+        tab.addEventListener('click', () => seleccionarMascota(m))
+        tabs.appendChild(tab)
+      })
+
+      const btnNueva = document.createElement('button')
+      btnNueva.className = 'mascota-tab nueva'
+      btnNueva.textContent = '+ Nueva'
+      btnNueva.addEventListener('click', nuevaMascota)
+      tabs.appendChild(btnNueva)
+
+      if (!mascotaActual && mascotas.length > 0) seleccionarMascota(mascotas[0])
+    }
+
+    // ─── seleccionar mascota ──────────────────────
+    function seleccionarMascota(m) {
+      mascotaActual = m
+      modoNueva = false
+      document.getElementById('formContainer').style.display = 'block'
+      document.getElementById('emptyState').style.display = 'none'
+      renderTabs()
+      cargarCampos(m)
+      renderPlacaSection(m)
+      renderQR(m)
+    }
+
+    // ─── nueva mascota ───────────────────────────
+    function nuevaMascota() {
+      mascotaActual = null
+      modoNueva = true
+      document.getElementById('formContainer').style.display = 'block'
+      document.getElementById('emptyState').style.display = 'none'
+      limpiarCampos()
+      document.getElementById('placaSection').innerHTML = ''
+      document.getElementById('qrSection').style.display = 'none'
+      document.getElementById('btnGuardar').textContent = '💾 Crear mascota'
+      hideAlert()
+    }
+
+    document.getElementById('btnPrimeraMascota')?.addEventListener('click', nuevaMascota)
+    document.getElementById('btnCancelar').addEventListener('click', () => {
+      if (mascotas.length > 0) seleccionarMascota(mascotas[0])
+      else document.getElementById('emptyState').style.display = 'block'
+      document.getElementById('formContainer').style.display = mascotas.length > 0 ? 'block' : 'none'
+    })
+
+    // ─── sección de placa ─────────────────────────
+    function renderPlacaSection(m) {
+      const sec = document.getElementById('placaSection')
+
+      if (m.placa_id) {
+        // ya tiene placa asociada
+        sec.innerHTML = `
+          <div class="placa-activa">
+            <p style="font-weight:800; color:var(--sage-d); margin-bottom:4px;">✅ Placa asociada</p>
+            <p style="font-size:22px; font-weight:900; letter-spacing:2px; color:var(--ink);">
+              ${m.placas?.codigo || '—'}
+            </p>
+          </div>
+        `
+      } else {
+        // sin placa — formulario para asociar
+        sec.innerHTML = `
+          <div class="placa-box">
+            <p style="font-weight:800; color:var(--clay); margin-bottom:8px;">🏷️ Asociar placa física</p>
+            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">
+              Ingresá el código que aparece en tu placa UbiPet (ej: UBI-001)
+            </p>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+              <input type="text" id="codigoPlaca" placeholder="UBI-001"
+                style="max-width:160px; text-transform:uppercase; font-weight:800; letter-spacing:2px;">
+              <button class="btn btn-primary" id="btnAsociarPlaca">Asociar placa</button>
+            </div>
+            <div id="alertPlaca" class="alert" style="margin-top:10px;"></div>
+          </div>
+        `
+        document.getElementById('btnAsociarPlaca').addEventListener('click', asociarPlaca)
+
+        // pre-cargar placa desde QR escaneado
+        const placaPendiente = sessionStorage.getItem('placa_pendiente')
+        if (placaPendiente) {
+          document.getElementById('codigoPlaca').value = placaPendiente
+          sessionStorage.removeItem('placa_pendiente')
+        }
+        document.getElementById('codigoPlaca').addEventListener('input', e => {
+          e.target.value = e.target.value.toUpperCase()
+        })
+      }
+    }
+
+    // ─── asociar placa ────────────────────────────
+    async function asociarPlaca() {
+      const codigo = document.getElementById('codigoPlaca').value.trim().toUpperCase()
+      if (!codigo) return
+
+      const alertEl = document.getElementById('alertPlaca')
+      alertEl.className = 'alert alert-info show'
+      alertEl.textContent = '🔍 Verificando placa...'
+
+      // buscar la placa
+      const { data: placa, error } = await supabase
+        .from('placas')
+        .select('*')
+        .eq('codigo', codigo)
+        .single()
+
+      if (error || !placa) {
+        alertEl.className = 'alert alert-err show'
+        alertEl.textContent = '❌ Código no encontrado. Revisá que esté bien escrito.'
+        return
+      }
+      if (placa.estado === 'activa') {
+        alertEl.className = 'alert alert-err show'
+        alertEl.textContent = '❌ Esta placa ya está en uso.'
+        return
+      }
+
+      // asociar
+      const { error: errUpdate } = await supabase
+        .from('perfiles')
+        .update({ placa_id: placa.id })
+        .eq('id', mascotaActual.id)
+
+      if (errUpdate) {
+        alertEl.className = 'alert alert-err show'
+        alertEl.textContent = '❌ Error: ' + errUpdate.message
+        return
+      }
+
+      // marcar placa como activa
+      await supabase.from('placas').update({ estado: 'activa' }).eq('id', placa.id)
+
+      alertEl.className = 'alert alert-ok show'
+      alertEl.textContent = '✅ ¡Placa asociada!'
+
+      setTimeout(async () => {
+        await cargarMascotas()
+        const m = mascotas.find(x => x.id === mascotaActual.id)
+        if (m) seleccionarMascota(m)
+      }, 800)
+    }
+
+    // ─── QR ──────────────────────────────────────
+    function renderQR(m) {
+      const sec = document.getElementById('qrSection')
+      if (!m.placa_id) { sec.style.display = 'none'; return }
+
+      const url = `${window.location.origin}/rescate.html?id=${m.id}`
+      document.getElementById('qrImg').src =
+        `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`
+      document.getElementById('qrUrl').textContent = url
+      document.getElementById('qrDownload').href =
+        `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`
+      sec.style.display = 'block'
+    }
+
+    window.copiarUrl = () => {
+      const url = document.getElementById('qrUrl').textContent
+      navigator.clipboard.writeText(url)
+      showAlert('📋 URL copiada', 'ok')
+    }
+
+    // ─── cargar campos ────────────────────────────
+    function cargarCampos(m) {
+      document.getElementById('nombreMascota').value = m.nombre_mascota || ''
+      document.getElementById('raza').value           = m.raza || ''
+      document.getElementById('edad').value           = m.edad || ''
+      document.getElementById('peso').value           = m.peso || ''
+      document.getElementById('descripcion').value    = m.descripcion || ''
+      document.getElementById('nombreDueno').value    = m.nombre_dueno || ''
+      document.getElementById('telefono').value       = m.telefono || ''
+
+      const toggle = document.getElementById('togglePerdida')
+      const label  = document.getElementById('toggleLabel')
+      if (m.esta_perdida) {
+        toggle.classList.add('on')
+        label.textContent = '¡Está perdida! 🚨'
+      } else {
+        toggle.classList.remove('on')
+        label.textContent = 'Está en casa ✅'
+      }
+
+      document.getElementById('btnGuardar').textContent = '💾 Guardar cambios'
+      hideAlert()
+
+      // mostrar foto si tiene
+      if (m.foto_url) {
+        mostrarFotoPreview(m.foto_url)
+      } else {
+        limpiarFotoPreview()
+      }
+    }
+
+    function limpiarCampos() {
+      ['nombreMascota','raza','edad','peso','descripcion','nombreDueno','telefono']
+        .forEach(id => { document.getElementById(id).value = '' })
+      document.getElementById('togglePerdida').classList.remove('on')
+      document.getElementById('toggleLabel').textContent = 'Está en casa ✅'
+      limpiarFotoPreview()
+    }
+
+    // ─── toggle perdida ───────────────────────────
+    document.getElementById('togglePerdida').addEventListener('click', function() {
+      this.classList.toggle('on')
+      document.getElementById('toggleLabel').textContent =
+        this.classList.contains('on') ? '¡Está perdida! 🚨' : 'Está en casa ✅'
+    })
+
+    // ─── guardar ──────────────────────────────────
+    document.getElementById('btnGuardar').addEventListener('click', async () => {
+      const nombre  = document.getElementById('nombreMascota').value.trim()
+      const dueno   = document.getElementById('nombreDueno').value.trim()
+      const telefono= document.getElementById('telefono').value.trim()
+
+      if (!nombre)   return showAlert('El nombre de la mascota es obligatorio')
+      if (!dueno)    return showAlert('Tu nombre es obligatorio')
+      if (!telefono) return showAlert('El WhatsApp es obligatorio')
+
+      const btn = document.getElementById('btnGuardar')
+      btn.disabled = true
+      btn.textContent = '⏳ Guardando...'
+
+      const perdida = document.getElementById('togglePerdida').classList.contains('on')
+
+      const payload = {
+        user_id:        user.id,
+        nombre_mascota: nombre,
+        raza:           document.getElementById('raza').value,
+        edad:           parseInt(document.getElementById('edad').value) || null,
+        peso:           parseFloat(document.getElementById('peso').value) || null,
+        descripcion:    document.getElementById('descripcion').value,
+        nombre_dueno:   dueno,
+        email_dueno:    user.email,
+        telefono:       telefono,
+        esta_perdida:   perdida
+      }
+
+      // subir foto si se seleccionó una nueva
+      const fotoFile = document.getElementById('fotoInput').files[0]
+
+      let error
+      if (modoNueva) {
+        const res = await supabase.from('perfiles').insert(payload).select().single()
+        error = res.error
+        if (!error) mascotaActual = res.data
+      } else {
+        const res = await supabase.from('perfiles').update(payload).eq('id', mascotaActual.id).select().single()
+        error = res.error
+        if (!error) mascotaActual = res.data
+      }
+
+      // subir foto si hay una nueva seleccionada
+      if (!error && fotoFile && mascotaActual?.id) {
+        try {
+          const fotoUrl = await subirFoto(fotoFile, mascotaActual.id)
+          await supabase.from('perfiles').update({ foto_url: fotoUrl }).eq('id', mascotaActual.id)
+          mascotaActual.foto_url = fotoUrl
+        } catch(fotoErr) {
+          console.error('Error foto:', fotoErr)
+          // no bloquear el guardado por error de foto
+        }
+      }
+
+      btn.disabled = false
+      btn.textContent = '💾 Guardar cambios'
+
+      if (error) return showAlert('❌ ' + error.message)
+
+      showAlert('✅ ¡Guardado correctamente!', 'ok')
+      modoNueva = false
+      await cargarMascotas()
+      const m = mascotas.find(x => x.id === mascotaActual.id)
+      if (m) seleccionarMascota(m)
+    })
+
+    // ─── init ─────────────────────────────────────
+    setupFotoPreview()
+    await cargarMascotas()
+  </script>
+</body>
+</html>

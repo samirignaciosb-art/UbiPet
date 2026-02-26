@@ -244,12 +244,6 @@
       if (error || !data) { mostrarNoEncontrado() }
       else {
         // Llenar datos
-        // Mostrar foto o placeholder
-        const fotoPet = document.getElementById('fotoPet')
-        if (data.foto_url) {
-          fotoPet.outerHTML = `<img src="${data.foto_url}" class="mascota-foto" alt="${data.nombre_mascota || 'Mascota'}">`
-        }
-
         document.getElementById('infoNombre').textContent = data.nombre_mascota || '—'
         document.getElementById('infoRaza').textContent   = data.raza || 'No especificada'
         document.getElementById('infoDueno').textContent  = data.nombre_dueno || '—'
@@ -264,13 +258,20 @@
         const header = document.getElementById('rescueHeader')
         const perdida = data.esta_perdida
         header.className = 'rescue-header ' + (perdida ? 'perdida' : 'ok')
-        // mostrar foto si tiene
-        if (data.foto_url) {
-          document.getElementById('fotoPerfil').src = data.foto_url
-          document.getElementById('fotoPerfil').style.display = 'block'
-          document.getElementById('fotoPlaceholder').style.display = 'none'
-        } else {
-          document.getElementById('fotoPlaceholder').textContent = perdida ? '🚨' : '🐾'
+
+        // Foto de la mascota
+        const fotoPet = document.getElementById('fotoPet')
+        if (fotoPet) {
+          if (data.foto_url) {
+            fotoPet.innerHTML = ''
+            const img = document.createElement('img')
+            img.src = data.foto_url
+            img.className = 'mascota-foto'
+            img.alt = data.nombre_mascota || 'Mascota'
+            fotoPet.replaceWith(img)
+          } else {
+            fotoPet.textContent = perdida ? '🚨' : '🐾'
+          }
         }
 
         document.getElementById('headerTitle').textContent  = perdida ? '¡Mascota perdida!' : 'Mascota encontrada'

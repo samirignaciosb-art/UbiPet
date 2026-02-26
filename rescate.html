@@ -223,6 +223,48 @@
   <script type="module">
     import { supabase } from '/js/supabase.js'
 
+    // ─── notificar al dueño por email ─────────────
+    async function notificarDueno(data) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer re_Cns2ptsH_GodruPB1huEVdqdZU3PNxru1'
+          },
+          body: JSON.stringify({
+            from: 'UbiPet <noreply@ubipet.shop>',
+            to: [data.email_dueno],
+            subject: `🐾 ¡Encontraron a ${data.nombre_mascota}!`,
+            html: `
+              <div style="font-family:Arial,sans-serif; max-width:480px; margin:0 auto; padding:24px;">
+                <div style="background:#d4956a; border-radius:16px; padding:24px; text-align:center; margin-bottom:24px;">
+                  <h1 style="color:white; margin:0; font-size:24px;">🐾 UbiPet</h1>
+                </div>
+                <h2 style="color:#2c2016;">¡Alguien encontró a ${data.nombre_mascota}!</h2>
+                <p style="color:#6b5a4e; font-size:16px;">
+                  Hola <strong>${data.nombre_dueno}</strong>, alguien escaneó el QR de la placa de 
+                  <strong>${data.nombre_mascota}</strong> y está esperando tu contacto.
+                </p>
+                <div style="background:#fdf6ee; border-radius:12px; padding:16px; margin:20px 0;">
+                  <p style="margin:0; color:#6b5a4e; font-size:14px;">
+                    📱 El rescatista puede contactarte al <strong>${data.telefono}</strong> 
+                    o te enviará su ubicación por WhatsApp.
+                  </p>
+                </div>
+                <p style="color:#9e8a7e; font-size:13px; margin-top:24px;">
+                  Este es un mensaje automático de UbiPet — La placa inteligente para tu mascota.
+                </p>
+              </div>
+            `
+          })
+        })
+      } catch(e) {
+        // no bloquear si falla el email
+        console.log('Email error:', e)
+      }
+    }
+
     const params  = new URLSearchParams(window.location.search)
     const perfilId = params.get('id')
 
@@ -243,6 +285,9 @@
 
       if (error || !data) { mostrarNoEncontrado() }
       else {
+        // Notificar al dueño por email (silencioso)
+        if (data.email_dueno) notificarDueno(data)
+
         // Llenar datos
         document.getElementById('infoNombre').textContent = data.nombre_mascota || '—'
         document.getElementById('infoRaza').textContent   = data.raza || 'No especificada'

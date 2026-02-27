@@ -257,6 +257,9 @@
             💾 Guardar
           </button>
           <button class="btn btn-ghost" id="btnCancelar">Cancelar</button>
+          <button class="btn" id="btnEliminar" style="background:#fff0f0; color:#c0392b; border:2px solid #ffcccc; display:none;">
+            🗑️ Eliminar mascota
+          </button>
         </div>
 
         <!-- QR -->
@@ -423,6 +426,7 @@
       document.getElementById('placaSection').innerHTML = ''
       document.getElementById('qrSection').style.display = 'none'
       document.getElementById('btnGuardar').textContent = '💾 Crear mascota'
+      document.getElementById('btnEliminar').style.display = 'none'
       hideAlert()
     }
 
@@ -570,6 +574,7 @@
       }
 
       document.getElementById('btnGuardar').textContent = '💾 Guardar cambios'
+      document.getElementById('btnEliminar').style.display = 'block'
       hideAlert()
 
       // mostrar foto si tiene
@@ -660,6 +665,48 @@
       await cargarMascotas()
       const m = mascotas.find(x => x.id === mascotaActual.id)
       if (m) seleccionarMascota(m)
+    })
+
+    // ─── ELIMINAR MASCOTA ────────────────────────
+    document.getElementById('btnEliminar').addEventListener('click', async () => {
+      if (!mascotaActual) return
+
+      const confirmar = confirm(`¿Seguro que querés eliminar a ${mascotaActual.nombre_mascota}? Esta acción no se puede deshacer.`)
+      if (!confirmar) return
+
+      const btn = document.getElementById('btnEliminar')
+      btn.disabled = true
+      btn.textContent = '⏳ Eliminando...'
+
+      // liberar la placa si tiene una asociada
+      if (mascotaActual.placa_id) {
+        await supabase
+          .from('placas')
+          .update({ estado: 'disponible' })
+          .eq('id', mascotaActual.placa_id)
+      }
+
+      // eliminar foto de storage si tiene
+      if (mascotaActual.foto_url) {
+        const fileName = `${mascotaActual.id}.${mascotaActual.foto_url.split('.').pop().split('?')[0]}`
+        await supabase.storage.from('fotos-mascotas').remove([fileName])
+      }
+
+      // eliminar perfil
+      const { error } = await supabase
+        .from('perfiles')
+        .delete()
+        .eq('id', mascotaActual.id)
+
+      if (error) {
+        btn.disabled = false
+        btn.textContent = '🗑️ Eliminar mascota'
+        showAlert('❌ Error al eliminar: ' + error.message)
+        return
+      }
+
+      mascotaActual = null
+      await cargarMascotas()
     })
 
     // ─── init ─────────────────────────────────────

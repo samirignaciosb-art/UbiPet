@@ -188,7 +188,7 @@
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://ubipet.netlify.app/perfil.html'
+          redirectTo: 'https://app.ubipet.shop/perfil.html'
         }
       })
 
@@ -218,7 +218,7 @@
       btn.textContent = '⏳ Enviando...'
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://ubipet.netlify.app/reset-password.html'
+        redirectTo: 'https://app.ubipet.shop/reset-password.html'
       })
 
       btn.disabled = false

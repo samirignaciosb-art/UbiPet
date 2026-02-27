@@ -253,6 +253,31 @@
       </div>
     </div>
 
+    <!-- Configuración -->
+    <div class="panel">
+      <h2>⚙️ Configuración del sitio</h2>
+      <div id="alertConfig" class="alert-admin"></div>
+      <div style="display:flex; flex-direction:column; gap:16px; margin-top:16px;">
+        <div>
+          <label style="color:#c9a882; font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+            Instagram
+          </label>
+          <input id="cfgInstagram" type="text" placeholder="https://instagram.com/usuario"
+            style="width:100%; background:#2a1a0e; border:1px solid #4a3520; color:#f0dcc8; padding:10px 14px; border-radius:8px; font-family:'Nunito',sans-serif; font-size:14px;">
+        </div>
+        <div>
+          <label style="color:#c9a882; font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+            Sitio web / App
+          </label>
+          <input id="cfgWeb" type="text" placeholder="https://app.ubipet.shop"
+            style="width:100%; background:#2a1a0e; border:1px solid #4a3520; color:#f0dcc8; padding:10px 14px; border-radius:8px; font-family:'Nunito',sans-serif; font-size:14px;">
+        </div>
+        <button id="btnGuardarConfig" class="btn btn-primary" style="align-self:flex-start;">
+          💾 Guardar configuración
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <script type="module">
@@ -298,7 +323,7 @@
 
     // ─── dashboard ────────────────────────────────
     async function cargarDashboard() {
-      await Promise.all([cargarStats(), cargarPlacas(), cargarClientes()])
+      await Promise.all([cargarStats(), cargarPlacas(), cargarClientes(), cargarConfig()])
     }
 
     async function cargarStats() {
@@ -444,6 +469,37 @@
         showAlert('alertGenerar', `✅ ${placas.length} placas generadas con códigos aleatorios`, 'ok')
         await cargarDashboard()
       }
+    })
+
+    // ─── CONFIGURACIÓN ───────────────────────────
+    async function cargarConfig() {
+      const { data } = await supabase.from('configuracion').select('*')
+      if (!data) return
+      data.forEach(row => {
+        if (row.clave === 'instagram') document.getElementById('cfgInstagram').value = row.valor
+        if (row.clave === 'web')       document.getElementById('cfgWeb').value = row.valor
+      })
+    }
+
+    document.getElementById('btnGuardarConfig').addEventListener('click', async () => {
+      const instagram = document.getElementById('cfgInstagram').value.trim()
+      const web       = document.getElementById('cfgWeb').value.trim()
+      const btn       = document.getElementById('btnGuardarConfig')
+
+      btn.disabled = true
+      btn.textContent = '⏳ Guardando...'
+
+      const results = await Promise.all([
+        supabase.from('configuracion').upsert({ clave: 'instagram', valor: instagram }),
+        supabase.from('configuracion').upsert({ clave: 'web',       valor: web })
+      ])
+      const hasError = results.find(r => r.error)
+
+      btn.disabled = false
+      btn.textContent = '💾 Guardar configuración'
+
+      if (hasError) return showAlert('alertConfig', '❌ Error al guardar', 'err')
+      showAlert('alertConfig', '✅ Configuración guardada', 'ok')
     })
   </script>
 </body>

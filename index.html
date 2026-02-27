@@ -147,6 +147,28 @@
       </div>
     </div>
 
+    <!-- BIENVENIDA POST REGISTRO -->
+    <div class="card" id="welcomePanel" style="display:none; margin-top:20px; text-align:center;">
+      <div style="font-size:56px; margin-bottom:16px;">🎉</div>
+      <h3 style="font-family:'Fraunces',serif; color:var(--clay); margin-bottom:8px; font-size:22px;">
+        ¡Bienvenido a UbiPet!
+      </h3>
+      <p style="color:var(--ink-soft); font-size:15px; line-height:1.6; margin-bottom:20px;">
+        Tu cuenta fue creada exitosamente. Ya podés asociar tu placa y crear el perfil de tu mascota.
+      </p>
+      <div style="background:var(--sand); border-radius:12px; padding:16px; margin-bottom:20px; text-align:left;">
+        <p style="font-size:13px; color:var(--ink-soft); margin:0; line-height:1.7;">
+          <strong style="color:var(--ink);">Próximos pasos:</strong><br>
+          1️⃣ Ingresá el código de tu placa<br>
+          2️⃣ Completá el perfil de tu mascota<br>
+          3️⃣ ¡Listo! Tu peludito ya está protegido 🐾
+        </p>
+      </div>
+      <button class="btn btn-primary btn-full" id="btnIrPerfil">
+        Ir a mi perfil →
+      </button>
+    </div>
+
     <!-- PANEL REGISTRO (oculto) -->
     <div class="card" id="registerPanel" style="display:none; margin-top:20px;">
       <h3 style="margin-bottom:20px; font-family:'Fraunces',serif; color:var(--clay);">
@@ -292,11 +314,25 @@
 
       // Login automático después del registro
       const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pass })
+      
+      // Ocultar panel de registro
+      document.getElementById('registerPanel').style.display = 'none'
+      
       if (loginErr) {
-        showAlert('alertReg', '✅ Cuenta creada. Revisá tu email para confirmar.', 'ok')
+        // Si no pudo loguearse (necesita confirmar email)
+        document.getElementById('welcomePanel').style.display = 'block'
+        document.getElementById('btnIrPerfil').textContent = 'Iniciar sesión →'
+        document.getElementById('btnIrPerfil').onclick = () => {
+          document.getElementById('welcomePanel').style.display = 'none'
+        }
         return
       }
-      window.location.href = 'perfil.html'
+      
+      // Login exitoso → mostrar bienvenida
+      document.getElementById('welcomePanel').style.display = 'block'
+      document.getElementById('btnIrPerfil').onclick = () => {
+        window.location.href = 'perfil.html'
+      }
     })
   </script>
   <!-- Banner instalación PWA -->

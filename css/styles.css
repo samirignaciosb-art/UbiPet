@@ -1,19 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fraunces:ital,wght@0,400;0,700;1,400&display=swap');
 
+/* ─── MODO CLARO (default) ───────────────────── */
 :root {
-  --cream:    #fdf6ee;
-  --sand:     #f0e4d0;
-  --clay:     #d4956a;
-  --clay-d:   #b8734a;
-  --sage:     #7aab8a;
-  --sage-d:   #5a8a6a;
-  --coral:    #e8725a;
-  --ink:      #2c2016;
-  --ink-soft: #6b5744;
-  --white:    #ffffff;
-  --radius:   16px;
-  --shadow:   0 4px 24px rgba(44,32,22,0.10);
-  --shadow-lg:0 8px 40px rgba(44,32,22,0.15);
+  --cream:      #fdf6ee;
+  --sand:       #f0e4d0;
+  --clay:       #d4956a;
+  --clay-d:     #b8734a;
+  --sage:       #7aab8a;
+  --sage-d:     #5a8a6a;
+  --coral:      #e8725a;
+  --ink:        #2c2016;
+  --ink-soft:   #6b5744;
+  --white:      #ffffff;
+  --card-bg:    #ffffff;
+  --input-bg:   #fdf6ee;
+  --input-border: #f0e4d0;
+  --nav-bg:     #ffffff;
+  --radius:     16px;
+  --shadow:     0 4px 24px rgba(44,32,22,0.10);
+  --shadow-lg:  0 8px 40px rgba(44,32,22,0.15);
+}
+
+/* ─── MODO OSCURO (automático) ───────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cream:        #141010;
+    --sand:         #2e2420;
+    --clay:         #d4956a;
+    --clay-d:       #e8a87a;
+    --sage:         #7aab8a;
+    --sage-d:       #9acaaa;
+    --coral:        #e8725a;
+    --ink:          #f5ede4;
+    --ink-soft:     #a08878;
+    --white:        #1e1816;
+    --card-bg:      #1e1816;
+    --input-bg:     #141010;
+    --input-border: #2e2420;
+    --nav-bg:       #1a1412;
+    --radius:       16px;
+    --shadow:       0 4px 24px rgba(0,0,0,0.30);
+    --shadow-lg:    0 8px 40px rgba(0,0,0,0.40);
+  }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,14 +51,16 @@ body {
   background: var(--cream);
   color: var(--ink);
   min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ─── CARDS ─────────────────────────────────── */
 .card {
-  background: var(--white);
+  background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 32px;
+  border: 1px solid var(--input-border);
 }
 
 /* ─── INPUTS ─────────────────────────────────── */
@@ -56,18 +86,18 @@ select,
 textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--sand);
+  border: 2px solid var(--input-border);
   border-radius: 10px;
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
   color: var(--ink);
-  background: var(--cream);
+  background: var(--input-bg);
   transition: border-color 0.2s, background 0.2s;
   outline: none;
 }
 input:focus, select:focus, textarea:focus {
   border-color: var(--clay);
-  background: var(--white);
+  background: var(--card-bg);
 }
 textarea { resize: vertical; min-height: 80px; }
 
@@ -91,13 +121,13 @@ textarea { resize: vertical; min-height: 80px; }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-.btn-primary  { background: var(--clay);  color: var(--white); }
+.btn-primary      { background: var(--clay);  color: #ffffff; }
 .btn-primary:hover { background: var(--clay-d); }
-.btn-success  { background: var(--sage);  color: var(--white); }
+.btn-success      { background: var(--sage);  color: #ffffff; }
 .btn-success:hover { background: var(--sage-d); }
-.btn-danger   { background: var(--coral); color: var(--white); }
-.btn-ghost    { background: var(--sand);  color: var(--ink); }
-.btn-whatsapp { background: #25D366;      color: var(--white); }
+.btn-danger       { background: var(--coral); color: #ffffff; }
+.btn-ghost        { background: var(--sand);  color: var(--ink); border: 1px solid var(--input-border); }
+.btn-whatsapp     { background: #25D366;      color: #ffffff; }
 .btn-full { width: 100%; }
 
 /* ─── ALERTS ─────────────────────────────────── */
@@ -109,15 +139,23 @@ textarea { resize: vertical; min-height: 80px; }
   margin: 12px 0;
   display: none;
 }
-.alert.show  { display: block; }
-.alert-ok    { background: #e8f5e8; color: #2e7d32; }
-.alert-err   { background: #fdecea; color: #c62828; }
-.alert-info  { background: #e3f2fd; color: #1565c0; }
+.alert.show { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  .alert-ok   { background: #1a3a1a; color: #6fcf6f; }
+  .alert-err  { background: #3a1a1a; color: #ef8080; }
+  .alert-info { background: #1a2a3a; color: #6fb0ef; }
+}
+@media (prefers-color-scheme: light) {
+  .alert-ok   { background: #e8f5e8; color: #2e7d32; }
+  .alert-err  { background: #fdecea; color: #c62828; }
+  .alert-info { background: #e3f2fd; color: #1565c0; }
+}
 
 /* ─── NAV ────────────────────────────────────── */
 .nav {
-  background: var(--white);
-  box-shadow: 0 2px 12px rgba(44,32,22,0.08);
+  background: var(--nav-bg);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
   padding: 16px 24px;
   display: flex;
   align-items: center;
@@ -125,6 +163,7 @@ textarea { resize: vertical; min-height: 80px; }
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid var(--input-border);
 }
 .nav-logo {
   font-family: 'Fraunces', serif;
@@ -143,8 +182,14 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: 12px;
   font-weight: 800;
 }
-.badge-ok   { background: #e8f5e8; color: #2e7d32; }
-.badge-warn { background: #fff3e0; color: #e65100; }
+@media (prefers-color-scheme: dark) {
+  .badge-ok   { background: #1a3a1a; color: #6fcf6f; }
+  .badge-warn { background: #3a2a10; color: #f0a040; }
+}
+@media (prefers-color-scheme: light) {
+  .badge-ok   { background: #e8f5e8; color: #2e7d32; }
+  .badge-warn { background: #fff3e0; color: #e65100; }
+}
 
 /* ─── SPINNER ────────────────────────────────── */
 .spinner {
@@ -158,5 +203,5 @@ textarea { resize: vertical; min-height: 80px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── PAGE WRAPPER ───────────────────────────── */
-.page { max-width: 520px; margin: 0 auto; padding: 32px 20px; }
+.page      { max-width: 520px; margin: 0 auto; padding: 32px 20px; }
 .page-wide { max-width: 960px; margin: 0 auto; padding: 32px 20px; }

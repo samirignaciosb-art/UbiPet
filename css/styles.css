@@ -205,3 +205,46 @@ textarea { resize: vertical; min-height: 80px; }
 /* ─── PAGE WRAPPER ───────────────────────────── */
 .page      { max-width: 520px; margin: 0 auto; padding: 32px 20px; }
 .page-wide { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+
+/* ─── TEMA MANUAL (override usuario) ────────── */
+[data-theme="light"] {
+  --cream:        #fdf6ee;
+  --sand:         #f0e4d0;
+  --clay:         #d4956a;
+  --clay-d:       #b8734a;
+  --sage:         #7aab8a;
+  --sage-d:       #5a8a6a;
+  --ink:          #2c2016;
+  --ink-soft:     #6b5744;
+  --white:        #ffffff;
+  --card-bg:      #ffffff;
+  --input-bg:     #fdf6ee;
+  --input-border: #f0e4d0;
+  --nav-bg:       #ffffff;
+}
+[data-theme="dark"] {
+  --cream:        #141010;
+  --sand:         #2e2420;
+  --clay:         #d4956a;
+  --clay-d:       #e8a87a;
+  --sage:         #7aab8a;
+  --sage-d:       #9acaaa;
+  --ink:          #f5ede4;
+  --ink-soft:     #a08878;
+  --white:        #1e1816;
+  --card-bg:      #1e1816;
+  --input-bg:     #141010;
+  --input-border: #2e2420;
+  --nav-bg:       #1a1412;
+}
+[data-theme="light"] .alert-ok,
+[data-theme="light"] .badge-ok  { background: #e8f5e8; color: #2e7d32; }
+[data-theme="light"] .alert-err { background: #fdecea; color: #c62828; }
+[data-theme="light"] .alert-info{ background: #e3f2fd; color: #1565c0; }
+[data-theme="light"] .badge-warn{ background: #fff3e0; color: #e65100; }
+
+[data-theme="dark"] .alert-ok,
+[data-theme="dark"] .badge-ok  { background: #1a3a1a; color: #6fcf6f; }
+[data-theme="dark"] .alert-err { background: #3a1a1a; color: #ef8080; }
+[data-theme="dark"] .alert-info{ background: #1a2a3a; color: #6fb0ef; }
+[data-theme="dark"] .badge-warn{ background: #3a2a10; color: #f0a040; }

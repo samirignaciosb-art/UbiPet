@@ -203,17 +203,7 @@
 
         card.innerHTML = `
           <div class="code">${placa.codigo}</div>
-          <span class="estado-badge" style="${estadoColor}">
-            ${placa.estado === 'activa' ? '✅ Activa' : '⏳ Disponible'}
-          </span>
           <div class="qr-wrap" id="qr-${placa.id}"></div>
-          ${perfil ? `
-            <div class="mascota-info">
-              <strong>${perfil.nombre_mascota}</strong><br>
-              ${perfil.nombre_dueno || ''}
-            </div>
-          ` : '<div class="mascota-info" style="color:#bbb;">Sin mascota aún</div>'}
-          <div class="url-small">${qrUrl}</div>
         `
 
         grid.appendChild(card)

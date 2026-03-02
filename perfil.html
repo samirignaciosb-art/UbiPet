@@ -525,13 +525,10 @@
     })
 
     // Mostrar email en menú
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const emailEl = document.getElementById('menuEmail')
-      const configEl = document.getElementById('configEmail')
-      if (emailEl) emailEl.textContent = user.email
-      if (configEl) configEl.textContent = user.email
-    }
+    const emailEl = document.getElementById('menuEmail')
+    const configEl = document.getElementById('configEmail')
+    if (emailEl) emailEl.textContent = user.email
+    if (configEl) configEl.textContent = user.email
 
     // ─── cargar mascotas ─────────────────────────
     async function cargarMascotas() {

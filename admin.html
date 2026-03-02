@@ -6,317 +6,266 @@
   <title>UbiPet — Admin</title>
   <link rel="stylesheet" href="/css/styles.css">
   <style>
-    body { background: #1a1208; min-height: 100vh; }
-
     .admin-nav {
-      background: #2c1f0e;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 2px solid var(--clay);
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--input-border);
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
     }
-    .admin-nav .logo {
-      font-family: 'Fraunces', serif;
-      font-size: 22px;
-      color: var(--clay);
-    }
-    .admin-nav .logo span { color: var(--sage); }
+    .admin-logo { font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:var(--clay); }
+    .admin-logo span { color: var(--sage); }
 
-    /* LOGIN */
-    .login-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - 60px);
-      padding: 32px 16px;
+    .sidebar {
+      position: fixed; top: 53px; left: 0;
+      width: 220px; height: calc(100vh - 53px);
+      background: var(--nav-bg); border-right: 1px solid var(--input-border);
+      display: flex; flex-direction: column; z-index: 50; overflow-y: auto;
     }
-    .login-card {
-      background: #2c1f0e;
-      border: 1px solid #4a3520;
-      border-radius: 20px;
-      padding: 40px;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
+    .menu-item {
+      width:100%; text-align:left; background:none; border:none;
+      padding:13px 20px; font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+      color:var(--ink); cursor:pointer; transition:background 0.15s;
+      display:flex; align-items:center; gap:10px;
+      border-left: 3px solid transparent;
     }
-    .login-card h1 {
-      font-family: 'Fraunces', serif;
-      font-size: 28px;
-      color: var(--clay);
-      margin-bottom: 8px;
+    .menu-item:hover { background: var(--sand); }
+    .menu-item.active { color:var(--clay); background:var(--sand); border-left-color:var(--clay); }
+    .menu-label {
+      padding: 12px 20px 4px; font-size:10px; font-weight:800;
+      color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.08em;
     }
-    .login-card p { color: #8a7060; font-size: 14px; margin-bottom: 28px; }
-    .login-card input {
-      background: #1a1208;
-      border-color: #4a3520;
-      color: var(--cream);
-      margin-bottom: 12px;
-    }
-    .login-card input:focus { border-color: var(--clay); background: #221508; }
+    .menu-divider { height:1px; background:var(--input-border); margin:6px 12px; }
 
-    /* DASHBOARD */
-    .dash-wrap { padding: 32px; max-width: 1100px; margin: 0 auto; }
+    .main-content { margin-left:220px; padding:24px; }
+    @media(max-width:700px) {
+      .sidebar { left:-220px; transition:left 0.3s; }
+      .sidebar.open { left:0; }
+      .main-content { margin-left:0; }
+      #btnMobMenu { display:flex !important; }
+    }
+
+    .mob-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:49; }
 
     .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:8px;
     }
+    @media(min-width:500px){ .stats-grid { grid-template-columns:repeat(4,1fr); } }
     .stat-card {
-      background: #2c1f0e;
-      border: 1px solid #4a3520;
-      border-radius: 14px;
-      padding: 20px;
-      text-align: center;
+      background:var(--card-bg); border:1px solid var(--input-border);
+      border-radius:14px; padding:20px; text-align:center;
     }
-    .stat-card .stat-num {
-      font-family: 'Fraunces', serif;
-      font-size: 36px;
-      color: var(--clay);
-      font-weight: 700;
-    }
-    .stat-card .stat-label { font-size: 13px; color: #8a7060; margin-top: 4px; }
+    .stat-num { font-family:'Fraunces',serif; font-size:38px; color:var(--clay); font-weight:700; line-height:1; }
+    .stat-label { font-size:12px; color:var(--ink-soft); margin-top:6px; font-weight:700; }
 
-    .panel {
-      background: #2c1f0e;
-      border: 1px solid #4a3520;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-    .panel h2 {
-      font-family: 'Fraunces', serif;
-      color: var(--clay);
-      font-size: 20px;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #4a3520;
+    .section-header {
+      font-family:'Fraunces',serif; font-size:22px; color:var(--clay);
+      margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--input-border);
     }
 
-    /* Generar placas */
-    .gen-form { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-    .gen-form .input-group { margin: 0; }
-    .gen-form input {
-      background: #1a1208;
-      border-color: #4a3520;
-      color: var(--cream);
-      width: 180px;
-    }
-    .gen-form input:focus { border-color: var(--clay); }
-    .gen-form label { color: #8a7060; }
-
-    /* Tabla placas */
-    .tabla { width: 100%; border-collapse: collapse; }
+    .tabla { width:100%; border-collapse:collapse; }
     .tabla th {
-      text-align: left;
-      padding: 10px 12px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #8a7060;
-      border-bottom: 1px solid #4a3520;
+      text-align:left; padding:10px 12px; font-size:11px;
+      text-transform:uppercase; letter-spacing:0.08em;
+      color:var(--ink-soft); border-bottom:1px solid var(--input-border);
     }
-    .tabla td {
-      padding: 12px;
-      color: var(--cream);
-      border-bottom: 1px solid #2a1a08;
-      font-size: 14px;
-    }
-    .tabla tr:hover td { background: #3a2a18; }
+    .tabla td { padding:12px; color:var(--ink); border-bottom:1px solid var(--input-border); font-size:14px; }
+    .tabla tr:hover td { background:var(--sand); }
+    .code-badge { font-family:monospace; font-size:15px; font-weight:700; letter-spacing:2px; color:var(--clay); }
 
-    .code-badge {
-      font-family: monospace;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--clay);
-    }
-
-    /* Clientes */
     .cliente-row {
-      padding: 14px;
-      border-radius: 10px;
-      background: #1a1208;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+      padding:14px; border-radius:12px; background:var(--sand); margin-bottom:10px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap; border:1px solid var(--input-border);
     }
-    .cliente-info { font-size: 14px; color: var(--cream); }
-    .cliente-info strong { color: var(--clay); }
 
-    .alert-admin {
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      margin: 12px 0;
-      display: none;
+    .theme-options { display:flex; gap:10px; margin-top:12px; }
+    .theme-btn {
+      flex:1; padding:12px 8px; border-radius:12px;
+      border:2px solid var(--input-border); background:var(--card-bg);
+      cursor:pointer; text-align:center; font-family:'Nunito',sans-serif;
+      font-size:12px; font-weight:700; color:var(--ink-soft); transition:all 0.2s;
     }
-    .alert-admin.show { display: block; }
-    .alert-admin.ok  { background: #1a3a1a; color: #6fcf6f; }
-    .alert-admin.err { background: #3a1a1a; color: #ef8080; }
+    .theme-btn.active { border-color:var(--clay); color:var(--clay); background:var(--sand); }
+
+    .config-section {
+      background:var(--card-bg); border-radius:14px; padding:20px;
+      margin-bottom:16px; border:1px solid var(--input-border);
+    }
+    .config-section h3 {
+      font-family:'Fraunces',serif; font-size:16px; color:var(--clay);
+      margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--input-border);
+    }
+
+    .alert-admin { padding:12px 16px; border-radius:8px; font-weight:600; font-size:14px; margin:12px 0; display:none; }
+    .alert-admin.show { display:block; }
+    .alert-admin.ok  { background:#1a3a1a; color:#6fcf6f; }
+    .alert-admin.err { background:#3a1a1a; color:#ef8080; }
+    @media(prefers-color-scheme:light){
+      .alert-admin.ok  { background:#e8f5e8; color:#2e7d32; }
+      .alert-admin.err { background:#fdecea; color:#c62828; }
+    }
+    [data-theme="light"] .alert-admin.ok  { background:#e8f5e8; color:#2e7d32; }
+    [data-theme="light"] .alert-admin.err { background:#fdecea; color:#c62828; }
+    [data-theme="dark"]  .alert-admin.ok  { background:#1a3a1a; color:#6fcf6f; }
+    [data-theme="dark"]  .alert-admin.err { background:#3a1a1a; color:#ef8080; }
+
+    .login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:32px 16px; }
+    .login-card {
+      background:var(--card-bg); border:1px solid var(--input-border);
+      border-radius:20px; padding:40px; width:100%; max-width:380px;
+      text-align:center; box-shadow:var(--shadow-lg);
+    }
+    .login-card h1 { font-family:'Fraunces',serif; font-size:28px; color:var(--clay); margin-bottom:8px; }
+    .login-card p  { color:var(--ink-soft); font-size:14px; margin-bottom:28px; }
+
+    .gen-form { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+    .gen-form .input-group { margin:0; }
+    .ham-line { width:22px; height:2px; background:var(--ink); border-radius:2px; display:block; }
   </style>
 </head>
 <body>
 
   <nav class="admin-nav">
-    <div class="logo">Ubi<span>Pet</span> 🐾 <small style="font-size:13px; color:#8a7060;">Admin</small></div>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span id="rolBadge" style="font-size:13px; font-weight:800;"></span>
-      <button class="btn btn-ghost" id="btnLogout" style="display:none; font-size:13px; padding:8px 16px;">
-        Salir
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button id="btnMobMenu" style="background:none;border:none;cursor:pointer;padding:6px;display:none;flex-direction:column;gap:5px;">
+        <span class="ham-line"></span><span class="ham-line"></span><span class="ham-line"></span>
       </button>
+      <div class="admin-logo">Ubi<span>Pet</span> 🐾 <small style="font-size:11px;color:var(--ink-soft);">Admin</small></div>
     </div>
+    <span id="rolBadge" style="font-size:12px;font-weight:800;"></span>
   </nav>
+
+  <div class="mob-overlay" id="mobOverlay" onclick="cerrarMob()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div style="padding:16px 20px 8px;">
+      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;" id="sidebarEmail"></div>
+    </div>
+    <div class="menu-label">Principal</div>
+    <button class="menu-item active" id="mi-dashboard" onclick="ir('dashboard')">📊 Dashboard</button>
+    <div class="menu-label">Placas</div>
+    <button class="menu-item" id="mi-activas"      onclick="ir('activas')">✅ Activas</button>
+    <button class="menu-item" id="mi-disponibles"  onclick="ir('disponibles')">⏳ Disponibles</button>
+    <button class="menu-item solo-superadmin" id="mi-crear" onclick="ir('crear')">⚡ Crear placas</button>
+    <div class="menu-label">Gestión</div>
+    <button class="menu-item" id="mi-mascotas"     onclick="ir('mascotas')">🐾 Mascotas</button>
+    <button class="menu-item solo-superadmin" id="mi-usuarios" onclick="ir('usuarios')">👥 Usuarios</button>
+    <div class="menu-label solo-superadmin">Configuración</div>
+    <button class="menu-item solo-superadmin" id="mi-enlaces" onclick="ir('enlaces')">🔗 Enlaces</button>
+    <button class="menu-item" id="mi-tema"         onclick="ir('tema')">🎨 Tema</button>
+    <div style="flex:1;"></div>
+    <div class="menu-divider"></div>
+    <button class="menu-item" id="btnLogout" style="color:var(--coral);margin-bottom:8px;">🚪 Cerrar sesión</button>
+  </div>
 
   <!-- LOGIN -->
   <div class="login-wrap" id="loginWrap">
     <div class="login-card">
       <h1>👑 Admin</h1>
-      <p>Acceso restringido</p>
-      <div class="input-group">
-        <label style="color:#8a7060;">Email</label>
-        <input type="email" id="adminEmail" placeholder="admin@ubipet.cl">
-      </div>
-      <div class="input-group">
-        <label style="color:#8a7060;">Contraseña</label>
-        <input type="password" id="adminPass" placeholder="••••••••">
-      </div>
+      <p>Acceso restringido a UbiPet</p>
+      <div class="input-group"><label>Email</label><input type="email" id="adminEmail" placeholder="tu@email.com"></div>
+      <div class="input-group"><label>Contraseña</label><input type="password" id="adminPass" placeholder="••••••••"></div>
       <div id="loginAlert" class="alert-admin"></div>
-      <button class="btn btn-primary btn-full" id="btnAdminLogin" style="margin-top:8px;">
-        🔐 Acceder
-      </button>
+      <button class="btn btn-primary btn-full" id="btnAdminLogin" style="margin-top:8px;">🔐 Acceder</button>
     </div>
   </div>
 
   <!-- DASHBOARD -->
-  <div class="dash-wrap" id="dashWrap" style="display:none;">
+  <div id="dashWrap" style="display:none;">
+  <div class="main-content">
 
-    <!-- Stats -->
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card">
-        <div class="stat-num" id="statTotal">—</div>
-        <div class="stat-label">Placas totales</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statActivas">—</div>
-        <div class="stat-label">Placas activas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statDisponibles">—</div>
-        <div class="stat-label">Disponibles</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statPerdidas">—</div>
-        <div class="stat-label">Mascotas perdidas ahora</div>
-      </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Placas totales</div></div>
+      <div class="stat-card"><div class="stat-num" id="statActivas">—</div><div class="stat-label">Activas</div></div>
+      <div class="stat-card"><div class="stat-num" id="statDisponibles">—</div><div class="stat-label">Disponibles</div></div>
+      <div class="stat-card"><div class="stat-num" id="statPerdidas">—</div><div class="stat-label">Perdidas 🚨</div></div>
     </div>
 
-    <!-- Generar placas -->
-    <div class="panel solo-superadmin">
-      <h2>🏷️ Generar placas nuevas</h2>
-      <div class="gen-form">
-        <div class="input-group">
-          <label>Prefijo</label>
-          <input type="text" id="prefijo" value="UBI" placeholder="UBI" style="width:100px;">
-        </div>
-        <div class="input-group">
-          <label>Cantidad</label>
-          <input type="number" id="hasta" value="10" min="1" max="100" style="width:100px;">
-        </div>
-        <button class="btn btn-primary" id="btnGenerar">⚡ Generar</button>
-        <button class="btn btn-ghost" onclick="window.location.href='admin-qr.html'">
-          🖨️ Ver QRs
-        </button>
-      </div>
-      <p style="color:#8a7060; font-size:13px; margin-top:10px;">
-        Los códigos se generan aleatoriamente. Ejemplo: <strong style="color:var(--clay);">UBI-K7X2M9</strong>
+    <div id="sec-dashboard" class="sec" style="margin-top:24px;">
+      <p style="color:var(--ink-soft);font-size:14px;text-align:center;padding:32px 0;">
+        Seleccioná una sección del menú para comenzar.
       </p>
-      <div id="alertGenerar" class="alert-admin"></div>
     </div>
 
-    <!-- Lista placas -->
-    <div class="panel">
-      <h2>📋 Placas</h2>
-      <div style="margin-bottom:16px;">
-        <input type="text" id="buscarPlaca" placeholder="🔍 Buscar por código o mascota..." 
-          style="max-width:320px; background:#1a1208; border-color:#4a3520; color:var(--cream);">
-      </div>
-      <div id="placasLista">
-        <div class="spinner"></div>
+    <div id="sec-activas" class="sec" style="display:none;">
+      <div class="section-header">✅ Placas activas</div>
+      <input type="text" id="buscarActivas" placeholder="🔍 Buscar..." style="max-width:320px;margin-bottom:16px;">
+      <div style="overflow-x:auto;"><div id="listaActivas"><div class="spinner"></div></div></div>
+    </div>
+
+    <div id="sec-disponibles" class="sec" style="display:none;">
+      <div class="section-header">⏳ Placas disponibles</div>
+      <input type="text" id="buscarDisponibles" placeholder="🔍 Buscar..." style="max-width:320px;margin-bottom:16px;">
+      <div style="overflow-x:auto;"><div id="listaDisponibles"><div class="spinner"></div></div></div>
+    </div>
+
+    <div id="sec-crear" class="sec solo-superadmin" style="display:none;">
+      <div class="section-header">⚡ Crear placas nuevas</div>
+      <div class="config-section">
+        <div class="gen-form">
+          <div class="input-group"><label>Prefijo</label><input type="text" id="prefijo" value="UBI" style="width:100px;"></div>
+          <div class="input-group"><label>Cantidad</label><input type="number" id="hasta" value="10" min="1" max="100" style="width:100px;"></div>
+          <button class="btn btn-primary" id="btnGenerar">⚡ Generar</button>
+          <button class="btn btn-ghost" onclick="window.location.href='admin-qr.html'">🖨️ Ver QRs</button>
+        </div>
+        <p style="color:var(--ink-soft);font-size:13px;margin-top:12px;">Ejemplo: <strong style="color:var(--clay);">UBI-K7X2M9</strong></p>
+        <div id="alertGenerar" class="alert-admin"></div>
       </div>
     </div>
 
-    <!-- Clientes -->
-    <div class="panel solo-superadmin">
-      <h2>🐾 Mascotas registradas</h2>
-      <div id="clientesLista">
-        <div class="spinner"></div>
-      </div>
+    <div id="sec-mascotas" class="sec" style="display:none;">
+      <div class="section-header">🐾 Mascotas registradas</div>
+      <div id="clientesLista"><div class="spinner"></div></div>
     </div>
 
-    <!-- Gestión de usuarios -->
-    <div class="panel solo-superadmin">
-      <h2>👥 Usuarios admin</h2>
+    <div id="sec-usuarios" class="sec solo-superadmin" style="display:none;">
+      <div class="section-header">👥 Usuarios admin</div>
       <div id="alertUsuarios" class="alert-admin"></div>
       <div id="usuariosLista" style="margin-bottom:20px;"></div>
-      <div style="border-top:1px solid #4a3520; padding-top:20px;">
-        <p style="color:#8a7060; font-size:13px; margin-bottom:14px; font-weight:700;">Agregar nuevo usuario</p>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
-          <div class="input-group" style="margin:0; flex:1; min-width:200px;">
-            <label style="color:#8a7060;">Email</label>
-            <input id="nuevoEmail" type="email" placeholder="email@ejemplo.com"
-              style="background:#1a1208; border-color:#4a3520; color:var(--cream);">
-          </div>
-          <div class="input-group" style="margin:0; min-width:140px;">
-            <label style="color:#8a7060;">Nombre</label>
-            <input id="nuevoNombre" type="text" placeholder="Nombre"
-              style="background:#1a1208; border-color:#4a3520; color:var(--cream);">
-          </div>
+      <div class="config-section">
+        <h3>➕ Agregar usuario</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="input-group" style="margin:0;flex:1;min-width:180px;"><label>Email</label><input id="nuevoEmail" type="email" placeholder="email@ejemplo.com"></div>
+          <div class="input-group" style="margin:0;min-width:130px;"><label>Nombre</label><input id="nuevoNombre" type="text" placeholder="Nombre"></div>
           <div class="input-group" style="margin:0;">
-            <label style="color:#8a7060;">Rol</label>
-            <select id="nuevoRol" style="background:#1a1208; border-color:#4a3520; color:var(--cream); width:140px;">
+            <label>Rol</label>
+            <select id="nuevoRol">
               <option value="admin">🔧 Admin</option>
               <option value="superadmin">👑 Super Admin</option>
             </select>
           </div>
-          <button id="btnAgregarUsuario" class="btn btn-primary" style="margin-bottom:0;">
-            ➕ Agregar
-          </button>
+          <button id="btnAgregarUsuario" class="btn btn-primary">➕ Agregar</button>
         </div>
       </div>
     </div>
 
-    <!-- Configuración -->
-    <div class="panel solo-superadmin">
-      <h2>⚙️ Configuración del sitio</h2>
-      <div id="alertConfig" class="alert-admin"></div>
-      <div style="display:flex; flex-direction:column; gap:16px; margin-top:16px;">
-        <div>
-          <label style="color:#c9a882; font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-            Instagram
-          </label>
-          <input id="cfgInstagram" type="text" placeholder="https://instagram.com/usuario"
-            style="width:100%; background:#2a1a0e; border:1px solid #4a3520; color:#f0dcc8; padding:10px 14px; border-radius:8px; font-family:'Nunito',sans-serif; font-size:14px;">
+    <div id="sec-enlaces" class="sec solo-superadmin" style="display:none;">
+      <div class="section-header">🔗 Enlaces del sitio</div>
+      <div class="config-section">
+        <div id="alertConfig" class="alert-admin"></div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="input-group" style="margin:0;"><label>Instagram</label><input id="cfgInstagram" type="text" placeholder="https://instagram.com/usuario"></div>
+          <div class="input-group" style="margin:0;"><label>Sitio web / App</label><input id="cfgWeb" type="text" placeholder="https://app.ubipet.shop"></div>
+          <button id="btnGuardarConfig" class="btn btn-primary" style="align-self:flex-start;">💾 Guardar cambios</button>
         </div>
-        <div>
-          <label style="color:#c9a882; font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-            Sitio web / App
-          </label>
-          <input id="cfgWeb" type="text" placeholder="https://app.ubipet.shop"
-            style="width:100%; background:#2a1a0e; border:1px solid #4a3520; color:#f0dcc8; padding:10px 14px; border-radius:8px; font-family:'Nunito',sans-serif; font-size:14px;">
-        </div>
-        <button id="btnGuardarConfig" class="btn btn-primary" style="align-self:flex-start;">
-          💾 Guardar configuración
-        </button>
       </div>
     </div>
 
+    <div id="sec-tema" class="sec" style="display:none;">
+      <div class="section-header">🎨 Tema</div>
+      <div class="config-section">
+        <h3>Apariencia del panel</h3>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">Se guarda en este dispositivo.</p>
+        <div class="theme-options">
+          <button class="theme-btn" id="themeLight" onclick="setTema('light')">☀️<br>Claro</button>
+          <button class="theme-btn" id="themeDark"  onclick="setTema('dark')">🌙<br>Oscuro</button>
+          <button class="theme-btn" id="themeAuto"  onclick="setTema('auto')">🔄<br>Automático</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
   </div>
 
   <script type="module">
@@ -324,356 +273,290 @@
 
     let rolActual = null
 
-    // ─── helpers ──────────────────────────────────
-    function showAlert(id, msg, type = 'err') {
+    // ─── TEMA ─────────────────────────────────────
+    function aplicarTema(t) {
+      document.documentElement.removeAttribute('data-theme')
+      if (t === 'light') document.documentElement.setAttribute('data-theme','light')
+      if (t === 'dark')  document.documentElement.setAttribute('data-theme','dark')
+      ;['Light','Dark','Auto'].forEach(x => {
+        const b = document.getElementById('theme'+x)
+        if (b) b.classList.toggle('active', t === x.toLowerCase())
+      })
+    }
+    window.setTema = t => { localStorage.setItem('ubipet-admin-tema',t); aplicarTema(t) }
+    aplicarTema(localStorage.getItem('ubipet-admin-tema') || 'auto')
+
+    function showAlert(id, msg, type='err') {
       const el = document.getElementById(id)
+      if (!el) return
       el.textContent = msg
       el.className = `alert-admin ${type} show`
     }
 
+    // ─── MOBILE ───────────────────────────────────
+    window.cerrarMob = () => {
+      document.getElementById('sidebar').classList.remove('open')
+      document.getElementById('mobOverlay').style.display = 'none'
+    }
+    document.getElementById('btnMobMenu').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('open')
+      document.getElementById('mobOverlay').style.display = 'block'
+    })
+
+    // ─── NAVEGACIÓN ───────────────────────────────
+    const cache = {}
+    window.ir = async nombre => {
+      cerrarMob()
+      document.querySelectorAll('.sec').forEach(s => s.style.display = 'none')
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'))
+      const sec = document.getElementById('sec-'+nombre)
+      const mi  = document.getElementById('mi-'+nombre)
+      if (sec) sec.style.display = 'block'
+      if (mi)  mi.classList.add('active')
+      if (!cache[nombre]) {
+        cache[nombre] = true
+        if (nombre === 'activas')     await cargarPlacas('activa')
+        if (nombre === 'disponibles') await cargarPlacas('disponible')
+        if (nombre === 'mascotas')    await cargarClientes()
+        if (nombre === 'usuarios')    await cargarUsuarios()
+        if (nombre === 'enlaces')     await cargarConfig()
+      }
+    }
+
+    // ─── ROL ──────────────────────────────────────
     function aplicarRol(rol) {
       rolActual = rol
-      // Elementos solo para superadmin
       document.querySelectorAll('.solo-superadmin').forEach(el => {
         el.style.display = rol === 'superadmin' ? '' : 'none'
       })
-      // Badge de rol en nav
-      const badge = document.getElementById('rolBadge')
-      if (badge) {
-        badge.textContent = rol === 'superadmin' ? '👑 Super Admin' : '🔧 Admin'
-        badge.style.color = rol === 'superadmin' ? 'var(--clay)' : 'var(--sage)'
-      }
+      const b = document.getElementById('rolBadge')
+      if (b) { b.textContent = rol === 'superadmin' ? '👑 Super Admin' : '🔧 Admin'; b.style.color = rol === 'superadmin' ? 'var(--clay)' : 'var(--sage)' }
     }
 
     async function mostrarDashboard(email) {
-      // Verificar rol en tabla admins
-      const { data, error } = await supabase
-        .from('admins')
-        .select('rol, nombre, activo')
-        .eq('email', email)
-        .single()
-
+      const { data, error } = await supabase.from('admins').select('rol,activo').eq('email',email).single()
       if (error || !data || !data.activo) {
         await supabase.auth.signOut()
-        return showAlert('loginAlert', '❌ No tenés permisos de administrador')
+        return showAlert('loginAlert','❌ No tenés permisos de administrador')
       }
-
       document.getElementById('loginWrap').style.display = 'none'
       document.getElementById('dashWrap').style.display  = 'block'
-      document.getElementById('btnLogout').style.display = 'block'
+      document.getElementById('sidebarEmail').textContent = email
       aplicarRol(data.rol)
-      await cargarDashboard()
+      await cargarStats()
     }
 
-    // ─── verificar sesión activa ──────────────────
+    // ─── SESIÓN ───────────────────────────────────
     const { data: { session } } = await supabase.auth.getSession()
     if (session) await mostrarDashboard(session.user.email)
 
-    // ─── LOGIN ────────────────────────────────────
     document.getElementById('btnAdminLogin').addEventListener('click', async () => {
       const email = document.getElementById('adminEmail').value.trim()
       const pass  = document.getElementById('adminPass').value
       const btn   = document.getElementById('btnAdminLogin')
-
-      if (!email || !pass) return showAlert('loginAlert', '❌ Completá todos los campos')
-
-      btn.disabled = true
-      btn.textContent = '⏳ Verificando...'
-
+      if (!email || !pass) return showAlert('loginAlert','❌ Completá todos los campos')
+      btn.disabled = true; btn.textContent = '⏳ Verificando...'
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass })
-
-      btn.disabled = false
-      btn.textContent = '🔐 Acceder'
-
-      if (error) return showAlert('loginAlert', '❌ Credenciales incorrectas')
-
+      btn.disabled = false; btn.textContent = '🔐 Acceder'
+      if (error) return showAlert('loginAlert','❌ Credenciales incorrectas')
       await mostrarDashboard(data.user.email)
     })
-
     document.getElementById('adminPass').addEventListener('keypress', e => {
       if (e.key === 'Enter') document.getElementById('btnAdminLogin').click()
     })
-
     document.getElementById('btnLogout').addEventListener('click', async () => {
       await supabase.auth.signOut()
-      rolActual = null
       document.getElementById('loginWrap').style.display = 'flex'
       document.getElementById('dashWrap').style.display  = 'none'
-      document.getElementById('btnLogout').style.display = 'none'
       document.getElementById('adminEmail').value = ''
       document.getElementById('adminPass').value  = ''
     })
 
-    // ─── dashboard ────────────────────────────────
-    async function cargarDashboard() {
-      await Promise.all([cargarStats(), cargarPlacas(), cargarClientes(), cargarConfig(), cargarUsuarios()])
-    }
-
+    // ─── STATS ────────────────────────────────────
     async function cargarStats() {
       const [{ data: placas }, { data: perdidas }] = await Promise.all([
         supabase.from('placas').select('estado'),
-        supabase.from('perfiles').select('id').eq('esta_perdida', true)
+        supabase.from('perfiles').select('id').eq('esta_perdida',true)
       ])
-
-      const total      = placas?.length || 0
-      const activas    = placas?.filter(p => p.estado === 'activa').length || 0
-      const disponibles= total - activas
-
-      document.getElementById('statTotal').textContent      = total
-      document.getElementById('statActivas').textContent    = activas
-      document.getElementById('statDisponibles').textContent= disponibles
-      document.getElementById('statPerdidas').textContent   = perdidas?.length || 0
+      const total   = placas?.length || 0
+      const activas = placas?.filter(p => p.estado === 'activa').length || 0
+      document.getElementById('statTotal').textContent       = total
+      document.getElementById('statActivas').textContent     = activas
+      document.getElementById('statDisponibles').textContent = total - activas
+      document.getElementById('statPerdidas').textContent    = perdidas?.length || 0
     }
 
-    let todasLasPlacas = []
-
-    async function cargarPlacas() {
+    // ─── PLACAS ───────────────────────────────────
+    async function cargarPlacas(estado) {
+      const listaId  = estado === 'activa' ? 'listaActivas'    : 'listaDisponibles'
+      const buscarId = estado === 'activa' ? 'buscarActivas'   : 'buscarDisponibles'
       const { data, error } = await supabase
-        .from('placas')
-        .select('*, perfiles(nombre_mascota, nombre_dueno, telefono)')
-        .order('codigo')
-
+        .from('placas').select('*, perfiles(nombre_mascota,nombre_dueno)').eq('estado',estado).order('codigo')
       if (error || !data?.length) {
-        document.getElementById('placasLista').innerHTML =
-          '<p style="color:#8a7060;">Sin placas aún. Generá la primera lote.</p>'
+        document.getElementById(listaId).innerHTML = `<p style="color:var(--ink-soft);padding:20px 0;">Sin placas aún.</p>`
         return
       }
-
-      todasLasPlacas = data
-      renderPlacas(data)
-
-      document.getElementById('buscarPlaca').addEventListener('input', (e) => {
+      let todas = data
+      renderTabla(listaId, todas, estado)
+      document.getElementById(buscarId).addEventListener('input', e => {
         const q = e.target.value.toLowerCase()
-        const filtradas = todasLasPlacas.filter(p => {
-          const perfil = p.perfiles?.[0] || p.perfiles || null
+        renderTabla(listaId, todas.filter(p => {
+          const pf = p.perfiles?.[0] || p.perfiles || null
           return p.codigo.toLowerCase().includes(q) ||
-                 (perfil?.nombre_mascota || '').toLowerCase().includes(q) ||
-                 (perfil?.nombre_dueno || '').toLowerCase().includes(q)
-        })
-        renderPlacas(filtradas)
+                 (pf?.nombre_mascota||'').toLowerCase().includes(q) ||
+                 (pf?.nombre_dueno||'').toLowerCase().includes(q)
+        }), estado)
       })
     }
 
-    function renderPlacas(data) {
-      document.getElementById('placasLista').innerHTML = `
-        <table class="tabla">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Estado</th>
-              <th>Mascota</th>
-              <th>Dueño</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map(p => {
-              const perfil = p.perfiles?.[0] || p.perfiles || null
-              const qrUrl  = `${window.location.origin}/rescate.html?id=${p.id}`
-              return `
-                <tr>
-                  <td><span class="code-badge">${p.codigo}</span></td>
-                  <td>
-                    <span class="badge ${p.estado === 'activa' ? 'badge-ok' : 'badge-warn'}">
-                      ${p.estado === 'activa' ? '✅ Activa' : '⏳ Disponible'}
-                    </span>
-                  </td>
-                  <td style="color:#c8b8a0;">${perfil?.nombre_mascota || '—'}</td>
-                  <td style="color:#c8b8a0;">${perfil?.nombre_dueno || '—'}</td>
-                  <td style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <a href="${qrUrl}" target="_blank" style="color:var(--clay); font-size:12px; padding:4px 8px; border:1px solid #4a3520; border-radius:6px; text-decoration:none;">🔗 Ver</a>
-                    ${p.estado === 'disponible' ? `<button onclick="eliminarPlaca('${p.id}')" style="background:#3a1a1a; color:#ef8080; border:1px solid #5a2a2a; border-radius:6px; padding:4px 8px; font-size:12px; cursor:pointer;">🗑️</button>` : ''}
-                  </td>
-                </tr>
-              `
-            }).join('')}
-          </tbody>
-        </table>
-      `
+    function renderTabla(listaId, data, estado) {
+      document.getElementById(listaId).innerHTML = `
+        <table class="tabla"><thead><tr>
+          <th>Código</th><th>Mascota</th><th>Dueño</th><th>Acciones</th>
+        </tr></thead><tbody>
+        ${data.map(p => {
+          const pf = p.perfiles?.[0] || p.perfiles || null
+          const qr = window.location.origin+'/rescate.html?id='+p.id
+          return `<tr>
+            <td><span class="code-badge">${p.codigo}</span></td>
+            <td>${pf?.nombre_mascota||'—'}</td>
+            <td>${pf?.nombre_dueno||'—'}</td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+              <a href="${qr}" target="_blank" style="color:var(--clay);font-size:12px;padding:4px 8px;border:1px solid var(--input-border);border-radius:6px;text-decoration:none;">🔗 Ver</a>
+              ${estado==='disponible'?`<button onclick="eliminarPlaca('${p.id}')" style="background:var(--sand);color:var(--coral);border:1px solid var(--input-border);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;">🗑️</button>`:''}
+            </td>
+          </tr>`
+        }).join('')}
+        </tbody></table>`
     }
 
-    async function eliminarPlaca(id) {
-      if (!confirm('¿Eliminar esta placa? Solo se pueden eliminar placas disponibles.')) return
-      const { error } = await supabase.from('placas').delete().eq('id', id)
-      if (error) return showAlert('alertGenerar', '❌ Error: ' + error.message)
-      showAlert('alertGenerar', '✅ Placa eliminada', 'ok')
-      await cargarPlacas()
+    window.eliminarPlaca = async id => {
+      if (!confirm('¿Eliminar esta placa?')) return
+      const { error } = await supabase.from('placas').delete().eq('id',id)
+      if (error) return alert('Error: '+error.message)
+      cache['disponibles'] = false
+      await cargarPlacas('disponible')
       await cargarStats()
     }
 
-    async function cargarClientes() {
-      const { data, error } = await supabase
-        .from('perfiles')
-        .select('*, placas(codigo)')
-        .order('created_at', { ascending: false })
+    // ─── GENERAR PLACAS ───────────────────────────
+    function codigoAleatorio(p) {
+      const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+      let s = ''
+      for (let i=0;i<6;i++) s += c[Math.floor(Math.random()*c.length)]
+      return `${p}-${s}`
+    }
+    document.getElementById('btnGenerar').addEventListener('click', async () => {
+      const prefijo  = document.getElementById('prefijo').value.trim().toUpperCase()||'UBI'
+      const cantidad = parseInt(document.getElementById('hasta').value)
+      if (isNaN(cantidad)||cantidad<1) return showAlert('alertGenerar','❌ Cantidad inválida')
+      if (cantidad>100) return showAlert('alertGenerar','❌ Máximo 100')
+      const btn = document.getElementById('btnGenerar')
+      btn.disabled=true; btn.textContent='⏳ Generando...'
+      const codigos = new Set()
+      while (codigos.size<cantidad) codigos.add(codigoAleatorio(prefijo))
+      const { error } = await supabase.from('placas').insert(Array.from(codigos).map(c=>({codigo:c})))
+      btn.disabled=false; btn.textContent='⚡ Generar'
+      if (error) return showAlert('alertGenerar','❌ '+error.message)
+      showAlert('alertGenerar',`✅ ${cantidad} placas generadas`,'ok')
+      cache['disponibles']=false
+      await cargarStats()
+    })
 
-      if (error || !data?.length) {
-        document.getElementById('clientesLista').innerHTML =
-          '<p style="color:#8a7060;">Sin mascotas registradas aún.</p>'
+    // ─── MASCOTAS ─────────────────────────────────
+    async function cargarClientes() {
+      const { data, error } = await supabase.from('perfiles').select('*,placas(codigo)').order('created_at',{ascending:false})
+      if (error||!data?.length) {
+        document.getElementById('clientesLista').innerHTML='<p style="color:var(--ink-soft);padding:20px 0;">Sin mascotas aún.</p>'
         return
       }
-
-      document.getElementById('clientesLista').innerHTML = data.map(c => `
+      document.getElementById('clientesLista').innerHTML = data.map(c=>`
         <div class="cliente-row">
-          <div class="cliente-info">
-            <strong>${c.nombre_mascota || '—'}</strong>
-            ${c.esta_perdida ? '<span style="color:#ef8080; font-weight:800;"> 🚨 PERDIDA</span>' : ''}
-            <br>
-            👤 ${c.nombre_dueno || '—'} &nbsp;|&nbsp; 📱 ${c.telefono || '—'}
-            <br>
-            <span style="color:#8a7060; font-size:12px;">
-              Placa: ${c.placas?.codigo || 'Sin placa'} &nbsp;|&nbsp;
-              ${new Date(c.created_at).toLocaleDateString('es-CL')}
-            </span>
+          <div>
+            <strong style="color:var(--clay);">${c.nombre_mascota||'—'}</strong>
+            ${c.esta_perdida?'<span style="color:var(--coral);font-weight:800;margin-left:6px;">🚨 PERDIDA</span>':''}
+            <br><span style="font-size:14px;color:var(--ink);">👤 ${c.nombre_dueno||'—'} | 📱 ${c.telefono||'—'}</span>
+            <br><span style="font-size:12px;color:var(--ink-soft);">Placa: ${c.placas?.codigo||'Sin placa'} | ${new Date(c.created_at).toLocaleDateString('es-CL')}</span>
           </div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            ${c.telefono ? `
-              <a href="https://wa.me/${c.telefono.replace(/[^0-9]/g,'')}"
-                 target="_blank" class="btn btn-success" style="font-size:12px; padding:6px 12px;">
-                WhatsApp
-              </a>` : ''}
-            ${c.esta_perdida ? `
-              <button onclick="marcarEncontrada('${c.id}')"
-                style="background:#1a3a1a; color:#6fcf6f; border:1px solid #2a5a2a; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700; cursor:pointer;">
-                ✅ Marcar encontrada
-              </button>` : ''}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            ${c.telefono?`<a href="https://wa.me/${c.telefono.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-success" style="font-size:12px;padding:6px 12px;">WhatsApp</a>`:''}
+            ${c.esta_perdida?`<button onclick="marcarEncontrada('${c.id}')" style="background:var(--sand);color:var(--sage);border:1px solid var(--input-border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">✅ Encontrada</button>`:''}
           </div>
-        </div>
-      `).join('')
+        </div>`).join('')
     }
 
-    // ─── USUARIOS ADMIN ───────────────────────────
+    window.marcarEncontrada = async id => {
+      await supabase.from('perfiles').update({esta_perdida:false}).eq('id',id)
+      cache['mascotas']=false
+      await cargarClientes()
+      await cargarStats()
+    }
+
+    // ─── USUARIOS ─────────────────────────────────
     async function cargarUsuarios() {
       const { data } = await supabase.from('admins').select('*').order('created_at')
       if (!data?.length) return
-      document.getElementById('usuariosLista').innerHTML = data.map(u => `
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:#1a1208; border-radius:10px; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+      document.getElementById('usuariosLista').innerHTML = data.map(u=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--sand);border-radius:12px;margin-bottom:8px;flex-wrap:wrap;gap:8px;border:1px solid var(--input-border);">
           <div>
-            <span style="color:var(--cream); font-weight:700;">${u.nombre || '—'}</span>
-            <span style="color:#8a7060; font-size:13px; margin-left:8px;">${u.email}</span>
-            <span style="margin-left:8px; font-size:12px; font-weight:800; color:${u.rol === 'superadmin' ? 'var(--clay)' : 'var(--sage)'};">
-              ${u.rol === 'superadmin' ? '👑 Super Admin' : '🔧 Admin'}
+            <span style="font-weight:700;color:var(--ink);">${u.nombre||'—'}</span>
+            <span style="color:var(--ink-soft);font-size:13px;margin-left:8px;">${u.email}</span>
+            <span style="margin-left:8px;font-size:12px;font-weight:800;color:${u.rol==='superadmin'?'var(--clay)':'var(--sage)'};">
+              ${u.rol==='superadmin'?'👑 Super Admin':'🔧 Admin'}
             </span>
-            ${!u.activo ? '<span style="color:#ef8080; font-size:12px; margin-left:6px;">⛔ Inactivo</span>' : ''}
+            ${!u.activo?'<span style="color:var(--coral);font-size:12px;margin-left:6px;">⛔ Inactivo</span>':''}
           </div>
-          <div style="display:flex; gap:6px;">
-            ${u.activo ? `
-              <button onclick="toggleUsuario('${u.id}', false)" style="background:#3a1a1a; color:#ef8080; border:1px solid #5a2a2a; border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;">
-                Desactivar
-              </button>` : `
-              <button onclick="toggleUsuario('${u.id}', true)" style="background:#1a3a1a; color:#6fcf6f; border:1px solid #2a5a2a; border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;">
-                Activar
-              </button>`}
+          <div style="display:flex;gap:6px;">
+            ${u.activo
+              ?`<button onclick="toggleUsuario('${u.id}',false)" style="background:var(--sand);color:var(--coral);border:1px solid var(--input-border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Desactivar</button>`
+              :`<button onclick="toggleUsuario('${u.id}',true)"  style="background:var(--sand);color:var(--sage);border:1px solid var(--input-border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Activar</button>`}
           </div>
-        </div>
-      `).join('')
+        </div>`).join('')
     }
 
     document.getElementById('btnAgregarUsuario').addEventListener('click', async () => {
       const email  = document.getElementById('nuevoEmail').value.trim()
       const nombre = document.getElementById('nuevoNombre').value.trim()
       const rol    = document.getElementById('nuevoRol').value
-
-      if (!email) return showAlert('alertUsuarios', '❌ Ingresá un email', 'err')
-
-      const { error } = await supabase.from('admins').insert({ email, nombre, rol })
-      if (error) return showAlert('alertUsuarios', '❌ Error: ' + (error.message.includes('unique') ? 'Ese email ya existe' : error.message), 'err')
-
-      document.getElementById('nuevoEmail').value = ''
-      document.getElementById('nuevoNombre').value = ''
-      showAlert('alertUsuarios', `✅ Usuario ${email} agregado como ${rol}`, 'ok')
+      if (!email) return showAlert('alertUsuarios','❌ Ingresá un email')
+      const { error } = await supabase.from('admins').insert({email,nombre,rol})
+      if (error) return showAlert('alertUsuarios','❌ '+(error.message.includes('unique')?'Ese email ya existe':error.message))
+      document.getElementById('nuevoEmail').value=''
+      document.getElementById('nuevoNombre').value=''
+      showAlert('alertUsuarios',`✅ Usuario agregado como ${rol}`,'ok')
+      cache['usuarios']=false
       await cargarUsuarios()
     })
 
-    async function toggleUsuario(id, activo) {
-      await supabase.from('admins').update({ activo }).eq('id', id)
+    window.toggleUsuario = async (id, activo) => {
+      await supabase.from('admins').update({activo}).eq('id',id)
+      cache['usuarios']=false
       await cargarUsuarios()
     }
 
-    async function marcarEncontrada(id) {
-      const { error } = await supabase
-        .from('perfiles')
-        .update({ esta_perdida: false })
-        .eq('id', id)
-      if (error) return alert('Error: ' + error.message)
-      await cargarDashboard()
-    }
-
-    // ─── GENERAR PLACAS ───────────────────────────
-    function codigoAleatorio(prefijo) {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sin O,0,I,1 para evitar confusión
-      let codigo = ''
-      for (let i = 0; i < 6; i++) {
-        codigo += chars[Math.floor(Math.random() * chars.length)]
-      }
-      return `${prefijo}-${codigo}`
-    }
-
-    document.getElementById('btnGenerar').addEventListener('click', async () => {
-      const prefijo   = document.getElementById('prefijo').value.trim().toUpperCase() || 'UBI'
-      const cantidad  = parseInt(document.getElementById('hasta').value)
-
-      if (isNaN(cantidad) || cantidad < 1) {
-        return showAlert('alertGenerar', '❌ Cantidad inválida')
-      }
-      if (cantidad > 100) {
-        return showAlert('alertGenerar', '❌ Máximo 100 placas por vez')
-      }
-
-      const btn = document.getElementById('btnGenerar')
-      btn.disabled = true
-      btn.textContent = '⏳ Generando...'
-
-      // generar códigos únicos localmente
-      const codigos = new Set()
-      while (codigos.size < cantidad) {
-        codigos.add(codigoAleatorio(prefijo))
-      }
-
-      const placas = Array.from(codigos).map(codigo => ({ codigo }))
-      const { error } = await supabase.from('placas').insert(placas)
-
-      btn.disabled = false
-      btn.textContent = '⚡ Generar'
-
-      if (error) {
-        showAlert('alertGenerar', '❌ Error: ' + error.message)
-      } else {
-        showAlert('alertGenerar', `✅ ${placas.length} placas generadas con códigos aleatorios`, 'ok')
-        await cargarDashboard()
-      }
-    })
-
-    // ─── CONFIGURACIÓN ───────────────────────────
+    // ─── CONFIG ───────────────────────────────────
     async function cargarConfig() {
       const { data } = await supabase.from('configuracion').select('*')
       if (!data) return
-      data.forEach(row => {
-        if (row.clave === 'instagram') document.getElementById('cfgInstagram').value = row.valor
-        if (row.clave === 'web')       document.getElementById('cfgWeb').value = row.valor
+      data.forEach(r => {
+        if (r.clave==='instagram') document.getElementById('cfgInstagram').value=r.valor
+        if (r.clave==='web')       document.getElementById('cfgWeb').value=r.valor
       })
     }
-
     document.getElementById('btnGuardarConfig').addEventListener('click', async () => {
       const instagram = document.getElementById('cfgInstagram').value.trim()
       const web       = document.getElementById('cfgWeb').value.trim()
       const btn       = document.getElementById('btnGuardarConfig')
-
-      btn.disabled = true
-      btn.textContent = '⏳ Guardando...'
-
+      btn.disabled=true; btn.textContent='⏳ Guardando...'
       const results = await Promise.all([
-        supabase.from('configuracion').upsert({ clave: 'instagram', valor: instagram }),
-        supabase.from('configuracion').upsert({ clave: 'web',       valor: web })
+        supabase.from('configuracion').upsert({clave:'instagram',valor:instagram}),
+        supabase.from('configuracion').upsert({clave:'web',valor:web})
       ])
-      const hasError = results.find(r => r.error)
-
-      btn.disabled = false
-      btn.textContent = '💾 Guardar configuración'
-
-      if (hasError) return showAlert('alertConfig', '❌ Error al guardar', 'err')
-      showAlert('alertConfig', '✅ Configuración guardada', 'ok')
+      btn.disabled=false; btn.textContent='💾 Guardar cambios'
+      if (results.find(r=>r.error)) return showAlert('alertConfig','❌ Error al guardar')
+      showAlert('alertConfig','✅ Guardado correctamente','ok')
     })
+
   </script>
 </body>
 </html>

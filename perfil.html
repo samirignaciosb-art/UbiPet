@@ -117,6 +117,76 @@
     }
     .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
 
+    /* Hamburger menu */
+    .ham-line {
+      width: 22px; height: 2px;
+      background: var(--ink);
+      border-radius: 2px;
+      transition: all 0.2s;
+      display: block;
+    }
+    .menu-item {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 14px 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .menu-item:hover { background: var(--sand); }
+    .menu-item.active { color: var(--clay); background: var(--sand); }
+
+    /* Selector de tema */
+    .theme-options {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .theme-btn {
+      flex: 1;
+      padding: 12px 8px;
+      border-radius: 12px;
+      border: 2px solid var(--input-border);
+      background: var(--card-bg);
+      cursor: pointer;
+      text-align: center;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      transition: all 0.2s;
+    }
+    .theme-btn.active {
+      border-color: var(--clay);
+      color: var(--clay);
+      background: var(--sand);
+    }
+
+    /* Config section */
+    .config-section {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid var(--input-border);
+    }
+    .config-section h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      color: var(--clay);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--input-border);
+    }
+
     /* Foto de perfil */
     .foto-upload-area {
       display: flex;
@@ -159,15 +229,66 @@
   <!-- NAV -->
   <nav class="nav">
     <a href="perfil.html" class="nav-logo">Ubi<span>Pet</span> 🐾</a>
-    <button class="btn btn-ghost" id="btnLogout" style="padding:8px 16px; font-size:13px;">
-      Salir
+    <button id="btnMenu" aria-label="Menú" style="
+      background:none; border:none; cursor:pointer; padding:8px;
+      display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center;
+    ">
+      <span class="ham-line"></span>
+      <span class="ham-line"></span>
+      <span class="ham-line"></span>
     </button>
   </nav>
+
+  <!-- MENÚ LATERAL -->
+  <div id="menuOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200;" onclick="cerrarMenu()"></div>
+  <div id="menuPanel" style="
+    position:fixed; top:0; right:-300px; width:280px; height:100vh;
+    background:var(--nav-bg); border-left:1px solid var(--input-border);
+    z-index:201; transition:right 0.3s; padding:0; display:flex; flex-direction:column;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  ">
+    <!-- Header menú -->
+    <div style="padding:20px 24px 16px; border-bottom:1px solid var(--input-border); display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:var(--clay);">Ubi<span style="color:var(--sage);">Pet</span></div>
+        <div id="menuEmail" style="font-size:12px; color:var(--ink-soft); margin-top:2px;"></div>
+      </div>
+      <button onclick="cerrarMenu()" style="background:none; border:none; cursor:pointer; font-size:20px; color:var(--ink-soft);">✕</button>
+    </div>
+
+    <!-- Opciones -->
+    <div style="flex:1; overflow-y:auto; padding:12px 0;">
+
+      <!-- Mis mascotas -->
+      <button onclick="cerrarMenu(); mostrarSeccion('mascotas')" class="menu-item" id="menuItemMascotas">
+        🐾 Mis mascotas
+      </button>
+
+      <!-- Configuración -->
+      <button onclick="cerrarMenu(); mostrarSeccion('config')" class="menu-item" id="menuItemConfig">
+        ⚙️ Configuración
+      </button>
+
+      <div style="height:1px; background:var(--input-border); margin:8px 16px;"></div>
+
+      <!-- Cerrar sesión -->
+      <button id="btnLogout" class="menu-item" style="color:var(--coral);">
+        🚪 Cerrar sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- PANEL CONFIGURACIÓN -->
+  <div id="seccionConfig" style="display:none;">
+  </div>
 
   <div class="page-wide" style="max-width:680px;">
 
     <!-- LOADING -->
     <div id="loading"><div class="spinner"></div></div>
+
+    <!-- SECCIÓN MASCOTAS -->
+    <div id="seccionMascotas" style="display:none;">
 
     <!-- CONTENIDO PRINCIPAL -->
     <div id="mainContent" style="display:none;">
@@ -275,6 +396,51 @@
       </div>
 
     </div>
+    </div> <!-- /seccionMascotas -->
+
+    <!-- SECCIÓN CONFIGURACIÓN -->
+    <div id="seccionConfigInner" style="display:none; padding-top:8px;">
+      <h2 style="font-family:'Fraunces',serif; color:var(--clay); margin-bottom:20px; font-size:22px;">⚙️ Configuración</h2>
+
+      <!-- Tema -->
+      <div class="config-section">
+        <h3>🎨 Tema de la app</h3>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:4px;">Elegí cómo se ve UbiPet en tu dispositivo</p>
+        <div class="theme-options">
+          <button class="theme-btn" id="themeLight" onclick="setTema('light')">
+            ☀️<br>Claro
+          </button>
+          <button class="theme-btn" id="themeDark" onclick="setTema('dark')">
+            🌙<br>Oscuro
+          </button>
+          <button class="theme-btn" id="themeAuto" onclick="setTema('auto')">
+            🔄<br>Automático
+          </button>
+        </div>
+      </div>
+
+      <!-- Cambiar contraseña -->
+      <div class="config-section">
+        <h3>🔑 Cambiar contraseña</h3>
+        <div id="alertPass" class="alert"></div>
+        <div class="input-group">
+          <label>Nueva contraseña</label>
+          <input type="password" id="newPass" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="input-group">
+          <label>Confirmar contraseña</label>
+          <input type="password" id="confirmPass" placeholder="Repetí la contraseña">
+        </div>
+        <button class="btn btn-primary" id="btnCambiarPass">🔐 Guardar contraseña</button>
+      </div>
+
+      <!-- Info cuenta -->
+      <div class="config-section">
+        <h3>👤 Mi cuenta</h3>
+        <p style="font-size:14px; color:var(--ink-soft);">Email: <strong id="configEmail" style="color:var(--ink);"></strong></p>
+      </div>
+    </div>
+
   </div>
 
   <script type="module">
@@ -357,6 +523,15 @@
       await supabase.auth.signOut()
       window.location.href = 'index.html'
     })
+
+    // Mostrar email en menú
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const emailEl = document.getElementById('menuEmail')
+      const configEl = document.getElementById('configEmail')
+      if (emailEl) emailEl.textContent = user.email
+      if (configEl) configEl.textContent = user.email
+    }
 
     // ─── cargar mascotas ─────────────────────────
     async function cargarMascotas() {
@@ -709,9 +884,77 @@
       await cargarMascotas()
     })
 
+    // ─── MENÚ HAMBURGUESA ────────────────────────
+    function abrirMenu() {
+      document.getElementById('menuPanel').style.right = '0'
+      document.getElementById('menuOverlay').style.display = 'block'
+    }
+    function cerrarMenu() {
+      document.getElementById('menuPanel').style.right = '-300px'
+      document.getElementById('menuOverlay').style.display = 'none'
+    }
+    window.cerrarMenu = cerrarMenu
+
+    document.getElementById('btnMenu').addEventListener('click', abrirMenu)
+
+    function mostrarSeccion(seccion) {
+      document.getElementById('seccionMascotas').style.display   = seccion === 'mascotas' ? 'block' : 'none'
+      document.getElementById('seccionConfigInner').style.display = seccion === 'config'   ? 'block' : 'none'
+      document.getElementById('menuItemMascotas').classList.toggle('active', seccion === 'mascotas')
+      document.getElementById('menuItemConfig').classList.toggle('active', seccion === 'config')
+    }
+    window.mostrarSeccion = mostrarSeccion
+
+    // ─── TEMA ─────────────────────────────────────
+    function aplicarTema(tema) {
+      const root = document.documentElement
+      root.removeAttribute('data-theme')
+      if (tema === 'light') root.setAttribute('data-theme', 'light')
+      if (tema === 'dark')  root.setAttribute('data-theme', 'dark')
+      // update botones
+      ;['Light','Dark','Auto'].forEach(t => {
+        const btn = document.getElementById('theme' + t)
+        if (btn) btn.classList.toggle('active', tema === t.toLowerCase())
+      })
+    }
+    function setTema(tema) {
+      localStorage.setItem('ubipet-tema', tema)
+      aplicarTema(tema)
+    }
+    window.setTema = setTema
+
+    // cargar tema guardado
+    const temaGuardado = localStorage.getItem('ubipet-tema') || 'auto'
+    aplicarTema(temaGuardado)
+
+    // ─── CAMBIAR CONTRASEÑA ───────────────────────
+    document.getElementById('btnCambiarPass').addEventListener('click', async () => {
+      const newPass     = document.getElementById('newPass').value
+      const confirmPass = document.getElementById('confirmPass').value
+
+      if (!newPass || !confirmPass) return showAlert('alertPass', 'Completá ambos campos')
+      if (newPass.length < 6) return showAlert('alertPass', 'Mínimo 6 caracteres')
+      if (newPass !== confirmPass) return showAlert('alertPass', 'Las contraseñas no coinciden')
+
+      const btn = document.getElementById('btnCambiarPass')
+      btn.disabled = true
+      btn.textContent = '⏳ Guardando...'
+
+      const { error } = await supabase.auth.updateUser({ password: newPass })
+
+      btn.disabled = false
+      btn.textContent = '🔐 Guardar contraseña'
+
+      if (error) return showAlert('alertPass', '❌ ' + error.message)
+      showAlert('alertPass', '✅ Contraseña actualizada', 'ok')
+      document.getElementById('newPass').value = ''
+      document.getElementById('confirmPass').value = ''
+    })
+
     // ─── init ─────────────────────────────────────
     setupFotoPreview()
     await cargarMascotas()
+    mostrarSeccion('mascotas')
   </script>
 
   <!-- Banner de instalación PWA -->

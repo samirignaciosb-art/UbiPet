@@ -203,7 +203,22 @@
 
         card.innerHTML = `
           <div class="code">${placa.codigo}</div>
-          <div class="qr-wrap" id="qr-${placa.id}"></div>
+          <div class="qr-wrap" style="position:relative;display:inline-block;" id="qr-${placa.id}">
+            <div class="qr-logo-overlay" id="logo-${placa.id}" style="
+              display:none;
+              position:absolute;
+              top:50%; left:50%;
+              transform:translate(-50%,-50%);
+              width:36px; height:36px;
+              background:white;
+              border-radius:6px;
+              padding:3px;
+              box-shadow:0 1px 4px rgba(0,0,0,0.15);
+            ">
+              <img src="/img/logo.png" style="width:100%;height:100%;object-fit:contain;">
+            </div>
+          </div>
+          <div style="font-family:'Fraunces',serif; font-size:13px; font-weight:700; color:var(--clay); margin-top:6px; letter-spacing:1px;">¡UbiPet!</div>
         `
 
         grid.appendChild(card)
@@ -216,9 +231,13 @@
             height: 180,
             colorDark: '#2c2016',
             colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
+            correctLevel: QRCode.CorrectLevel.H
           })
-        }, i * 50) // stagger para no bloquear el hilo
+          // mostrar logo overlay después que el QR se renderice
+          setTimeout(() => {
+            document.getElementById(`logo-${placa.id}`).style.display = 'block'
+          }, 100)
+        }, i * 50)
       })
     }
 

@@ -6,6 +6,7 @@
   <title>UbiPet — Imprimir QRs</title>
   <link rel="stylesheet" href="/css/styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     body { background: var(--cream); }
 
@@ -340,20 +341,93 @@
     document.getElementById('btnDescargarTodos').addEventListener('click', async () => {
       const btn = document.getElementById('btnDescargarTodos')
       btn.disabled = true
-      btn.textContent = '⏳ Preparando...'
 
       const placas = filtroActual === 'todas'
         ? todasLasPlacas
         : todasLasPlacas.filter(p => p.estado === filtroActual)
 
+      const total = placas.filter(p => getQRCanvas(p.id)).length
+      if (!total) { btn.disabled = false; return alert('No hay QRs generados aún') }
+
+      const zip = new JSZip()
+      let count = 0
+
       for (const placa of placas) {
         const canvas = getQRCanvas(placa.id)
         if (!canvas) continue
 
-        await descargarQR(placa.id, placa.codigo)
+        count++
+        btn.textContent = `⏳ ${count}/${total}...`
 
-        await new Promise(r => setTimeout(r, 300)) // pequeña pausa entre descargas
+        // Generar el card completo igual que descargarQR pero retornar base64
+        const DPI    = 300
+        const CM     = DPI / 2.54
+        const W      = Math.round(4 * CM)
+        const PAD    = Math.round(0.25 * CM)
+        const QR_S   = W - PAD * 2
+        const CODE_H = Math.round(0.45 * CM)
+        const UBIH   = Math.round(0.4 * CM)
+        const H      = PAD + CODE_H + PAD/2 + QR_S + PAD/2 + UBIH + PAD
+
+        const final = document.createElement('canvas')
+        final.width  = W
+        final.height = H
+        const ctx = final.getContext('2d')
+
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, W, H)
+        ctx.strokeStyle = '#dddddd'
+        ctx.lineWidth = 2
+        ctx.strokeRect(1, 1, W-2, H-2)
+
+        const codeFontSize = Math.round(CODE_H * 0.72)
+        ctx.fillStyle = '#D08C61'
+        ctx.font = `900 ${codeFontSize}px monospace`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(placa.codigo, W/2, PAD + CODE_H/2)
+
+        const qrY = PAD + CODE_H + PAD/2
+        ctx.drawImage(canvas, PAD, qrY, QR_S, QR_S)
+
+        await new Promise(resolve => {
+          const logoImg = new Image()
+          logoImg.crossOrigin = 'anonymous'
+          logoImg.onload = () => {
+            const logoSize = Math.round(QR_S * 0.18)
+            const lx = PAD + (QR_S - logoSize) / 2
+            const ly = qrY + (QR_S - logoSize) / 2
+            ctx.fillStyle = '#ffffff'
+            ctx.beginPath()
+            ctx.roundRect(lx - 3, ly - 3, logoSize + 6, logoSize + 6, 4)
+            ctx.fill()
+            ctx.drawImage(logoImg, lx, ly, logoSize, logoSize)
+            resolve()
+          }
+          logoImg.onerror = resolve
+          logoImg.src = '/img/logo-green.png'
+        })
+
+        const ubiY = qrY + QR_S + PAD/2 + UBIH/2
+        const ubiFontSize = Math.round(UBIH * 0.65)
+        ctx.fillStyle = '#D08C61'
+        ctx.font = `bold ${ubiFontSize}px serif`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('¡UbiPet!', W/2, ubiY)
+
+        // Convertir a blob y agregar al ZIP
+        const dataUrl = final.toDataURL('image/png')
+        const base64  = dataUrl.split(',')[1]
+        zip.file(`QR-${placa.codigo}.png`, base64, { base64: true })
       }
+
+      btn.textContent = '📦 Generando ZIP...'
+      const blob = await zip.generateAsync({ type: 'blob' })
+      const link = document.createElement('a')
+      link.download = `UbiPet-QRs-${new Date().toISOString().slice(0,10)}.zip`
+      link.href = URL.createObjectURL(blob)
+      link.click()
 
       btn.disabled = false
       btn.textContent = '⬇️ Descargar todos'

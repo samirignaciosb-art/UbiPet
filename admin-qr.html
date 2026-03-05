@@ -261,31 +261,76 @@
       return wrap ? wrap.querySelector('canvas') : null
     }
 
-    window.descargarQR = (placaId, codigo) => {
+    window.descargarQR = async (placaId, codigo) => {
       const canvas = getQRCanvas(placaId)
       if (!canvas) return alert('QR no generado aún')
 
-      // Crear canvas final con código abajo
-      const size = 400
+      // ── Dimensiones a 300 DPI para 4cm (~472px) ──
+      const DPI    = 300
+      const CM     = DPI / 2.54
+      const W      = Math.round(4 * CM)   // 472px ≈ 4cm
+      const PAD    = Math.round(0.25 * CM) // 3mm padding
+      const QR_S   = W - PAD * 2          // QR ocupa casi todo el ancho
+      const CODE_H = Math.round(0.45 * CM) // altura zona código arriba
+      const UBIH   = Math.round(0.4 * CM)  // altura zona UbiPet abajo
+      const H      = PAD + CODE_H + PAD/2 + QR_S + PAD/2 + UBIH + PAD
+
       const final = document.createElement('canvas')
-      final.width  = size
-      final.height = size + 40
+      final.width  = W
+      final.height = H
       const ctx = final.getContext('2d')
 
       // Fondo blanco
       ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, final.width, final.height)
+      ctx.fillRect(0, 0, W, H)
 
-      // QR escalado
-      ctx.drawImage(canvas, 0, 0, size, size)
+      // ── Borde fino ──
+      ctx.strokeStyle = '#dddddd'
+      ctx.lineWidth = 2
+      ctx.strokeRect(1, 1, W-2, H-2)
 
-      // Texto código abajo
-      ctx.fillStyle = '#2c2016'
-      ctx.font = 'bold 20px monospace'
+      // ── Código arriba ──
+      const codeFontSize = Math.round(CODE_H * 0.72)
+      ctx.fillStyle = '#D08C61'
+      ctx.font = `900 ${codeFontSize}px monospace`
       ctx.textAlign = 'center'
-      ctx.fillText(codigo, size / 2, size + 28)
+      ctx.textBaseline = 'middle'
+      ctx.fillText(codigo, W/2, PAD + CODE_H/2)
 
-      // Descargar
+      // ── QR ──
+      const qrY = PAD + CODE_H + PAD/2
+      ctx.drawImage(canvas, PAD, qrY, QR_S, QR_S)
+
+      // ── Logo verde al centro del QR ──
+      await new Promise(resolve => {
+        const logoImg = new Image()
+        logoImg.crossOrigin = 'anonymous'
+        logoImg.onload = () => {
+          const logoSize = Math.round(QR_S * 0.18)
+          const lx = PAD + (QR_S - logoSize) / 2
+          const ly = qrY + (QR_S - logoSize) / 2
+          // Fondo blanco detrás del logo
+          ctx.fillStyle = '#ffffff'
+          ctx.beginPath()
+          ctx.roundRect(lx - 3, ly - 3, logoSize + 6, logoSize + 6, 4)
+          ctx.fill()
+          ctx.drawImage(logoImg, lx, ly, logoSize, logoSize)
+          resolve()
+        }
+        logoImg.onerror = resolve
+        logoImg.src = '/img/logo-green.png'
+      })
+
+      // ── ¡UbiPet! abajo ──
+      const ubiY = qrY + QR_S + PAD/2 + UBIH/2
+      const ubiFontSize = Math.round(UBIH * 0.65)
+      ctx.fillStyle = '#D08C61'
+      ctx.font = `bold ${ubiFontSize}px serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('¡UbiPet!', W/2, ubiY)
+
+      // ── Descargar ──
       const link = document.createElement('a')
       link.download = `QR-${codigo}.png`
       link.href = final.toDataURL('image/png')
@@ -305,23 +350,7 @@
         const canvas = getQRCanvas(placa.id)
         if (!canvas) continue
 
-        const size = 400
-        const final = document.createElement('canvas')
-        final.width  = size
-        final.height = size + 40
-        const ctx = final.getContext('2d')
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, final.width, final.height)
-        ctx.drawImage(canvas, 0, 0, size, size)
-        ctx.fillStyle = '#2c2016'
-        ctx.font = 'bold 20px monospace'
-        ctx.textAlign = 'center'
-        ctx.fillText(placa.codigo, size / 2, size + 28)
-
-        const link = document.createElement('a')
-        link.download = `QR-${placa.codigo}.png`
-        link.href = final.toDataURL('image/png')
-        link.click()
+        await descargarQR(placa.id, placa.codigo)
 
         await new Promise(r => setTimeout(r, 300)) // pequeña pausa entre descargas
       }

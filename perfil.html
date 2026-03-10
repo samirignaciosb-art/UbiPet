@@ -441,7 +441,6 @@
 
   <script type="module">
     import { supabase } from '/js/supabase.js'
-    import { suscribir, desuscribir, getPushEstado } from '/js/push.js'
 
     // ─── ESTADO ──────────────────────────────────
     let user = null, mascotas = [], mascotaActual = null, modoNueva = false
@@ -805,128 +804,91 @@
       el.textContent = msg; el.className = `alert alert-${type} show`
     }
 
-    // ─── PUSH NOTIFICATIONS ──────────────────────
-    const PUSH_WORKER   = 'https://ubipet-push.samirignaciosb.workers.dev'
-    const VAPID_PUB_KEY = 'j_c1DV6_FAq5cgcjARGnAvw2zdW-GO-YCI3RBtswYPKCgNdW5fo-y7wSLHXu3nZ-wP_FlO7EifCjfaq98hOvEg'
+    // ─── PUSH NOTIFICATIONS ───────────────────────
+    const VAPID_PUB = 'j_c1DV6_FAq5cgcjARGnAvw2zdW-GO-YCI3RBtswYPKCgNdW5fo-y7wSLHXu3nZ-wP_FlO7EifCjfaq98hOvEg'
 
-    function urlB64ToUint8Array(b64) {
-      const pad  = '='.repeat((4 - b64.length % 4) % 4)
-      const raw  = atob(b64.replace(/-/g,'+').replace(/_/g,'/') + pad)
+    function b64ToUint8(b64) {
+      const pad = '='.repeat((4 - b64.length % 4) % 4)
+      const raw = atob(b64.replace(/-/g,'+').replace(/_/g,'/') + pad)
       return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
     }
 
-    async function initPush() {
-      const section = document.getElementById('pushSection')
-      const btn     = document.getElementById('btnActivarPush')
-      const status  = document.getElementById('pushStatus')
-
-      // Ocultar si no hay soporte
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        section.style.display = 'none'
-        return
-      }
-
-      const perm = Notification.permission
-      if (perm === 'granted') {
-        status.innerHTML = '<span class="badge badge-ok" style="background:var(--sage-bg);color:var(--sage-d);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;">✅ Notificaciones activas</span>'
-        btn.textContent = '🔕 Desactivar'
-        btn.className   = 'btn btn-ghost'
-      } else if (perm === 'denied') {
-        status.innerHTML = '<span style="font-size:13px;color:var(--ink-muted);">⛔ Bloqueadas en tu navegador. Habilitarlas desde Configuración del sitio.</span>'
-        btn.style.display = 'none'
-        return
-      }
-
-      btn.addEventListener('click', async () => {
-        if (Notification.permission === 'granted') {
-          // Desactivar — eliminar subscription
-          const reg = await navigator.serviceWorker.ready
-          const sub = await reg.pushManager.getSubscription()
-          if (sub) await sub.unsubscribe()
-          status.innerHTML = '<span style="font-size:13px;color:var(--ink-muted);">Notificaciones desactivadas.</span>'
-          btn.textContent = '🔔 Activar notificaciones'
-          btn.className   = 'btn btn-primary'
-          return
-        }
-
-        btn.disabled = true
-        btn.innerHTML = '<span class="spinner spinner-sm"></span> Activando...'
-
-        try {
-          const perm = await Notification.requestPermission()
-          if (perm !== 'granted') {
-            btn.disabled  = false
-            btn.textContent = '🔔 Activar notificaciones'
-            return
-          }
-          const reg = await navigator.serviceWorker.ready
-          const sub = await reg.pushManager.subscribe({
-            userVisibleOnly:      true,
-            applicationServerKey: urlB64ToUint8Array(VAPID_PUB_KEY)
-          })
-          // Enviar subscription al Worker
-          await fetch(`${PUSH_WORKER}/subscribe`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user.id, subscription: sub.toJSON() })
-          })
-          status.innerHTML = '<span class="badge" style="background:var(--sage-bg);color:var(--sage-d);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;">✅ Notificaciones activas</span>'
-          btn.disabled    = false
-          btn.textContent = '🔕 Desactivar'
-          btn.className   = 'btn btn-ghost'
-        } catch(e) {
-          console.error('Push error:', e)
-          btn.disabled    = false
-          btn.textContent = '🔔 Activar notificaciones'
-          showAlert('❌ No se pudo activar. Revisá los permisos del navegador.')
-        }
-      })
-    }
-
-    // ─── PUSH NOTIFICATIONS ───────────────────────
     async function actualizarUIPush() {
-      const estado = await getPushEstado()
-      const badge  = document.getElementById('pushBadge')
-      const btn    = document.getElementById('btnPushToggle')
+      const badge = document.getElementById('pushBadge')
+      const btn   = document.getElementById('btnPushToggle')
+      const noSop = document.getElementById('pushNoSoportado')
+      const bloq  = document.getElementById('pushBloqueado')
 
-      document.getElementById('pushNoSoportado').style.display = 'none'
-      document.getElementById('pushBloqueado').style.display   = 'none'
-      btn.style.display = 'inline-flex'
+      // reset
+      noSop.style.display = 'none'
+      bloq.style.display  = 'none'
+      btn.style.display   = 'inline-flex'
+      btn.disabled        = false
 
-      if (estado === 'no-soportado') {
+      // sin soporte
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
         badge.textContent = '❌ No soportado'
-        badge.style.background = 'var(--cream-d)'
         btn.style.display = 'none'
-        document.getElementById('pushNoSoportado').style.display = 'block'
-      } else if (estado === 'bloqueado') {
+        noSop.style.display = 'block'
+        return
+      }
+
+      // bloqueado
+      if (Notification.permission === 'denied') {
         badge.textContent = '🚫 Bloqueadas'
-        badge.style.background = 'rgba(229,115,115,0.12)'
-        badge.style.color = '#e57373'
-        badge.style.borderColor = 'rgba(229,115,115,0.3)'
+        Object.assign(badge.style, { background:'rgba(229,115,115,0.12)', color:'#e57373', borderColor:'rgba(229,115,115,0.3)' })
         btn.style.display = 'none'
-        document.getElementById('pushBloqueado').style.display = 'block'
-      } else if (estado === 'activo') {
+        bloq.style.display = 'block'
+        return
+      }
+
+      // verificar si hay suscripción activa
+      let subActiva = false
+      try {
+        const reg = await navigator.serviceWorker.ready
+        const sub = await reg.pushManager.getSubscription()
+        subActiva = !!sub && Notification.permission === 'granted'
+      } catch(e) { console.warn('Push check error:', e) }
+
+      if (subActiva) {
         badge.textContent = '🔔 Activadas'
-        badge.style.background = 'var(--sage-bg)'
-        badge.style.color = 'var(--sage-d)'
-        badge.style.borderColor = 'var(--sage-l)'
-        btn.textContent = 'Desactivar'
+        Object.assign(badge.style, { background:'var(--sage-bg)', color:'var(--sage-d)', borderColor:'var(--sage-l)' })
+        btn.textContent = '🔕 Desactivar'
         btn.onclick = async () => {
           btn.disabled = true; btn.textContent = '⏳'
-          await desuscribir(supabase, user.id)
+          try {
+            const reg = await navigator.serviceWorker.ready
+            const sub = await reg.pushManager.getSubscription()
+            if (sub) await sub.unsubscribe()
+            await supabase.from('push_subscriptions').delete().eq('user_id', user.id)
+          } catch(e) { console.error('Unsub error:', e) }
           await actualizarUIPush()
         }
       } else {
         badge.textContent = '🔕 Desactivadas'
-        badge.style.background = 'var(--cream-d)'
-        badge.style.color = 'var(--ink-muted)'
-        badge.style.borderColor = 'var(--sand)'
+        Object.assign(badge.style, { background:'var(--cream-d)', color:'var(--ink-muted)', borderColor:'var(--sand)' })
         btn.textContent = '🔔 Activar notificaciones'
         btn.onclick = async () => {
-          btn.disabled = true; btn.textContent = '⏳'
-          const sub = await suscribir(supabase, user.id)
-          btn.disabled = false
-          if (!sub) btn.textContent = '🔔 Activar notificaciones'
+          btn.disabled = true; btn.textContent = '⏳ Activando...'
+          try {
+            const perm = await Notification.requestPermission()
+            if (perm !== 'granted') { await actualizarUIPush(); return }
+            const reg = await navigator.serviceWorker.ready
+            let sub = await reg.pushManager.getSubscription()
+            if (!sub) {
+              sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: b64ToUint8(VAPID_PUB)
+              })
+            }
+            const { error } = await supabase
+              .from('push_subscriptions')
+              .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: 'user_id' })
+            if (error) throw error
+          } catch(e) {
+            console.error('Push activate error:', e)
+            showAlert('❌ No se pudo activar. Revisá los permisos del navegador.')
+          }
           await actualizarUIPush()
         }
       }
@@ -936,8 +898,7 @@
     setupFotoPreview()
     await cargarMascotas()
     mostrarSeccion('mascotas')
-    actualizarUIPush() // no await — carga en background
-    initPush()
+    actualizarUIPush()
   </script>
 
   <!-- PWA -->

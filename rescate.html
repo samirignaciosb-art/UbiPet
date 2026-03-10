@@ -8,160 +8,194 @@
   <style>
     body {
       min-height: 100vh;
-      background: linear-gradient(160deg, #fff8f0 0%, #fdf6ee 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
+      padding: 24px 16px 40px;
+      background: var(--cream);
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+      opacity: 0.6;
+      transition: background 0.4s;
+    }
+    body.perdida::before {
+      background: radial-gradient(ellipse at top, rgba(192,57,43,0.08) 0%, transparent 60%);
+    }
+    body.ok::before {
+      background: radial-gradient(ellipse at top, rgba(90,138,106,0.08) 0%, transparent 60%);
     }
 
+    /* ── CARD ── */
     .rescue-card {
-      background: var(--white);
-      border-radius: 24px;
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-      width: 100%;
-      max-width: 420px;
+      width: 100%; max-width: 400px;
+      position: relative; z-index: 1;
+      animation: fadeUp 0.5s var(--ease) both;
     }
 
+    /* ── HEADER ── */
     .rescue-header {
-      padding: 28px 28px 20px;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 32px 28px 28px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-    .rescue-header.perdida { background: linear-gradient(135deg, #e8725a, #c0392b); }
-    .rescue-header.ok      { background: linear-gradient(135deg, #7aab8a, #5a8a6a); }
+    .rescue-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.08);
+      pointer-events: none;
+    }
+    .rescue-header.perdida { background: linear-gradient(145deg, #c0392b, #96281b); }
+    .rescue-header.ok      { background: linear-gradient(145deg, #5a8a6a, #3d6b50); }
 
-    .rescue-header .emoji  { font-size: 56px; margin-bottom: 8px; }
     .rescue-header h1 {
       font-family: 'Fraunces', serif;
-      font-size: 26px;
-      color: white;
-      margin-bottom: 4px;
+      font-size: 26px; font-weight: 700;
+      color: white; margin-bottom: 4px;
+      position: relative; z-index: 1;
     }
-    .rescue-header p { color: rgba(255,255,255,0.85); font-size: 14px; }
+    .rescue-header p {
+      color: rgba(255,255,255,0.82);
+      font-size: 14px; line-height: 1.5;
+      position: relative; z-index: 1;
+    }
 
-    /* foto mascota */
+    /* ── FOTO ── */
+    .foto-wrap {
+      position: relative; z-index: 1;
+      margin-bottom: 16px; display: inline-block;
+    }
     .mascota-foto {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid rgba(255,255,255,0.9);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-      margin-bottom: 12px;
-    }
-    .mascota-foto-placeholder {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      border: 4px solid rgba(255,255,255,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-
-    .rescue-body { padding: 24px 28px; }
-
-    .info-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--sand);
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-icon { font-size: 24px; flex-shrink: 0; width: 36px; text-align: center; }
-    .info-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
-    .info-value { font-size: 17px; font-weight: 700; color: var(--ink); }
-
-    .action-section { padding: 20px 28px 28px; display: flex; flex-direction: column; gap: 12px; }
-
-    .btn-wsp {
-      background: #25D366;
-      color: white;
-      font-size: 17px;
-      padding: 16px;
-      border-radius: 14px;
-      border: none;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 800;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.2s;
-    }
-    .btn-wsp:hover { background: #20b858; transform: translateY(-2px); box-shadow: var(--shadow); }
-    .btn-wsp:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .btn-copy-tel {
-      background: var(--sand);
-      color: var(--ink);
-      border: none;
-      border-radius: 10px;
-      padding: 12px;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s;
-    }
-    .btn-copy-tel:hover { background: #e0d4c0; }
-
-    .not-found {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--ink-soft);
-    }
-    .not-found .icon { font-size: 64px; margin-bottom: 16px; }
-
-    .foto-mascota {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid white;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      margin: 0 auto 4px;
+      width: 96px; height: 96px;
+      border-radius: 50%; object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.9);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
       display: block;
     }
-    .foto-placeholder-rescue {
-      width: 110px;
-      height: 110px;
+    .mascota-placeholder {
+      width: 96px; height: 96px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 52px;
-      margin: 0 auto 4px;
+      background: rgba(255,255,255,0.18);
+      border: 3px solid rgba(255,255,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px;
+    }
+    .estado-badge {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: white; display: flex; align-items: center;
+      justify-content: center; font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
-    .logo-footer {
-      margin-top: 24px;
-      font-family: 'Fraunces', serif;
-      font-size: 18px;
-      color: var(--clay);
-      opacity: 0.7;
+    /* ── BODY ── */
+    .rescue-body {
+      background: var(--card-bg);
+      padding: 6px 0;
+      border: 1px solid var(--card-border);
+      border-top: none; border-bottom: none;
     }
-    .logo-footer span { color: var(--sage); }
+
+    .info-row {
+      display: flex; align-items: center;
+      gap: 16px; padding: 14px 24px;
+      border-bottom: 1px solid var(--card-border);
+      transition: background var(--duration-fast);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon {
+      width: 38px; height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--cream-d);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .info-label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--ink-muted); margin-bottom: 2px;
+    }
+    .info-value {
+      font-size: 16px; font-weight: 600; color: var(--ink);
+      line-height: 1.3;
+    }
+
+    /* ── ACCIONES ── */
+    .action-section {
+      background: var(--card-bg);
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+      padding: 20px 24px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+      border: 1px solid var(--card-border); border-top: none;
+    }
+
+    .btn-ubicacion {
+      background: #25D366; color: white;
+      border: none; border-radius: var(--radius);
+      padding: 16px; font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      width: 100%; transition: all var(--duration-fast) var(--ease-bounce);
+      box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+    }
+    .btn-ubicacion:hover { background: #1fb855; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(37,211,102,0.45); }
+    .btn-ubicacion:active { transform: translateY(0); }
+    .btn-ubicacion:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-copiar {
+      background: var(--cream-d); color: var(--ink-soft);
+      border: 1.5px solid var(--sand); border-radius: var(--radius);
+      padding: 12px; font-family: 'DM Sans', sans-serif;
+      font-weight: 600; font-size: 14px; cursor: pointer;
+      width: 100%; transition: all var(--duration-fast) var(--ease);
+    }
+    .btn-copiar:hover { background: var(--sand); border-color: var(--sand-d); }
+
+    /* ── NOT FOUND ── */
+    .not-found {
+      text-align: center; padding: 60px 24px;
+      color: var(--ink-muted); max-width: 320px;
+      position: relative; z-index: 1;
+    }
+    .not-found .icon { font-size: 56px; margin-bottom: 16px; opacity: 0.7; }
+
+    /* ── FOOTER ── */
+    .rescue-footer {
+      margin-top: 24px; text-align: center;
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0.6;
+    }
+    .rescue-footer img { height: 20px; width: auto; }
+    .rescue-footer span {
+      font-family: 'Fraunces', serif; font-size: 16px;
+      color: var(--clay);
+    }
+    .rescue-footer span em { color: var(--sage); font-style: normal; }
   </style>
 </head>
 <body>
 
-  <div id="loadingSpinner"><div class="spinner"></div></div>
+  <div id="loadingSpinner" style="z-index:1; position:relative;"><div class="spinner"></div></div>
 
   <div id="rescueCard" class="rescue-card" style="display:none;">
+
+    <!-- HEADER -->
     <div class="rescue-header" id="rescueHeader">
-      <div id="fotoPet" class="mascota-foto-placeholder">🐾</div>
-      <div class="emoji" id="headerEmoji" style="display:none;">🐾</div>
+      <div class="foto-wrap">
+        <div id="fotoPet" class="mascota-placeholder">🐾</div>
+        <div class="estado-badge" id="estadoBadge">🐾</div>
+      </div>
       <h1 id="headerTitle">Mascota encontrada</h1>
       <p id="headerSub">Ayudá a esta mascota a volver a casa</p>
     </div>
 
+    <!-- INFO -->
     <div class="rescue-body">
       <div class="info-row">
         <div class="info-icon">🐾</div>
@@ -195,54 +229,65 @@
         <div class="info-icon">📝</div>
         <div>
           <div class="info-label">Descripción</div>
-          <div class="info-value" id="infoDesc" style="font-size:14px; font-weight:600;">—</div>
+          <div class="info-value" id="infoDesc" style="font-size:14px; font-weight:400; color:var(--ink-soft);">—</div>
         </div>
       </div>
     </div>
 
+    <!-- ACCIONES -->
     <div class="action-section">
-      <button class="btn-wsp" id="btnUbicacion">
+      <button class="btn-ubicacion" id="btnUbicacion">
         📍 Enviar mi ubicación al dueño
       </button>
-      <button class="btn-copy-tel" id="btnCopiarTel">
+      <button class="btn-copiar" id="btnCopiarTel">
         📋 Copiar número de WhatsApp
       </button>
     </div>
+
   </div>
 
+  <!-- NOT FOUND -->
   <div id="notFound" class="not-found" style="display:none;">
     <div class="icon">😕</div>
-    <h2 style="font-family:'Fraunces',serif; color:var(--clay); margin-bottom:8px;">
-      Mascota no encontrada
-    </h2>
-    <p>Este QR no está asociado a ningún perfil activo.</p>
+    <h3 style="margin-bottom:8px; color:var(--ink);">QR no encontrado</h3>
+    <p>Este código no está asociado a ningún perfil activo en UbiPet.</p>
   </div>
 
-  <div class="logo-footer">Ubi<span>Pet</span> 🐾</div>
+  <!-- FOOTER -->
+  <div class="rescue-footer">
+    <img src="/img/logo-green.png" alt="UbiPet">
+    <span>Ubi<em>Pet</em></span>
+  </div>
 
   <script type="module">
     import { supabase } from '/js/supabase.js'
 
-    // ─── notificar al dueño por email ─────────────
     async function notificarDueno(data) {
       try {
         await fetch('/.netlify/functions/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email_dueno:    data.email_dueno,
-            nombre_mascota: data.nombre_mascota,
-            nombre_dueno:   data.nombre_dueno,
-            telefono:       data.telefono
+            email_dueno: data.email_dueno, nombre_mascota: data.nombre_mascota,
+            nombre_dueno: data.nombre_dueno, telefono: data.telefono
           })
         })
-      } catch(e) {
-        console.log('Email error:', e)
-      }
+      } catch(e) { console.log('Email error:', e) }
+      try {
+        await fetch('https://ubipet-push.samirignaciosb-art.workers.dev/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: data.user_id,
+            title: '🐾 ¡Escanearon el QR de ' + (data.nombre_mascota || 'tu mascota') + '!',
+            body:  'Alguien encontró a ' + (data.nombre_mascota || 'tu mascota') + '. Revisá la app.',
+            url:   '/perfil.html'
+          })
+        })
+      } catch(e) { console.log('Push error:', e) }
     }
 
-    const params  = new URLSearchParams(window.location.search)
-    const perfilId = params.get('id')
+    const perfilId = new URLSearchParams(window.location.search).get('id')
 
     function mostrarNoEncontrado() {
       document.getElementById('loadingSpinner').style.display = 'none'
@@ -251,67 +296,56 @@
 
     if (!perfilId) { mostrarNoEncontrado() }
     else {
-      const { data, error } = await supabase
-        .from('perfiles')
-        .select('*')
-        .eq('id', perfilId)
-        .single()
-
+      const { data, error } = await supabase.from('perfiles').select('*').eq('id', perfilId).single()
       document.getElementById('loadingSpinner').style.display = 'none'
 
       if (error || !data) { mostrarNoEncontrado() }
       else {
-        // Notificar al dueño por email (silencioso)
         if (data.email_dueno) notificarDueno(data)
 
-        // Llenar datos
+        const perdida = data.esta_perdida
+
+        // Fondo dinámico
+        document.body.classList.add(perdida ? 'perdida' : 'ok')
+
+        // Header
+        document.getElementById('rescueHeader').className = 'rescue-header ' + (perdida ? 'perdida' : 'ok')
+        document.getElementById('headerTitle').textContent = perdida ? '¡Mascota perdida!' : 'Mascota encontrada'
+        document.getElementById('headerSub').textContent   = perdida
+          ? 'El dueño está buscando a esta mascota'
+          : 'Ayudá a esta mascota a volver a casa'
+        document.getElementById('estadoBadge').textContent = perdida ? '🚨' : '✅'
+
+        // Foto
+        const fotoPet = document.getElementById('fotoPet')
+        if (data.foto_url) {
+          const img = document.createElement('img')
+          img.src = data.foto_url; img.className = 'mascota-foto'; img.alt = data.nombre_mascota || 'Mascota'
+          fotoPet.replaceWith(img)
+        } else {
+          fotoPet.textContent = perdida ? '🚨' : '🐾'
+        }
+
+        // Datos
         document.getElementById('infoNombre').textContent = data.nombre_mascota || '—'
         document.getElementById('infoRaza').textContent   = data.raza || 'No especificada'
         document.getElementById('infoDueno').textContent  = data.nombre_dueno || '—'
         document.getElementById('infoTel').textContent    = data.telefono || '—'
-
         if (data.descripcion) {
           document.getElementById('infoDesc').textContent = data.descripcion
           document.getElementById('rowDescripcion').style.display = 'flex'
         }
 
-        // Header según estado
-        const header = document.getElementById('rescueHeader')
-        const perdida = data.esta_perdida
-        header.className = 'rescue-header ' + (perdida ? 'perdida' : 'ok')
-
-        // Foto de la mascota
-        const fotoPet = document.getElementById('fotoPet')
-        if (fotoPet) {
-          if (data.foto_url) {
-            fotoPet.innerHTML = ''
-            const img = document.createElement('img')
-            img.src = data.foto_url
-            img.className = 'mascota-foto'
-            img.alt = data.nombre_mascota || 'Mascota'
-            fotoPet.replaceWith(img)
-          } else {
-            fotoPet.textContent = perdida ? '🚨' : '🐾'
-          }
-        }
-
-        document.getElementById('headerTitle').textContent  = perdida ? '¡Mascota perdida!' : 'Mascota encontrada'
-        document.getElementById('headerSub').textContent    = perdida
-          ? 'El dueño está buscando a esta mascota'
-          : 'Ayudá a esta mascota a volver a casa'
-
         document.getElementById('rescueCard').style.display = 'block'
 
-        // ─── ENVIAR UBICACIÓN ────────────────────
+        // Botón ubicación
         document.getElementById('btnUbicacion').addEventListener('click', function() {
           const btn = this
-          btn.textContent = '⏳ Obteniendo GPS...'
-          btn.disabled = true
+          btn.textContent = '⏳ Obteniendo GPS...'; btn.disabled = true
 
           if (!navigator.geolocation) {
             alert('Tu navegador no soporta GPS. Compartí tu ubicación manualmente.')
-            btn.textContent = '📍 Enviar mi ubicación al dueño'
-            btn.disabled = false
+            btn.textContent = '📍 Enviar mi ubicación al dueño'; btn.disabled = false
             return
           }
 
@@ -320,34 +354,24 @@
               const lat = pos.coords.latitude.toFixed(6)
               const lng = pos.coords.longitude.toFixed(6)
               const tel = data.telefono.replace(/[^0-9]/g, '')
-              const nombre = data.nombre_mascota
-
-              const msg = `🐾 *¡Encontré a ${nombre}!*\n\n` +
-                `📍 *Mi ubicación actual:*\n` +
-                `https://maps.google.com/maps?q=${lat},${lng}\n\n` +
-                `Estoy esperando aquí con tu mascota. ¡Avisame cuando venís! 🙏`
-
-              btn.textContent = '✅ ¡Abriendo WhatsApp...'
-              btn.disabled = false
+              const msg = `🐾 *¡Encontré a ${data.nombre_mascota}!*\n\n📍 *Mi ubicación actual:*\nhttps://maps.google.com/maps?q=${lat},${lng}\n\nEstoy esperando aquí con tu mascota. ¡Avisame cuando venís! 🙏`
+              btn.textContent = '✅ ¡Abriendo WhatsApp...'; btn.disabled = false
               window.location.href = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`
             },
             err => {
-              console.error('GPS error:', err)
-              // Fallback: abrir WhatsApp sin ubicación
               const tel = data.telefono.replace(/[^0-9]/g, '')
               const msg = `🐾 ¡Encontré a ${data.nombre_mascota}! No pude compartir mi ubicación GPS. Por favor contactame.`
-              btn.textContent = '📍 Enviar mi ubicación al dueño'
-              btn.disabled = false
+              btn.textContent = '📍 Enviar mi ubicación al dueño'; btn.disabled = false
               window.location.href = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           )
         })
 
-        // ─── COPIAR TELÉFONO ──────────────────────
+        // Botón copiar
         document.getElementById('btnCopiarTel').addEventListener('click', function() {
           navigator.clipboard.writeText(data.telefono).then(() => {
-            this.textContent = '✅ ¡Copiado!'
+            this.textContent = '✅ ¡Número copiado!'
             setTimeout(() => { this.textContent = '📋 Copiar número de WhatsApp' }, 2000)
           })
         })

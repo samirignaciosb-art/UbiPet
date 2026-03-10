@@ -387,32 +387,23 @@
       </div>
 
       <!-- Notificaciones push -->
-      <div class="config-section" id="pushSection">
-        <h3>🔔 Notificaciones</h3>
-        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:14px;">
-          Recibí un aviso en tu celular cuando alguien escanee el QR de tu mascota, incluso con la app cerrada.
-        </p>
-        <div id="pushStatus" style="margin-bottom:12px;"></div>
-        <button class="btn btn-primary" id="btnActivarPush">🔔 Activar notificaciones</button>
-      </div>
-
       <div class="config-section">
         <h3>🔔 Notificaciones push</h3>
         <p style="font-size:13px; color:var(--ink-muted); margin-bottom:14px;">
-          Recibí una notificación en tu celular cada vez que alguien escanee el QR de tu mascota.
+          Recibí un aviso en tu celular cuando alguien escanee el QR de tu mascota, incluso con la app cerrada.
         </p>
-        <div id="pushEstadoWrap" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
           <div id="pushBadge" style="
             padding:6px 14px; border-radius:999px; font-size:13px; font-weight:600;
             background:var(--cream-d); color:var(--ink-muted); border:1px solid var(--sand);
-          ">⏳ Verificando...</div>
-          <button id="btnPushToggle" class="btn btn-ghost btn-sm" style="display:none;"></button>
+          "></div>
+          <button id="btnPushToggle" class="btn btn-primary btn-sm" style="display:none;"></button>
         </div>
-        <p id="pushNoSoportado" style="display:none; font-size:13px; color:var(--ink-muted); margin-top:8px;">
-          Tu navegador no soporta notificaciones push. Intentá desde Chrome o Edge en Android.
+        <p id="pushNoSoportado" style="display:none; font-size:13px; color:var(--ink-muted); margin-top:10px;">
+          Tu navegador no soporta notificaciones push. Usá Chrome o Edge en Android.
         </p>
-        <p id="pushBloqueado" style="display:none; font-size:13px; color:#e57373; margin-top:8px;">
-          Las notificaciones están bloqueadas. Habilitálas en la configuración del navegador.
+        <p id="pushBloqueado" style="display:none; font-size:13px; color:#e57373; margin-top:10px;">
+          Las notificaciones están bloqueadas. Habilitálas en Configuración del sitio del navegador.
         </p>
       </div>
 
@@ -898,7 +889,11 @@
     setupFotoPreview()
     await cargarMascotas()
     mostrarSeccion('mascotas')
-    actualizarUIPush()
+    // Push: esperar SW listo con timeout de 3s
+    Promise.race([
+      navigator.serviceWorker?.ready,
+      new Promise(r => setTimeout(r, 3000))
+    ]).then(() => actualizarUIPush()).catch(() => actualizarUIPush())
   </script>
 
   <!-- PWA -->

@@ -5,421 +5,373 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UbiPet — Mi perfil</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#D08C61">
   <style>
+    /* ── TABS MASCOTAS ── */
     .mascotas-nav {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
+      display: flex; gap: 8px; flex-wrap: nowrap;
+      overflow-x: auto; scrollbar-width: none;
+      margin-bottom: 20px; padding-bottom: 4px;
     }
+    .mascotas-nav::-webkit-scrollbar { display: none; }
     .mascota-tab {
-      padding: 8px 18px;
-      border-radius: 30px;
-      border: 2px solid var(--sand);
-      background: var(--white);
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--ink-soft);
+      flex-shrink: 0; padding: 8px 18px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--sand);
+      background: var(--card-bg);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600; font-size: 14px;
+      cursor: pointer; color: var(--ink-soft);
+      transition: all var(--duration-fast) var(--ease);
+      white-space: nowrap;
     }
-    .mascota-tab.active {
-      background: var(--clay);
-      border-color: var(--clay);
-      color: var(--white);
-    }
+    .mascota-tab:hover { border-color: var(--clay-l); color: var(--clay); }
+    .mascota-tab.active { background: var(--clay); border-color: var(--clay); color: white; }
     .mascota-tab.nueva {
-      border-style: dashed;
-      color: var(--clay);
+      border-style: dashed; border-color: var(--clay-l);
+      color: var(--clay); background: var(--clay-bg);
     }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 24px;
-    }
+    .mascota-tab.nueva:hover { background: var(--clay); color: white; border-style: solid; }
+
+    /* ── FORM GRID ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
     @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
 
+    /* ── SECTION TITLE ── */
     .section-title {
-      font-family: 'Fraunces', serif;
-      font-size: 18px;
-      color: var(--clay);
-      margin: 24px 0 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--sand);
+      font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600;
+      color: var(--ink-soft); margin: 24px 0 14px;
+      padding-bottom: 10px; border-bottom: 1px solid var(--sand);
+      display: flex; align-items: center; gap: 8px;
     }
 
-    /* Toggle perdida */
-    .toggle-wrap { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; }
-    .toggle {
-      width: 52px; height: 28px;
-      background: var(--sand);
-      border-radius: 14px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.3s;
-      border: none;
-      flex-shrink: 0;
+    /* ── TOGGLE PERDIDA ── */
+    .toggle-wrap { display: flex; align-items: center; gap: 12px; margin: 4px 0 16px; }
+    .toggle-custom {
+      width: 50px; height: 27px; background: var(--sand);
+      border-radius: var(--radius-full); position: relative;
+      cursor: pointer; transition: background var(--duration) var(--ease);
+      border: none; flex-shrink: 0;
     }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      width: 20px; height: 20px;
-      background: white;
-      border-radius: 50%;
-      top: 4px; left: 4px;
-      transition: left 0.3s;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    .toggle-custom::after {
+      content: ''; position: absolute;
+      width: 19px; height: 19px; background: white;
+      border-radius: 50%; top: 4px; left: 4px;
+      transition: left var(--duration) var(--ease-bounce);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
     }
-    .toggle.on { background: var(--coral); }
-    .toggle.on::after { left: 28px; }
-    .toggle-label { font-weight: 700; font-size: 14px; color: var(--ink-soft); }
+    .toggle-custom.on { background: #e57373; }
+    .toggle-custom.on::after { left: 27px; }
+    .toggle-label { font-weight: 600; font-size: 14px; color: var(--ink-soft); }
 
-    /* QR section */
+    /* ── QR BOX ── */
     .qr-box {
-      background: var(--sand);
-      border-radius: 12px;
-      padding: 24px;
-      text-align: center;
-      margin-top: 20px;
+      background: var(--cream-d); border-radius: var(--radius-lg);
+      border: 1px solid var(--card-border);
+      padding: 24px; text-align: center; margin-top: 20px;
     }
-    .qr-box img { border-radius: 8px; box-shadow: var(--shadow); }
+    .qr-box img { border-radius: var(--radius); box-shadow: var(--shadow); }
     .qr-url {
-      font-size: 11px;
-      color: var(--ink-soft);
-      word-break: break-all;
-      margin: 10px 0;
-      padding: 8px;
-      background: var(--white);
-      border-radius: 6px;
+      font-size: 11px; color: var(--ink-muted); word-break: break-all;
+      margin: 12px 0; padding: 8px 12px;
+      background: var(--card-bg); border-radius: var(--radius-sm);
+      border: 1px solid var(--card-border);
     }
 
-    /* Placa association */
+    /* ── PLACA BOXES ── */
     .placa-box {
-      background: #fff8f0;
-      border: 2px dashed var(--clay);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 16px 0;
-      text-align: center;
+      background: var(--clay-bg); border: 1.5px dashed var(--clay-l);
+      border-radius: var(--radius-lg); padding: 20px; margin: 12px 0; text-align: center;
     }
     .placa-activa {
-      background: #e8f5e8;
-      border: 2px solid var(--sage);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
+      background: var(--sage-bg); border: 1.5px solid var(--sage-l);
+      border-radius: var(--radius-lg); padding: 16px 20px; margin: 12px 0;
+      display: flex; align-items: center; gap: 14px;
     }
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--ink-soft);
-    }
-    .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
-
-    /* Hamburger menu */
-    .ham-line {
-      width: 22px; height: 2px;
-      background: var(--ink);
-      border-radius: 2px;
-      transition: all 0.2s;
-      display: block;
-    }
-    .menu-item {
-      width: 100%;
-      text-align: left;
-      background: none;
-      border: none;
-      padding: 14px 24px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--ink);
-      cursor: pointer;
-      transition: background 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .menu-item:hover { background: var(--sand); }
-    .menu-item.active { color: var(--clay); background: var(--sand); }
-
-    /* Selector de tema */
-    .theme-options {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .theme-btn {
-      flex: 1;
-      padding: 12px 8px;
-      border-radius: 12px;
-      border: 2px solid var(--input-border);
-      background: var(--card-bg);
-      cursor: pointer;
-      text-align: center;
-      font-family: 'Nunito', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--ink-soft);
-      transition: all 0.2s;
-    }
-    .theme-btn.active {
-      border-color: var(--clay);
-      color: var(--clay);
-      background: var(--sand);
+    .placa-activa .placa-codigo {
+      font-size: 20px; font-weight: 900; letter-spacing: 3px; color: var(--ink);
+      font-family: monospace;
     }
 
-    /* Config section */
-    .config-section {
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 16px;
-      border: 1px solid var(--input-border);
-    }
-    .config-section h3 {
-      font-family: 'Fraunces', serif;
-      font-size: 16px;
-      color: var(--clay);
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--input-border);
-    }
-
-    /* Foto de perfil */
+    /* ── FOTO UPLOAD ── */
     .foto-upload-area {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 20px;
-      background: var(--sand);
-      border-radius: 14px;
-      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 20px;
+      padding: 18px; background: var(--cream-d);
+      border-radius: var(--radius-lg); margin-bottom: 4px;
+      border: 1px solid var(--card-border);
     }
     .foto-preview {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--white);
-      box-shadow: var(--shadow);
-      flex-shrink: 0;
-      background: var(--cream);
+      width: 88px; height: 88px; border-radius: 50%; object-fit: cover;
+      border: 3px solid var(--card-bg); box-shadow: var(--shadow);
+      flex-shrink: 0; background: var(--cream); cursor: pointer;
     }
     .foto-placeholder {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      background: var(--cream);
-      border: 3px dashed var(--clay);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      flex-shrink: 0;
-      cursor: pointer;
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--clay-bg); border: 2px dashed var(--clay-l);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; flex-shrink: 0; cursor: pointer;
+      transition: all var(--duration-fast);
     }
+    .foto-placeholder:hover { background: var(--clay-l); }
     .foto-upload-info { flex: 1; }
-    .foto-upload-info p { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
+    .foto-upload-info p { font-size: 12px; color: var(--ink-muted); margin-top: 6px; line-height: 1.5; }
+
+    /* ── MENÚ HAMBURGUESA ── */
+    .ham-btn {
+      background: none; border: none; cursor: pointer; padding: 8px;
+      display: flex; flex-direction: column; gap: 5px;
+      align-items: center; justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: background var(--duration-fast);
+    }
+    .ham-btn:hover { background: var(--cream-d); }
+    .ham-line {
+      width: 20px; height: 2px; background: var(--ink);
+      border-radius: 2px; transition: all var(--duration-fast);
+      display: block;
+    }
+
+    /* ── MENU PANEL ── */
+    .menu-item {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 13px 20px; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 500; color: var(--ink);
+      cursor: pointer; transition: background var(--duration-fast);
+      display: flex; align-items: center; gap: 10px;
+      border-radius: var(--radius-sm); margin: 2px 8px; width: calc(100% - 16px);
+    }
+    .menu-item:hover { background: var(--cream-d); }
+    .menu-item.active { color: var(--clay); background: var(--clay-bg); font-weight: 600; }
+
+    /* ── CONFIG SECTION ── */
+    .config-section {
+      background: var(--card-bg); border-radius: var(--radius-lg);
+      padding: 22px; margin-bottom: 14px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-xs);
+    }
+    .config-section h3 {
+      font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink);
+      margin-bottom: 14px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--sand);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── TEMA ── */
+    .theme-options { display: flex; gap: 8px; margin-top: 4px; }
+    .theme-btn {
+      flex: 1; padding: 12px 8px; border-radius: var(--radius);
+      border: 1.5px solid var(--input-border); background: var(--input-bg);
+      cursor: pointer; text-align: center;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      color: var(--ink-muted); transition: all var(--duration-fast) var(--ease);
+      line-height: 1.8;
+    }
+    .theme-btn:hover { border-color: var(--clay-l); color: var(--clay); }
+    .theme-btn.active { border-color: var(--clay); color: var(--clay); background: var(--clay-bg); }
+
+    /* ── PWA BANNER ── */
+    .pwa-banner {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 420px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);
+      padding: 14px 16px; display: none; align-items: center; gap: 12px;
+      z-index: 999; animation: fadeUp 0.3s var(--ease-bounce) both;
+    }
+    .pwa-banner-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+    .pwa-banner-icon { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .pwa-banner-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .pwa-banner-text .title { font-weight: 700; font-size: 14px; color: var(--ink); }
+    .pwa-banner-text .sub   { font-size: 12px; color: var(--ink-muted); }
+    .pwa-banner-actions { display: flex; gap: 8px; align-items: center; }
+    .pwa-btn-install {
+      background: var(--clay); color: white; border: none;
+      border-radius: var(--radius-sm); padding: 8px 14px;
+      font-weight: 700; font-size: 13px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .pwa-btn-dismiss {
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-muted); font-size: 18px; padding: 4px; line-height: 1;
+    }
   </style>
 </head>
 <body>
 
   <!-- NAV -->
   <nav class="nav">
-    <a href="perfil.html" class="nav-logo"><img src="/img/logo.png" style="height:48px;width:auto;vertical-align:middle;margin-right:8px;">UbiPet</a>
-    <button id="btnMenu" aria-label="Menú" style="
-      background:none; border:none; cursor:pointer; padding:8px;
-      display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center;
-    ">
+    <a href="perfil.html" class="nav-logo">
+      <img src="/img/logo.png" alt="UbiPet">
+      <span style="color:var(--clay);">Ubi</span><span style="color:var(--sage);">Pet</span>
+    </a>
+    <button id="btnMenu" class="ham-btn" aria-label="Menú">
       <span class="ham-line"></span>
       <span class="ham-line"></span>
       <span class="ham-line"></span>
     </button>
   </nav>
 
+  <!-- OVERLAY -->
+  <div id="menuOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:200; backdrop-filter:blur(2px);" onclick="cerrarMenu()"></div>
+
   <!-- MENÚ LATERAL -->
-  <div id="menuOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200;" onclick="cerrarMenu()"></div>
   <div id="menuPanel" style="
     position:fixed; top:0; right:-300px; width:280px; height:100vh;
-    background:var(--nav-bg); border-left:1px solid var(--input-border);
-    z-index:201; transition:right 0.3s; padding:0; display:flex; flex-direction:column;
-    box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+    background:var(--nav-bg); border-left:1px solid var(--card-border);
+    z-index:201; transition:right var(--duration) var(--ease);
+    display:flex; flex-direction:column;
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(16px);
   ">
     <!-- Header menú -->
-    <div style="padding:20px 24px 16px; border-bottom:1px solid var(--input-border); display:flex; align-items:center; justify-content:space-between;">
+    <div style="padding:20px; border-bottom:1px solid var(--card-border); display:flex; align-items:center; justify-content:space-between;">
       <div>
-        <div style="font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:var(--clay);">Ubi<span style="color:var(--sage);">Pet</span></div>
-        <div id="menuEmail" style="font-size:12px; color:var(--ink-soft); margin-top:2px;"></div>
+        <div style="font-family:'Fraunces',serif; font-size:20px; font-weight:700;">
+          <span style="color:var(--clay);">Ubi</span><span style="color:var(--sage);">Pet</span>
+        </div>
+        <div id="menuEmail" style="font-size:12px; color:var(--ink-muted); margin-top:2px;"></div>
       </div>
-      <button onclick="cerrarMenu()" style="background:none; border:none; cursor:pointer; font-size:20px; color:var(--ink-soft);">✕</button>
+      <button onclick="cerrarMenu()" style="background:none; border:none; cursor:pointer; font-size:20px; color:var(--ink-muted); padding:4px; line-height:1;">✕</button>
     </div>
 
     <!-- Opciones -->
     <div style="flex:1; overflow-y:auto; padding:12px 0;">
-
-      <!-- Mis mascotas -->
       <button onclick="cerrarMenu(); mostrarSeccion('mascotas')" class="menu-item" id="menuItemMascotas">
         🐾 Mis mascotas
       </button>
-
-      <!-- Configuración -->
       <button onclick="cerrarMenu(); mostrarSeccion('config')" class="menu-item" id="menuItemConfig">
         ⚙️ Configuración
       </button>
-
-      <div style="height:1px; background:var(--input-border); margin:8px 16px;"></div>
-
-      <!-- Cerrar sesión -->
-      <button id="btnLogout" class="menu-item" style="color:var(--coral);">
+      <div style="height:1px; background:var(--sand); margin:8px 16px;"></div>
+      <button id="btnLogout" class="menu-item" style="color:#e57373;">
         🚪 Cerrar sesión
       </button>
     </div>
   </div>
 
-  <!-- PANEL CONFIGURACIÓN -->
-  <div id="seccionConfig" style="display:none;">
-  </div>
+  <!-- CONTENIDO -->
+  <div class="page-wide" style="max-width:680px; padding-top:28px;">
 
-  <div class="page-wide" style="max-width:680px;">
-
-    <!-- LOADING -->
     <div id="loading"><div class="spinner"></div></div>
 
     <!-- SECCIÓN MASCOTAS -->
     <div id="seccionMascotas" style="display:none;">
+      <div id="mainContent" style="display:none;">
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div id="mainContent" style="display:none;">
+        <!-- Tabs -->
+        <div id="mascotasTabs" class="mascotas-nav"></div>
 
-      <!-- Tabs de mascotas -->
-      <div id="mascotasTabs" class="mascotas-nav"></div>
-
-      <!-- Estado vacío -->
-      <div id="emptyState" class="empty-state" style="display:none;">
-        <div class="icon">🐾</div>
-        <h2 style="font-family:'Fraunces',serif; color:var(--clay); margin-bottom:8px;">
-          ¡Bienvenido a UbiPet!
-        </h2>
-        <p style="margin-bottom:24px;">Agregá tu primera mascota para empezar</p>
-        <button class="btn btn-primary" id="btnPrimeraMascota">➕ Agregar mascota</button>
-      </div>
-
-      <!-- FORMULARIO -->
-      <div id="formContainer" class="card" style="display:none;">
-        <div id="alert" class="alert"></div>
-
-        <!-- ASOCIAR PLACA -->
-        <div id="placaSection">
-          <!-- se llena dinámicamente -->
+        <!-- Estado vacío -->
+        <div id="emptyState" class="card" style="display:none; text-align:center; padding:56px 24px;">
+          <div style="font-size:56px; margin-bottom:16px;">🐾</div>
+          <h2 style="margin-bottom:8px;">¡Bienvenido a UbiPet!</h2>
+          <p style="margin-bottom:24px; max-width:280px; margin-left:auto; margin-right:auto;">Agregá tu primera mascota para empezar a protegerla</p>
+          <button class="btn btn-primary" id="btnPrimeraMascota">➕ Agregar mascota</button>
         </div>
 
-        <!-- FOTO DE PERFIL -->
-        <div class="section-title">📸 Foto de la mascota</div>
-        <div class="foto-upload-area">
-          <div id="fotoPlaceholder" class="foto-placeholder" onclick="document.getElementById('fotoInput').click()">🐾</div>
-          <img id="fotoPreview" class="foto-preview" src="" alt="Foto" style="display:none;" onclick="document.getElementById('fotoInput').click()">
-          <div class="foto-upload-info">
-            <button class="btn btn-ghost" type="button" onclick="document.getElementById('fotoInput').click()">
-              📷 Subir foto
-            </button>
-            <p>JPG o PNG. Máx 5MB.<br>Aparecerá cuando alguien escanee el QR.</p>
-            <input type="file" id="fotoInput" accept="image/*" style="display:none;">
-          </div>
-        </div>
+        <!-- FORMULARIO -->
+        <div id="formContainer" class="card" style="display:none;">
+          <div id="alert" class="alert"></div>
 
-        <div class="section-title">🐾 Datos de la mascota</div>
-        <div class="form-grid">
-          <div>
-            <div class="input-group">
-              <label>Nombre *</label>
-              <input type="text" id="nombreMascota" placeholder="Firulais">
-            </div>
-            <div class="input-group">
-              <label>Raza</label>
-              <input type="text" id="raza" placeholder="Labrador, mestizo...">
-            </div>
-            <div class="input-group">
-              <label>Edad (años)</label>
-              <input type="number" id="edad" min="0" max="30" placeholder="3">
-            </div>
-          </div>
-          <div>
-            <div class="input-group">
-              <label>Peso (kg)</label>
-              <input type="number" id="peso" step="0.1" placeholder="12.5">
-            </div>
-            <div class="input-group">
-              <label>Descripción</label>
-              <textarea id="descripcion" placeholder="Color, señas particulares..."></textarea>
-            </div>
-            <div class="toggle-wrap">
-              <button class="toggle" id="togglePerdida" type="button"></button>
-              <span class="toggle-label" id="toggleLabel">Está en casa ✅</span>
-            </div>
-          </div>
-        </div>
+          <!-- Placa -->
+          <div id="placaSection"></div>
 
-        <div class="section-title">👤 Datos del dueño</div>
-        <div class="form-grid">
-          <div class="input-group">
-            <label>Tu nombre *</label>
-            <input type="text" id="nombreDueno" placeholder="Juan Pérez">
+          <!-- Foto -->
+          <div class="section-title">📸 Foto de la mascota</div>
+          <div class="foto-upload-area">
+            <div id="fotoPlaceholder" class="foto-placeholder" onclick="document.getElementById('fotoInput').click()">🐾</div>
+            <img id="fotoPreview" class="foto-preview" src="" alt="Foto" style="display:none;" onclick="document.getElementById('fotoInput').click()">
+            <div class="foto-upload-info">
+              <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('fotoInput').click()">📷 Subir foto</button>
+              <p>JPG o PNG, máx 5MB.<br>Visible cuando alguien escanea el QR.</p>
+              <input type="file" id="fotoInput" accept="image/*" style="display:none;">
+            </div>
           </div>
-          <div class="input-group">
-            <label>WhatsApp * (+569...)</label>
-            <input type="tel" id="telefono" placeholder="+56912345678">
-          </div>
-        </div>
 
-        <div style="display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" style="flex:1; min-width:160px;" id="btnGuardar">
-            💾 Guardar
-          </button>
-          <button class="btn btn-ghost" id="btnCancelar">Cancelar</button>
-          <button class="btn" id="btnEliminar" style="background:#fff0f0; color:#c0392b; border:2px solid #ffcccc; display:none;">
-            🗑️ Eliminar mascota
-          </button>
-        </div>
-
-        <!-- QR -->
-        <div id="qrSection" style="display:none;" class="qr-box">
-          <p style="font-weight:800; margin-bottom:12px; color:var(--clay);">📲 QR de tu placa</p>
-          <img id="qrImg" src="" alt="QR" width="200" height="200">
-          <div class="qr-url" id="qrUrl"></div>
-          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-            <button class="btn btn-ghost" onclick="copiarUrl()">📋 Copiar URL</button>
-            <a class="btn btn-primary" id="qrDownload" download="ubipet-qr.png">⬇️ Descargar QR</a>
+          <!-- Datos mascota -->
+          <div class="section-title">🐾 Datos de la mascota</div>
+          <div class="form-grid">
+            <div>
+              <div class="input-group">
+                <label>Nombre *</label>
+                <input type="text" id="nombreMascota" placeholder="Firulais">
+              </div>
+              <div class="input-group">
+                <label>Raza</label>
+                <input type="text" id="raza" placeholder="Labrador, mestizo...">
+              </div>
+              <div class="input-group">
+                <label>Edad (años)</label>
+                <input type="number" id="edad" min="0" max="30" placeholder="3">
+              </div>
+            </div>
+            <div>
+              <div class="input-group">
+                <label>Peso (kg)</label>
+                <input type="number" id="peso" step="0.1" placeholder="12.5">
+              </div>
+              <div class="input-group">
+                <label>Descripción</label>
+                <textarea id="descripcion" placeholder="Color, señas particulares..."></textarea>
+              </div>
+              <div class="toggle-wrap">
+                <button class="toggle-custom" id="togglePerdida" type="button"></button>
+                <span class="toggle-label" id="toggleLabel">Está en casa ✅</span>
+              </div>
+            </div>
           </div>
+
+          <!-- Datos dueño -->
+          <div class="section-title">👤 Datos del dueño</div>
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Tu nombre *</label>
+              <input type="text" id="nombreDueno" placeholder="Juan Pérez">
+            </div>
+            <div class="input-group">
+              <label>WhatsApp * (+569...)</label>
+              <input type="tel" id="telefono" placeholder="+56912345678">
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" style="flex:1; min-width:150px;" id="btnGuardar">💾 Guardar</button>
+            <button class="btn btn-ghost" id="btnCancelar">Cancelar</button>
+            <button class="btn btn-danger" id="btnEliminar" style="display:none; opacity:0.85;">🗑️ Eliminar</button>
+          </div>
+
+          <!-- QR -->
+          <div id="qrSection" style="display:none;" class="qr-box">
+            <p style="font-weight:700; margin-bottom:14px; color:var(--clay); font-family:'Fraunces',serif; font-size:16px;">📲 QR de tu placa</p>
+            <img id="qrImg" src="" alt="QR" width="180" height="180">
+            <div class="qr-url" id="qrUrl"></div>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" onclick="copiarUrl()">📋 Copiar URL</button>
+              <a class="btn btn-primary btn-sm" id="qrDownload" download="ubipet-qr.png">⬇️ Descargar QR</a>
+            </div>
+          </div>
+
         </div>
       </div>
-
     </div>
-    </div> <!-- /seccionMascotas -->
 
     <!-- SECCIÓN CONFIGURACIÓN -->
-    <div id="seccionConfigInner" style="display:none; padding-top:8px;">
-      <h2 style="font-family:'Fraunces',serif; color:var(--clay); margin-bottom:20px; font-size:22px;">⚙️ Configuración</h2>
+    <div id="seccionConfigInner" style="display:none; padding-top:4px;">
+      <h2 style="margin-bottom:20px;">Configuración</h2>
 
-      <!-- Tema -->
       <div class="config-section">
-        <h3>🎨 Tema de la app</h3>
-        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:4px;">Elegí cómo se ve UbiPet en tu dispositivo</p>
+        <h3>🎨 Tema</h3>
+        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:12px;">Elegí cómo se ve UbiPet en tu dispositivo</p>
         <div class="theme-options">
-          <button class="theme-btn" id="themeLight" onclick="setTema('light')">
-            ☀️<br>Claro
-          </button>
-          <button class="theme-btn" id="themeDark" onclick="setTema('dark')">
-            🌙<br>Oscuro
-          </button>
-          <button class="theme-btn" id="themeAuto" onclick="setTema('auto')">
-            🔄<br>Automático
-          </button>
+          <button class="theme-btn" id="themeLight" onclick="setTema('light')">☀️<br>Claro</button>
+          <button class="theme-btn" id="themeDark"  onclick="setTema('dark')">🌙<br>Oscuro</button>
+          <button class="theme-btn" id="themeAuto"  onclick="setTema('auto')">🔄<br>Auto</button>
         </div>
       </div>
 
-      <!-- Cambiar contraseña -->
       <div class="config-section">
         <h3>🔑 Cambiar contraseña</h3>
         <div id="alertPass" class="alert"></div>
@@ -434,7 +386,6 @@
         <button class="btn btn-primary" id="btnCambiarPass">🔐 Guardar contraseña</button>
       </div>
 
-      <!-- Info cuenta -->
       <div class="config-section">
         <h3>👤 Mi cuenta</h3>
         <p style="font-size:14px; color:var(--ink-soft);">Email: <strong id="configEmail" style="color:var(--ink);"></strong></p>
@@ -443,53 +394,74 @@
 
   </div>
 
+  <!-- PWA BANNER -->
+  <div class="pwa-banner" id="installBanner">
+    <div class="pwa-banner-info">
+      <div class="pwa-banner-icon"><img src="/icon-192.png" alt="UbiPet"></div>
+      <div class="pwa-banner-text">
+        <div class="title">Instalá UbiPet</div>
+        <div class="sub">Accedé más rápido desde tu celular</div>
+      </div>
+    </div>
+    <div class="pwa-banner-actions">
+      <button class="pwa-btn-install" id="btnInstallApp">Instalar</button>
+      <button class="pwa-btn-dismiss" id="btnDismissInstall">✕</button>
+    </div>
+  </div>
+
   <script type="module">
     import { supabase } from '/js/supabase.js'
 
-    // ─── subir foto a Supabase Storage ───────────
+    // ─── ESTADO ──────────────────────────────────
+    let user = null, mascotas = [], mascotaActual = null, modoNueva = false
+
+    // ─── HELPERS ─────────────────────────────────
+    function showAlert(msg, type = 'err') {
+      const el = document.getElementById('alert')
+      el.textContent = msg
+      el.className = `alert alert-${type} show`
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+    function hideAlert() { document.getElementById('alert').className = 'alert' }
+
+    // ─── AUTH GUARD ──────────────────────────────
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { window.location.href = 'index.html' }
+    user = session.user
+    document.getElementById('menuEmail').textContent = user.email
+    document.getElementById('configEmail').textContent = user.email
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.href = 'index.html'
+    })
+
+    // ─── FOTO ────────────────────────────────────
     async function subirFoto(file, mascotaId) {
-      const ext      = file.name.split('.').pop()
+      const ext = file.name.split('.').pop()
       const fileName = `${mascotaId}.${ext}`
-      
-      // eliminar foto anterior si existe
       await supabase.storage.from('fotos-mascotas').remove([fileName])
-
-      const { error } = await supabase.storage
-        .from('fotos-mascotas')
-        .upload(fileName, file, { upsert: true })
-
+      const { error } = await supabase.storage.from('fotos-mascotas').upload(fileName, file, { upsert: true })
       if (error) throw new Error('Error subiendo foto: ' + error.message)
-
-      const { data } = supabase.storage
-        .from('fotos-mascotas')
-        .getPublicUrl(fileName)
-
+      const { data } = supabase.storage.from('fotos-mascotas').getPublicUrl(fileName)
       return data.publicUrl
     }
 
-    // ─── preview local de foto ────────────────────
     function setupFotoPreview() {
       document.getElementById('fotoInput').addEventListener('change', function() {
         const file = this.files[0]
         if (!file) return
-        if (file.size > 5 * 1024 * 1024) {
-          showAlert('La foto no puede superar 5MB')
-          return
-        }
+        if (file.size > 5 * 1024 * 1024) { showAlert('La foto no puede superar 5MB'); return }
         const reader = new FileReader()
         reader.onload = e => mostrarFotoPreview(e.target.result)
         reader.readAsDataURL(file)
       })
     }
-
     function mostrarFotoPreview(url) {
-      const preview     = document.getElementById('fotoPreview')
-      const placeholder = document.getElementById('fotoPlaceholder')
-      preview.src = url
-      preview.style.display = 'block'
-      placeholder.style.display = 'none'
+      document.getElementById('fotoPreview').src = url
+      document.getElementById('fotoPreview').style.display = 'block'
+      document.getElementById('fotoPlaceholder').style.display = 'none'
     }
-
     function limpiarFotoPreview() {
       document.getElementById('fotoPreview').style.display = 'none'
       document.getElementById('fotoPreview').src = ''
@@ -497,57 +469,20 @@
       document.getElementById('fotoInput').value = ''
     }
 
-    // ─── estado ──────────────────────────────────
-    let user = null
-    let mascotas = []
-    let mascotaActual = null
-    let modoNueva = false
-
-    // ─── helpers ─────────────────────────────────
-    function showAlert(msg, type = 'err') {
-      const el = document.getElementById('alert')
-      el.textContent = msg
-      el.className = `alert alert-${type} show`
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
-    function hideAlert() {
-      document.getElementById('alert').className = 'alert'
-    }
-
-    // ─── auth guard ──────────────────────────────
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { window.location.href = 'index.html' }
-    user = session.user
-
-    document.getElementById('btnLogout').addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      window.location.href = 'index.html'
-    })
-
-    // Mostrar email en menú
-    const emailEl = document.getElementById('menuEmail')
-    const configEl = document.getElementById('configEmail')
-    if (emailEl) emailEl.textContent = user.email
-    if (configEl) configEl.textContent = user.email
-
-    // ─── cargar mascotas ─────────────────────────
+    // ─── CARGAR MASCOTAS ─────────────────────────
     async function cargarMascotas() {
       const { data, error } = await supabase
-        .from('perfiles')
-        .select('*, placas(codigo)')
-        .eq('user_id', user.id)
-        .order('created_at')
-
+        .from('perfiles').select('*, placas(codigo)')
+        .eq('user_id', user.id).order('created_at')
       if (error) { console.error(error); return }
       mascotas = data || []
       renderTabs()
     }
 
-    // ─── tabs ────────────────────────────────────
+    // ─── TABS ────────────────────────────────────
     function renderTabs() {
       document.getElementById('loading').style.display = 'none'
       document.getElementById('mainContent').style.display = 'block'
-
       const tabs = document.getElementById('mascotasTabs')
       tabs.innerHTML = ''
 
@@ -556,10 +491,9 @@
         document.getElementById('formContainer').style.display = 'none'
         return
       }
-
       document.getElementById('emptyState').style.display = 'none'
 
-      mascotas.forEach((m, i) => {
+      mascotas.forEach(m => {
         const tab = document.createElement('button')
         tab.className = 'mascota-tab' + (mascotaActual?.id === m.id ? ' active' : '')
         tab.textContent = (m.esta_perdida ? '🚨 ' : '🐾 ') + m.nombre_mascota
@@ -576,22 +510,15 @@
       if (!mascotaActual && mascotas.length > 0) seleccionarMascota(mascotas[0])
     }
 
-    // ─── seleccionar mascota ──────────────────────
+    // ─── SELECCIONAR / NUEVA MASCOTA ─────────────
     function seleccionarMascota(m) {
-      mascotaActual = m
-      modoNueva = false
+      mascotaActual = m; modoNueva = false
       document.getElementById('formContainer').style.display = 'block'
       document.getElementById('emptyState').style.display = 'none'
-      renderTabs()
-      cargarCampos(m)
-      renderPlacaSection(m)
-      renderQR(m)
+      renderTabs(); cargarCampos(m); renderPlacaSection(m); renderQR(m)
     }
-
-    // ─── nueva mascota ───────────────────────────
     function nuevaMascota() {
-      mascotaActual = null
-      modoNueva = true
+      mascotaActual = null; modoNueva = true
       document.getElementById('formContainer').style.display = 'block'
       document.getElementById('emptyState').style.display = 'none'
       limpiarCampos()
@@ -605,43 +532,34 @@
     document.getElementById('btnPrimeraMascota')?.addEventListener('click', nuevaMascota)
     document.getElementById('btnCancelar').addEventListener('click', () => {
       if (mascotas.length > 0) seleccionarMascota(mascotas[0])
-      else document.getElementById('emptyState').style.display = 'block'
-      document.getElementById('formContainer').style.display = mascotas.length > 0 ? 'block' : 'none'
+      else { document.getElementById('emptyState').style.display = 'block'; document.getElementById('formContainer').style.display = 'none' }
     })
 
-    // ─── sección de placa ─────────────────────────
+    // ─── PLACA ───────────────────────────────────
     function renderPlacaSection(m) {
       const sec = document.getElementById('placaSection')
-
       if (m.placa_id) {
-        // ya tiene placa asociada
         sec.innerHTML = `
           <div class="placa-activa">
-            <p style="font-weight:800; color:var(--sage-d); margin-bottom:4px;">✅ Placa asociada</p>
-            <p style="font-size:22px; font-weight:900; letter-spacing:2px; color:var(--ink);">
-              ${m.placas?.codigo || '—'}
-            </p>
-          </div>
-        `
+            <span style="font-size:28px;">🏷️</span>
+            <div>
+              <p style="font-size:12px; font-weight:600; color:var(--sage); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:2px;">Placa asociada</p>
+              <span class="placa-codigo">${m.placas?.codigo || '—'}</span>
+            </div>
+          </div>`
       } else {
-        // sin placa — formulario para asociar
         sec.innerHTML = `
           <div class="placa-box">
-            <p style="font-weight:800; color:var(--clay); margin-bottom:8px;">🏷️ Asociar placa física</p>
-            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">
-              Ingresá el código que aparece en tu placa UbiPet (ej: UBI-001)
-            </p>
+            <p style="font-weight:700; color:var(--clay); margin-bottom:6px;">🏷️ Asociar placa física</p>
+            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">Ingresá el código que aparece en tu placa UbiPet</p>
             <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
               <input type="text" id="codigoPlaca" placeholder="UBI-001"
-                style="max-width:160px; text-transform:uppercase; font-weight:800; letter-spacing:2px;">
-              <button class="btn btn-primary" id="btnAsociarPlaca">Asociar placa</button>
+                style="max-width:150px; text-transform:uppercase; font-weight:700; letter-spacing:2px; text-align:center;">
+              <button class="btn btn-primary btn-sm" id="btnAsociarPlaca">Asociar</button>
             </div>
             <div id="alertPlaca" class="alert" style="margin-top:10px;"></div>
-          </div>
-        `
+          </div>`
         document.getElementById('btnAsociarPlaca').addEventListener('click', asociarPlaca)
-
-        // pre-cargar placa desde QR escaneado
         const placaPendiente = sessionStorage.getItem('placa_pendiente')
         if (placaPendiente) {
           document.getElementById('codigoPlaca').value = placaPendiente
@@ -653,51 +571,21 @@
       }
     }
 
-    // ─── asociar placa ────────────────────────────
     async function asociarPlaca() {
       const codigo = document.getElementById('codigoPlaca').value.trim().toUpperCase()
       if (!codigo) return
-
       const alertEl = document.getElementById('alertPlaca')
-      alertEl.className = 'alert alert-info show'
-      alertEl.textContent = '🔍 Verificando placa...'
+      alertEl.className = 'alert alert-info show'; alertEl.textContent = '🔍 Verificando...'
 
-      // buscar la placa
-      const { data: placa, error } = await supabase
-        .from('placas')
-        .select('*')
-        .eq('codigo', codigo)
-        .single()
+      const { data: placa, error } = await supabase.from('placas').select('*').eq('codigo', codigo).single()
+      if (error || !placa) { alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ Código no encontrado'; return }
+      if (placa.estado === 'activa') { alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ Esta placa ya está en uso'; return }
 
-      if (error || !placa) {
-        alertEl.className = 'alert alert-err show'
-        alertEl.textContent = '❌ Código no encontrado. Revisá que esté bien escrito.'
-        return
-      }
-      if (placa.estado === 'activa') {
-        alertEl.className = 'alert alert-err show'
-        alertEl.textContent = '❌ Esta placa ya está en uso.'
-        return
-      }
+      const { error: errUpdate } = await supabase.from('perfiles').update({ placa_id: placa.id }).eq('id', mascotaActual.id)
+      if (errUpdate) { alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ Error: ' + errUpdate.message; return }
 
-      // asociar
-      const { error: errUpdate } = await supabase
-        .from('perfiles')
-        .update({ placa_id: placa.id })
-        .eq('id', mascotaActual.id)
-
-      if (errUpdate) {
-        alertEl.className = 'alert alert-err show'
-        alertEl.textContent = '❌ Error: ' + errUpdate.message
-        return
-      }
-
-      // marcar placa como activa
       await supabase.from('placas').update({ estado: 'activa' }).eq('id', placa.id)
-
-      alertEl.className = 'alert alert-ok show'
-      alertEl.textContent = '✅ ¡Placa asociada!'
-
+      alertEl.className = 'alert alert-ok show'; alertEl.textContent = '✅ ¡Placa asociada!'
       setTimeout(async () => {
         await cargarMascotas()
         const m = mascotas.find(x => x.id === mascotaActual.id)
@@ -709,54 +597,36 @@
     function renderQR(m) {
       const sec = document.getElementById('qrSection')
       if (!m.placa_id) { sec.style.display = 'none'; return }
-
       const url = `${window.location.origin}/rescate.html?id=${m.id}`
-      document.getElementById('qrImg').src =
-        `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`
+      document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`
       document.getElementById('qrUrl').textContent = url
-      document.getElementById('qrDownload').href =
-        `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`
+      document.getElementById('qrDownload').href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`
       sec.style.display = 'block'
     }
-
     window.copiarUrl = () => {
-      const url = document.getElementById('qrUrl').textContent
-      navigator.clipboard.writeText(url)
+      navigator.clipboard.writeText(document.getElementById('qrUrl').textContent)
       showAlert('📋 URL copiada', 'ok')
     }
 
-    // ─── cargar campos ────────────────────────────
+    // ─── CAMPOS ──────────────────────────────────
     function cargarCampos(m) {
       document.getElementById('nombreMascota').value = m.nombre_mascota || ''
-      document.getElementById('raza').value           = m.raza || ''
-      document.getElementById('edad').value           = m.edad || ''
-      document.getElementById('peso').value           = m.peso || ''
-      document.getElementById('descripcion').value    = m.descripcion || ''
-      document.getElementById('nombreDueno').value    = m.nombre_dueno || ''
-      document.getElementById('telefono').value       = m.telefono || ''
-
+      document.getElementById('raza').value          = m.raza || ''
+      document.getElementById('edad').value          = m.edad || ''
+      document.getElementById('peso').value          = m.peso || ''
+      document.getElementById('descripcion').value   = m.descripcion || ''
+      document.getElementById('nombreDueno').value   = m.nombre_dueno || ''
+      document.getElementById('telefono').value      = m.telefono || ''
       const toggle = document.getElementById('togglePerdida')
       const label  = document.getElementById('toggleLabel')
-      if (m.esta_perdida) {
-        toggle.classList.add('on')
-        label.textContent = '¡Está perdida! 🚨'
-      } else {
-        toggle.classList.remove('on')
-        label.textContent = 'Está en casa ✅'
-      }
-
+      toggle.classList.toggle('on', !!m.esta_perdida)
+      label.textContent = m.esta_perdida ? '¡Está perdida! 🚨' : 'Está en casa ✅'
       document.getElementById('btnGuardar').textContent = '💾 Guardar cambios'
       document.getElementById('btnEliminar').style.display = 'block'
       hideAlert()
-
-      // mostrar foto si tiene
-      if (m.foto_url) {
-        mostrarFotoPreview(m.foto_url)
-      } else {
-        limpiarFotoPreview()
-      }
+      if (m.foto_url) mostrarFotoPreview(m.foto_url)
+      else limpiarFotoPreview()
     }
-
     function limpiarCampos() {
       ['nombreMascota','raza','edad','peso','descripcion','nombreDueno','telefono']
         .forEach(id => { document.getElementById(id).value = '' })
@@ -765,31 +635,26 @@
       limpiarFotoPreview()
     }
 
-    // ─── toggle perdida ───────────────────────────
     document.getElementById('togglePerdida').addEventListener('click', function() {
       this.classList.toggle('on')
       document.getElementById('toggleLabel').textContent =
         this.classList.contains('on') ? '¡Está perdida! 🚨' : 'Está en casa ✅'
     })
 
-    // ─── guardar ──────────────────────────────────
+    // ─── GUARDAR ─────────────────────────────────
     document.getElementById('btnGuardar').addEventListener('click', async () => {
-      const nombre  = document.getElementById('nombreMascota').value.trim()
-      const dueno   = document.getElementById('nombreDueno').value.trim()
-      const telefono= document.getElementById('telefono').value.trim()
-
+      const nombre   = document.getElementById('nombreMascota').value.trim()
+      const dueno    = document.getElementById('nombreDueno').value.trim()
+      const telefono = document.getElementById('telefono').value.trim()
       if (!nombre)   return showAlert('El nombre de la mascota es obligatorio')
       if (!dueno)    return showAlert('Tu nombre es obligatorio')
       if (!telefono) return showAlert('El WhatsApp es obligatorio')
 
       const btn = document.getElementById('btnGuardar')
-      btn.disabled = true
-      btn.textContent = '⏳ Guardando...'
-
-      const perdida = document.getElementById('togglePerdida').classList.contains('on')
+      btn.disabled = true; btn.innerHTML = '<span class="spinner spinner-sm"></span>'
 
       const payload = {
-        user_id:        user.id,
+        user_id: user.id,
         nombre_mascota: nombre,
         raza:           document.getElementById('raza').value,
         edad:           parseInt(document.getElementById('edad').value) || null,
@@ -798,40 +663,29 @@
         nombre_dueno:   dueno,
         email_dueno:    user.email,
         telefono:       telefono,
-        esta_perdida:   perdida
+        esta_perdida:   document.getElementById('togglePerdida').classList.contains('on')
       }
-
-      // subir foto si se seleccionó una nueva
-      const fotoFile = document.getElementById('fotoInput').files[0]
 
       let error
       if (modoNueva) {
         const res = await supabase.from('perfiles').insert(payload).select().single()
-        error = res.error
-        if (!error) mascotaActual = res.data
+        error = res.error; if (!error) mascotaActual = res.data
       } else {
         const res = await supabase.from('perfiles').update(payload).eq('id', mascotaActual.id).select().single()
-        error = res.error
-        if (!error) mascotaActual = res.data
+        error = res.error; if (!error) mascotaActual = res.data
       }
 
-      // subir foto si hay una nueva seleccionada
+      const fotoFile = document.getElementById('fotoInput').files[0]
       if (!error && fotoFile && mascotaActual?.id) {
         try {
           const fotoUrl = await subirFoto(fotoFile, mascotaActual.id)
           await supabase.from('perfiles').update({ foto_url: fotoUrl }).eq('id', mascotaActual.id)
           mascotaActual.foto_url = fotoUrl
-        } catch(fotoErr) {
-          console.error('Error foto:', fotoErr)
-          // no bloquear el guardado por error de foto
-        }
+        } catch(e) { console.error('Error foto:', e) }
       }
 
-      btn.disabled = false
-      btn.textContent = '💾 Guardar cambios'
-
+      btn.disabled = false; btn.textContent = '💾 Guardar cambios'
       if (error) return showAlert('❌ ' + error.message)
-
       showAlert('✅ ¡Guardado correctamente!', 'ok')
       modoNueva = false
       await cargarMascotas()
@@ -839,49 +693,30 @@
       if (m) seleccionarMascota(m)
     })
 
-    // ─── ELIMINAR MASCOTA ────────────────────────
+    // ─── ELIMINAR ────────────────────────────────
     document.getElementById('btnEliminar').addEventListener('click', async () => {
       if (!mascotaActual) return
-
-      const confirmar = confirm(`¿Seguro que querés eliminar a ${mascotaActual.nombre_mascota}? Esta acción no se puede deshacer.`)
-      if (!confirmar) return
+      if (!confirm(`¿Seguro que querés eliminar a ${mascotaActual.nombre_mascota}? Esta acción no se puede deshacer.`)) return
 
       const btn = document.getElementById('btnEliminar')
-      btn.disabled = true
-      btn.textContent = '⏳ Eliminando...'
+      btn.disabled = true; btn.innerHTML = '<span class="spinner spinner-sm"></span>'
 
-      // liberar la placa si tiene una asociada
-      if (mascotaActual.placa_id) {
-        await supabase
-          .from('placas')
-          .update({ estado: 'disponible' })
-          .eq('id', mascotaActual.placa_id)
-      }
+      if (mascotaActual.placa_id)
+        await supabase.from('placas').update({ estado: 'disponible' }).eq('id', mascotaActual.placa_id)
 
-      // eliminar foto de storage si tiene
       if (mascotaActual.foto_url) {
         const fileName = `${mascotaActual.id}.${mascotaActual.foto_url.split('.').pop().split('?')[0]}`
         await supabase.storage.from('fotos-mascotas').remove([fileName])
       }
 
-      // eliminar perfil
-      const { error } = await supabase
-        .from('perfiles')
-        .delete()
-        .eq('id', mascotaActual.id)
-
-      if (error) {
-        btn.disabled = false
-        btn.textContent = '🗑️ Eliminar mascota'
-        showAlert('❌ Error al eliminar: ' + error.message)
-        return
-      }
+      const { error } = await supabase.from('perfiles').delete().eq('id', mascotaActual.id)
+      if (error) { btn.disabled = false; btn.textContent = '🗑️ Eliminar'; showAlert('❌ ' + error.message); return }
 
       mascotaActual = null
       await cargarMascotas()
     })
 
-    // ─── MENÚ HAMBURGUESA ────────────────────────
+    // ─── MENÚ ────────────────────────────────────
     function abrirMenu() {
       document.getElementById('menuPanel').style.right = '0'
       document.getElementById('menuOverlay').style.display = 'block'
@@ -895,128 +730,68 @@
     document.getElementById('btnMenu').addEventListener('click', abrirMenu)
 
     function mostrarSeccion(seccion) {
-      document.getElementById('seccionMascotas').style.display   = seccion === 'mascotas' ? 'block' : 'none'
-      document.getElementById('seccionConfigInner').style.display = seccion === 'config'   ? 'block' : 'none'
+      document.getElementById('seccionMascotas').style.display    = seccion === 'mascotas' ? 'block' : 'none'
+      document.getElementById('seccionConfigInner').style.display  = seccion === 'config'   ? 'block' : 'none'
       document.getElementById('menuItemMascotas').classList.toggle('active', seccion === 'mascotas')
       document.getElementById('menuItemConfig').classList.toggle('active', seccion === 'config')
     }
     window.mostrarSeccion = mostrarSeccion
 
-    // ─── TEMA ─────────────────────────────────────
+    // ─── TEMA ────────────────────────────────────
     function aplicarTema(tema) {
       const root = document.documentElement
       root.removeAttribute('data-theme')
       if (tema === 'light') root.setAttribute('data-theme', 'light')
       if (tema === 'dark')  root.setAttribute('data-theme', 'dark')
-      // update botones
       ;['Light','Dark','Auto'].forEach(t => {
-        const btn = document.getElementById('theme' + t)
-        if (btn) btn.classList.toggle('active', tema === t.toLowerCase())
+        document.getElementById('theme' + t)?.classList.toggle('active', tema === t.toLowerCase())
       })
     }
-    function setTema(tema) {
-      localStorage.setItem('ubipet-tema', tema)
-      aplicarTema(tema)
-    }
+    function setTema(tema) { localStorage.setItem('ubipet-tema', tema); aplicarTema(tema) }
     window.setTema = setTema
-
-    // cargar tema guardado
-    const temaGuardado = localStorage.getItem('ubipet-tema') || 'auto'
-    aplicarTema(temaGuardado)
+    aplicarTema(localStorage.getItem('ubipet-tema') || 'auto')
 
     // ─── CAMBIAR CONTRASEÑA ───────────────────────
     document.getElementById('btnCambiarPass').addEventListener('click', async () => {
       const newPass     = document.getElementById('newPass').value
       const confirmPass = document.getElementById('confirmPass').value
-
-      if (!newPass || !confirmPass) return showAlert('alertPass', 'Completá ambos campos')
-      if (newPass.length < 6) return showAlert('alertPass', 'Mínimo 6 caracteres')
-      if (newPass !== confirmPass) return showAlert('alertPass', 'Las contraseñas no coinciden')
+      if (!newPass || !confirmPass) return showAlert2('Completá ambos campos')
+      if (newPass.length < 6) return showAlert2('Mínimo 6 caracteres')
+      if (newPass !== confirmPass) return showAlert2('Las contraseñas no coinciden')
 
       const btn = document.getElementById('btnCambiarPass')
-      btn.disabled = true
-      btn.textContent = '⏳ Guardando...'
-
+      btn.disabled = true; btn.innerHTML = '<span class="spinner spinner-sm"></span>'
       const { error } = await supabase.auth.updateUser({ password: newPass })
-
-      btn.disabled = false
-      btn.textContent = '🔐 Guardar contraseña'
-
-      if (error) return showAlert('alertPass', '❌ ' + error.message)
-      showAlert('alertPass', '✅ Contraseña actualizada', 'ok')
+      btn.disabled = false; btn.textContent = '🔐 Guardar contraseña'
+      if (error) return showAlert2('❌ ' + error.message)
+      showAlert2('✅ Contraseña actualizada', 'ok')
       document.getElementById('newPass').value = ''
       document.getElementById('confirmPass').value = ''
     })
+    function showAlert2(msg, type = 'err') {
+      const el = document.getElementById('alertPass')
+      el.textContent = msg; el.className = `alert alert-${type} show`
+    }
 
-    // ─── init ─────────────────────────────────────
+    // ─── INIT ────────────────────────────────────
     setupFotoPreview()
     await cargarMascotas()
     mostrarSeccion('mascotas')
   </script>
 
-  <!-- Banner de instalación PWA -->
-  <div id="installBanner" style="
-    display:none;
-    position:fixed;
-    bottom:0; left:0; right:0;
-    background:var(--clay);
-    color:white;
-    padding:16px 20px;
-    z-index:999;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    box-shadow:0 -4px 20px rgba(0,0,0,0.15);
-  ">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span style="font-size:28px;">🐾</span>
-      <div>
-        <div style="font-weight:800; font-size:14px;">Instalá UbiPet</div>
-        <div style="font-size:12px; opacity:0.85;">Accedé más rápido desde tu celular</div>
-      </div>
-    </div>
-    <div style="display:flex; gap:8px;">
-      <button id="btnInstallApp" style="
-        background:white; color:var(--clay);
-        border:none; padding:8px 16px;
-        border-radius:20px; font-weight:800;
-        font-size:13px; cursor:pointer;
-      ">Instalar</button>
-      <button id="btnDismissInstall" style="
-        background:transparent; color:white;
-        border:2px solid rgba(255,255,255,0.4);
-        padding:8px 12px; border-radius:20px;
-        font-size:13px; cursor:pointer;
-      ">Ahora no</button>
-    </div>
-  </div>
-
+  <!-- PWA -->
   <script>
     let deferredPrompt = null
     const banner = document.getElementById('installBanner')
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault()
-      deferredPrompt = e
-      banner.style.display = 'flex'
-    })
-
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; banner.style.display = 'flex' })
     document.getElementById('btnInstallApp').addEventListener('click', async () => {
       if (!deferredPrompt) return
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      deferredPrompt = null
-      banner.style.display = 'none'
+      deferredPrompt.prompt(); await deferredPrompt.userChoice
+      deferredPrompt = null; banner.style.display = 'none'
     })
-
-    document.getElementById('btnDismissInstall').addEventListener('click', () => {
-      banner.style.display = 'none'
-    })
-
-    window.addEventListener('appinstalled', () => {
-      banner.style.display = 'none'
-      deferredPrompt = null
-    })
+    document.getElementById('btnDismissInstall').addEventListener('click', () => banner.style.display = 'none')
+    window.addEventListener('appinstalled', () => { banner.style.display = 'none'; deferredPrompt = null })
   </script>
+
 </body>
 </html>

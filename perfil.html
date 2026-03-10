@@ -809,42 +809,44 @@
       const btn   = document.getElementById('btnPushToggle')
       const noSop = document.getElementById('pushNoSoportado')
       const bloq  = document.getElementById('pushBloqueado')
+      if (!badge || !btn) return
 
-      // reset
+      // reset visual
       noSop.style.display = 'none'
       bloq.style.display  = 'none'
-      btn.style.display   = 'inline-flex'
+      btn.style.display   = 'none'
       btn.disabled        = false
+      btn.onclick         = null
 
       // sin soporte
       if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
         badge.textContent = '❌ No soportado'
-        btn.style.display = 'none'
         noSop.style.display = 'block'
         return
       }
 
-      // bloqueado
+      // bloqueado por el usuario
       if (Notification.permission === 'denied') {
         badge.textContent = '🚫 Bloqueadas'
         Object.assign(badge.style, { background:'rgba(229,115,115,0.12)', color:'#e57373', borderColor:'rgba(229,115,115,0.3)' })
-        btn.style.display = 'none'
         bloq.style.display = 'block'
         return
       }
 
-      // verificar si hay suscripción activa
+      // verificar suscripción activa
       let subActiva = false
       try {
         const reg = await navigator.serviceWorker.ready
         const sub = await reg.pushManager.getSubscription()
         subActiva = !!sub && Notification.permission === 'granted'
-      } catch(e) { console.warn('Push check error:', e) }
+      } catch(e) { console.warn('Push check:', e) }
 
       if (subActiva) {
         badge.textContent = '🔔 Activadas'
         Object.assign(badge.style, { background:'var(--sage-bg)', color:'var(--sage-d)', borderColor:'var(--sage-l)' })
         btn.textContent = '🔕 Desactivar'
+        btn.className   = 'btn btn-ghost btn-sm'
+        btn.style.display = 'inline-flex'
         btn.onclick = async () => {
           btn.disabled = true; btn.textContent = '⏳'
           try {
@@ -852,13 +854,15 @@
             const sub = await reg.pushManager.getSubscription()
             if (sub) await sub.unsubscribe()
             await supabase.from('push_subscriptions').delete().eq('user_id', user.id)
-          } catch(e) { console.error('Unsub error:', e) }
+          } catch(e) { console.error('Unsub:', e) }
           await actualizarUIPush()
         }
       } else {
         badge.textContent = '🔕 Desactivadas'
         Object.assign(badge.style, { background:'var(--cream-d)', color:'var(--ink-muted)', borderColor:'var(--sand)' })
         btn.textContent = '🔔 Activar notificaciones'
+        btn.className   = 'btn btn-primary btn-sm'
+        btn.style.display = 'inline-flex'
         btn.onclick = async () => {
           btn.disabled = true; btn.textContent = '⏳ Activando...'
           try {
@@ -868,7 +872,7 @@
             let sub = await reg.pushManager.getSubscription()
             if (!sub) {
               sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
+                userVisibleOnly:      true,
                 applicationServerKey: b64ToUint8(VAPID_PUB)
               })
             }
@@ -877,7 +881,7 @@
               .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: 'user_id' })
             if (error) throw error
           } catch(e) {
-            console.error('Push activate error:', e)
+            console.error('Push activate:', e)
             showAlert('❌ No se pudo activar. Revisá los permisos del navegador.')
           }
           await actualizarUIPush()
@@ -889,11 +893,7 @@
     setupFotoPreview()
     await cargarMascotas()
     mostrarSeccion('mascotas')
-    // Push: esperar SW listo con timeout de 3s
-    Promise.race([
-      navigator.serviceWorker?.ready,
-      new Promise(r => setTimeout(r, 3000))
-    ]).then(() => actualizarUIPush()).catch(() => actualizarUIPush())
+    await actualizarUIPush()
   </script>
 
   <!-- PWA -->

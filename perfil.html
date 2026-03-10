@@ -386,6 +386,36 @@
         <button class="btn btn-primary" id="btnCambiarPass">🔐 Guardar contraseña</button>
       </div>
 
+      <!-- Notificaciones push -->
+      <div class="config-section" id="pushSection">
+        <h3>🔔 Notificaciones</h3>
+        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:14px;">
+          Recibí un aviso en tu celular cuando alguien escanee el QR de tu mascota, incluso con la app cerrada.
+        </p>
+        <div id="pushStatus" style="margin-bottom:12px;"></div>
+        <button class="btn btn-primary" id="btnActivarPush">🔔 Activar notificaciones</button>
+      </div>
+
+      <div class="config-section">
+        <h3>🔔 Notificaciones push</h3>
+        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:14px;">
+          Recibí una notificación en tu celular cada vez que alguien escanee el QR de tu mascota.
+        </p>
+        <div id="pushEstadoWrap" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div id="pushBadge" style="
+            padding:6px 14px; border-radius:999px; font-size:13px; font-weight:600;
+            background:var(--cream-d); color:var(--ink-muted); border:1px solid var(--sand);
+          ">⏳ Verificando...</div>
+          <button id="btnPushToggle" class="btn btn-ghost btn-sm" style="display:none;"></button>
+        </div>
+        <p id="pushNoSoportado" style="display:none; font-size:13px; color:var(--ink-muted); margin-top:8px;">
+          Tu navegador no soporta notificaciones push. Intentá desde Chrome o Edge en Android.
+        </p>
+        <p id="pushBloqueado" style="display:none; font-size:13px; color:#e57373; margin-top:8px;">
+          Las notificaciones están bloqueadas. Habilitálas en la configuración del navegador.
+        </p>
+      </div>
+
       <div class="config-section">
         <h3>👤 Mi cuenta</h3>
         <p style="font-size:14px; color:var(--ink-soft);">Email: <strong id="configEmail" style="color:var(--ink);"></strong></p>
@@ -411,6 +441,7 @@
 
   <script type="module">
     import { supabase } from '/js/supabase.js'
+    import { suscribir, desuscribir, getPushEstado } from '/js/push.js'
 
     // ─── ESTADO ──────────────────────────────────
     let user = null, mascotas = [], mascotaActual = null, modoNueva = false
@@ -734,6 +765,7 @@
       document.getElementById('seccionConfigInner').style.display  = seccion === 'config'   ? 'block' : 'none'
       document.getElementById('menuItemMascotas').classList.toggle('active', seccion === 'mascotas')
       document.getElementById('menuItemConfig').classList.toggle('active', seccion === 'config')
+      if (seccion === 'config') actualizarUIPush()
     }
     window.mostrarSeccion = mostrarSeccion
 
@@ -773,10 +805,139 @@
       el.textContent = msg; el.className = `alert alert-${type} show`
     }
 
+    // ─── PUSH NOTIFICATIONS ──────────────────────
+    const PUSH_WORKER   = 'https://ubipet-push.samirignaciosb.workers.dev'
+    const VAPID_PUB_KEY = 'j_c1DV6_FAq5cgcjARGnAvw2zdW-GO-YCI3RBtswYPKCgNdW5fo-y7wSLHXu3nZ-wP_FlO7EifCjfaq98hOvEg'
+
+    function urlB64ToUint8Array(b64) {
+      const pad  = '='.repeat((4 - b64.length % 4) % 4)
+      const raw  = atob(b64.replace(/-/g,'+').replace(/_/g,'/') + pad)
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
+    }
+
+    async function initPush() {
+      const section = document.getElementById('pushSection')
+      const btn     = document.getElementById('btnActivarPush')
+      const status  = document.getElementById('pushStatus')
+
+      // Ocultar si no hay soporte
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        section.style.display = 'none'
+        return
+      }
+
+      const perm = Notification.permission
+      if (perm === 'granted') {
+        status.innerHTML = '<span class="badge badge-ok" style="background:var(--sage-bg);color:var(--sage-d);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;">✅ Notificaciones activas</span>'
+        btn.textContent = '🔕 Desactivar'
+        btn.className   = 'btn btn-ghost'
+      } else if (perm === 'denied') {
+        status.innerHTML = '<span style="font-size:13px;color:var(--ink-muted);">⛔ Bloqueadas en tu navegador. Habilitarlas desde Configuración del sitio.</span>'
+        btn.style.display = 'none'
+        return
+      }
+
+      btn.addEventListener('click', async () => {
+        if (Notification.permission === 'granted') {
+          // Desactivar — eliminar subscription
+          const reg = await navigator.serviceWorker.ready
+          const sub = await reg.pushManager.getSubscription()
+          if (sub) await sub.unsubscribe()
+          status.innerHTML = '<span style="font-size:13px;color:var(--ink-muted);">Notificaciones desactivadas.</span>'
+          btn.textContent = '🔔 Activar notificaciones'
+          btn.className   = 'btn btn-primary'
+          return
+        }
+
+        btn.disabled = true
+        btn.innerHTML = '<span class="spinner spinner-sm"></span> Activando...'
+
+        try {
+          const perm = await Notification.requestPermission()
+          if (perm !== 'granted') {
+            btn.disabled  = false
+            btn.textContent = '🔔 Activar notificaciones'
+            return
+          }
+          const reg = await navigator.serviceWorker.ready
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly:      true,
+            applicationServerKey: urlB64ToUint8Array(VAPID_PUB_KEY)
+          })
+          // Enviar subscription al Worker
+          await fetch(`${PUSH_WORKER}/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: user.id, subscription: sub.toJSON() })
+          })
+          status.innerHTML = '<span class="badge" style="background:var(--sage-bg);color:var(--sage-d);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;">✅ Notificaciones activas</span>'
+          btn.disabled    = false
+          btn.textContent = '🔕 Desactivar'
+          btn.className   = 'btn btn-ghost'
+        } catch(e) {
+          console.error('Push error:', e)
+          btn.disabled    = false
+          btn.textContent = '🔔 Activar notificaciones'
+          showAlert('❌ No se pudo activar. Revisá los permisos del navegador.')
+        }
+      })
+    }
+
+    // ─── PUSH NOTIFICATIONS ───────────────────────
+    async function actualizarUIPush() {
+      const estado = await getPushEstado()
+      const badge  = document.getElementById('pushBadge')
+      const btn    = document.getElementById('btnPushToggle')
+
+      document.getElementById('pushNoSoportado').style.display = 'none'
+      document.getElementById('pushBloqueado').style.display   = 'none'
+      btn.style.display = 'inline-flex'
+
+      if (estado === 'no-soportado') {
+        badge.textContent = '❌ No soportado'
+        badge.style.background = 'var(--cream-d)'
+        btn.style.display = 'none'
+        document.getElementById('pushNoSoportado').style.display = 'block'
+      } else if (estado === 'bloqueado') {
+        badge.textContent = '🚫 Bloqueadas'
+        badge.style.background = 'rgba(229,115,115,0.12)'
+        badge.style.color = '#e57373'
+        badge.style.borderColor = 'rgba(229,115,115,0.3)'
+        btn.style.display = 'none'
+        document.getElementById('pushBloqueado').style.display = 'block'
+      } else if (estado === 'activo') {
+        badge.textContent = '🔔 Activadas'
+        badge.style.background = 'var(--sage-bg)'
+        badge.style.color = 'var(--sage-d)'
+        badge.style.borderColor = 'var(--sage-l)'
+        btn.textContent = 'Desactivar'
+        btn.onclick = async () => {
+          btn.disabled = true; btn.textContent = '⏳'
+          await desuscribir(supabase, user.id)
+          await actualizarUIPush()
+        }
+      } else {
+        badge.textContent = '🔕 Desactivadas'
+        badge.style.background = 'var(--cream-d)'
+        badge.style.color = 'var(--ink-muted)'
+        badge.style.borderColor = 'var(--sand)'
+        btn.textContent = '🔔 Activar notificaciones'
+        btn.onclick = async () => {
+          btn.disabled = true; btn.textContent = '⏳'
+          const sub = await suscribir(supabase, user.id)
+          btn.disabled = false
+          if (!sub) btn.textContent = '🔔 Activar notificaciones'
+          await actualizarUIPush()
+        }
+      }
+    }
+
     // ─── INIT ────────────────────────────────────
     setupFotoPreview()
     await cargarMascotas()
     mostrarSeccion('mascotas')
+    actualizarUIPush() // no await — carga en background
+    initPush()
   </script>
 
   <!-- PWA -->

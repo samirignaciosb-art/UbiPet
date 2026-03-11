@@ -803,32 +803,24 @@
       return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
     }
 
-    function setPushUI(estado) {
-      const badge = document.getElementById('pushBadge')
-      const btn   = document.getElementById('btnPushToggle')
-      if (!badge || !btn) return
-      if (estado === 'activo') {
-        badge.textContent = '🔔 Activadas'
-        Object.assign(badge.style, { background:'var(--sage-bg)', color:'var(--sage-d)', borderColor:'var(--sage-l)' })
-        btn.textContent = '🔕 Desactivar'
-        btn.className   = 'btn btn-ghost btn-sm'
-      } else {
-        badge.textContent = '🔕 Desactivadas'
-        Object.assign(badge.style, { background:'var(--cream-d)', color:'var(--ink-muted)', borderColor:'var(--sand)' })
-        btn.textContent = '🔔 Activar notificaciones'
-        btn.className   = 'btn btn-primary btn-sm'
-      }
+    // SW ready con timeout
+    function swReady(ms = 5000) {
+      return Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((_, rej) => setTimeout(() => rej(new Error('SW timeout')), ms))
+      ])
     }
 
     async function setupPush() {
+      const badge = document.getElementById('pushBadge')
       const btn   = document.getElementById('btnPushToggle')
       const noSop = document.getElementById('pushNoSoportado')
       const bloq  = document.getElementById('pushBloqueado')
-      if (!btn) return
+      if (!badge || !btn) return
 
       // Sin soporte
       if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
-        document.getElementById('pushBadge').textContent = '❌ No soportado'
+        badge.textContent = '❌ No soportado'
         btn.style.display = 'none'
         noSop.style.display = 'block'
         return
@@ -836,48 +828,71 @@
 
       // Bloqueado
       if (Notification.permission === 'denied') {
-        document.getElementById('pushBadge').textContent = '🚫 Bloqueadas'
+        badge.textContent = '🚫 Bloqueadas'
         btn.style.display = 'none'
         bloq.style.display = 'block'
         return
       }
 
-      // Estado inicial basado solo en el permiso (sin esperar SW)
-      setPushUI(Notification.permission === 'granted' ? 'activo' : 'inactivo')
+      // Detectar si hay suscripción real activa
+      let subActiva = false
+      try {
+        const reg = await swReady(3000)
+        const sub = await reg.pushManager.getSubscription()
+        subActiva = !!sub
+      } catch(e) {
+        console.warn('SW check:', e.message)
+        // Si SW no responde, usar solo el permiso como indicador
+        subActiva = Notification.permission === 'granted'
+      }
+
+      function setActivo() {
+        badge.textContent = '🔔 Activadas'
+        Object.assign(badge.style, { background:'var(--sage-bg)', color:'var(--sage-d)', borderColor:'var(--sage-l)' })
+        btn.textContent = '🔕 Desactivar'
+        btn.className   = 'btn btn-ghost btn-sm'
+        btn.disabled    = false
+        btn.style.display = 'inline-flex'
+      }
+
+      function setInactivo() {
+        badge.textContent = '🔕 Desactivadas'
+        Object.assign(badge.style, { background:'var(--cream-d)', color:'var(--ink-muted)', borderColor:'var(--sand)' })
+        btn.textContent = '🔔 Activar notificaciones'
+        btn.className   = 'btn btn-primary btn-sm'
+        btn.disabled    = false
+        btn.style.display = 'inline-flex'
+      }
+
+      subActiva ? setActivo() : setInactivo()
 
       btn.onclick = async () => {
         btn.disabled = true
 
-        // DESACTIVAR
-        if (Notification.permission === 'granted') {
+        if (subActiva) {
+          // ── DESACTIVAR ──
           btn.textContent = '⏳ Desactivando...'
           try {
-            const reg = await navigator.serviceWorker.ready
+            const reg = await swReady(4000)
             const sub = await reg.pushManager.getSubscription()
             if (sub) await sub.unsubscribe()
+          } catch(e) { console.warn('Unsub SW:', e.message) }
+          try {
             await supabase.from('push_subscriptions').delete().eq('user_id', user.id)
-            setPushUI('inactivo')
-          } catch(e) {
-            console.error('Unsub:', e)
-            showAlert('❌ Error al desactivar.')
-          }
-          btn.disabled = false
+          } catch(e) { console.warn('Unsub DB:', e.message) }
+          subActiva = false
+          setInactivo()
           return
         }
 
-        // ACTIVAR
+        // ── ACTIVAR ──
         btn.textContent = '⏳ Activando...'
         try {
           const perm = await Notification.requestPermission()
-          if (perm !== 'granted') {
-            if (perm === 'denied') {
-              btn.style.display = 'none'
-              bloq.style.display = 'block'
-            }
-            btn.disabled = false
-            return
-          }
-          const reg = await navigator.serviceWorker.ready
+          if (perm === 'denied') { btn.style.display='none'; bloq.style.display='block'; return }
+          if (perm !== 'granted') { setInactivo(); return }
+
+          const reg = await swReady(5000)
           let sub = await reg.pushManager.getSubscription()
           if (!sub) {
             sub = await reg.pushManager.subscribe({
@@ -885,16 +900,15 @@
               applicationServerKey: b64ToUint8(VAPID_PUB)
             })
           }
-          const { error } = await supabase
-            .from('push_subscriptions')
+          await supabase.from('push_subscriptions')
             .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: 'user_id' })
-          if (error) throw error
-          setPushUI('activo')
+          subActiva = true
+          setActivo()
         } catch(e) {
           console.error('Push activate:', e)
-          showAlert('❌ No se pudo activar. Revisá los permisos del navegador.')
+          showAlert('❌ No se pudo activar. Intentá desde Chrome en Android.')
+          setInactivo()
         }
-        btn.disabled = false
       }
     }
 

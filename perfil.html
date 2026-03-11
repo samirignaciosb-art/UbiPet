@@ -65,8 +65,8 @@
     .toggle-custom.on::after { left: 27px; }
     .toggle-label { font-weight: 600; font-size: 14px; color: var(--ink-soft); }
 
-    /* ── QR BOX ── */
-    .qr-box {
+    /* ── QR BOX (removed) ── */
+    .qr-box-unused {
       background: var(--cream-d); border-radius: var(--radius-lg);
       border: 1px solid var(--card-border);
       padding: 24px; text-align: center; margin-top: 20px;
@@ -241,6 +241,9 @@
       <button onclick="cerrarMenu(); mostrarSeccion('mascotas')" class="menu-item" id="menuItemMascotas">
         🐾 Mis mascotas
       </button>
+      <button onclick="cerrarMenu(); mostrarSeccion('escaneos')" class="menu-item" id="menuItemEscaneos">
+        📡 Escaneos
+      </button>
       <button onclick="cerrarMenu(); mostrarSeccion('config')" class="menu-item" id="menuItemConfig">
         ⚙️ Configuración
       </button>
@@ -343,19 +346,33 @@
             <button class="btn btn-danger" id="btnEliminar" style="display:none; opacity:0.85;">🗑️ Eliminar</button>
           </div>
 
-          <!-- QR -->
-          <div id="qrSection" style="display:none;" class="qr-box">
-            <p style="font-weight:700; margin-bottom:14px; color:var(--clay); font-family:'Fraunces',serif; font-size:16px;">📲 QR de tu placa</p>
-            <img id="qrImg" src="" alt="QR" width="180" height="180">
-            <div class="qr-url" id="qrUrl"></div>
-            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-              <button class="btn btn-ghost btn-sm" onclick="copiarUrl()">📋 Copiar URL</button>
-              <a class="btn btn-primary btn-sm" id="qrDownload" download="ubipet-qr.png">⬇️ Descargar QR</a>
-            </div>
-          </div>
-
         </div>
       </div>
+    </div>
+
+    <!-- SECCIÓN ESCANEOS -->
+    <div id="seccionEscaneos" style="display:none; padding-top:4px;">
+      <h2 style="margin-bottom:6px;">Escaneos</h2>
+      <p style="font-size:14px; color:var(--ink-muted); margin-bottom:20px;">Cada vez que alguien escanea el QR de tu mascota queda registrado acá.</p>
+
+      <!-- Filtro por mascota -->
+      <div style="margin-bottom:16px;">
+        <select id="escaneosFiltro" class="input" style="max-width:260px;">
+          <option value="">Todas las mascotas</option>
+        </select>
+      </div>
+
+      <div id="escaneosLoading" style="text-align:center; padding:32px 0; color:var(--ink-muted); font-size:14px;">
+        <span class="spinner"></span>
+      </div>
+      <div id="escaneosEmpty" style="display:none;">
+        <div class="empty-state">
+          <div class="empty-icon">📡</div>
+          <div class="empty-title">Sin escaneos aún</div>
+          <div class="empty-sub">Cuando alguien escanee el QR de tu mascota, el registro aparecerá acá.</div>
+        </div>
+      </div>
+      <div id="escaneosList" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
 
     <!-- SECCIÓN CONFIGURACIÓN -->
@@ -536,7 +553,7 @@
       mascotaActual = m; modoNueva = false
       document.getElementById('formContainer').style.display = 'block'
       document.getElementById('emptyState').style.display = 'none'
-      renderTabs(); cargarCampos(m); renderPlacaSection(m); renderQR(m)
+      renderTabs(); cargarCampos(m); renderPlacaSection(m)
     }
     function nuevaMascota() {
       mascotaActual = null; modoNueva = true
@@ -544,7 +561,6 @@
       document.getElementById('emptyState').style.display = 'none'
       limpiarCampos()
       document.getElementById('placaSection').innerHTML = ''
-      document.getElementById('qrSection').style.display = 'none'
       document.getElementById('btnGuardar').textContent = '💾 Crear mascota'
       document.getElementById('btnEliminar').style.display = 'none'
       hideAlert()
@@ -614,20 +630,6 @@
       }, 800)
     }
 
-    // ─── QR ──────────────────────────────────────
-    function renderQR(m) {
-      const sec = document.getElementById('qrSection')
-      if (!m.placa_id) { sec.style.display = 'none'; return }
-      const url = `${window.location.origin}/rescate.html?id=${m.id}`
-      document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`
-      document.getElementById('qrUrl').textContent = url
-      document.getElementById('qrDownload').href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`
-      sec.style.display = 'block'
-    }
-    window.copiarUrl = () => {
-      navigator.clipboard.writeText(document.getElementById('qrUrl').textContent)
-      showAlert('📋 URL copiada', 'ok')
-    }
 
     // ─── CAMPOS ──────────────────────────────────
     function cargarCampos(m) {
@@ -752,9 +754,12 @@
 
     function mostrarSeccion(seccion) {
       document.getElementById('seccionMascotas').style.display    = seccion === 'mascotas' ? 'block' : 'none'
+      document.getElementById('seccionEscaneos').style.display    = seccion === 'escaneos' ? 'block' : 'none'
       document.getElementById('seccionConfigInner').style.display  = seccion === 'config'   ? 'block' : 'none'
       document.getElementById('menuItemMascotas').classList.toggle('active', seccion === 'mascotas')
+      document.getElementById('menuItemEscaneos').classList.toggle('active', seccion === 'escaneos')
       document.getElementById('menuItemConfig').classList.toggle('active', seccion === 'config')
+      if (seccion === 'escaneos') cargarEscaneos()
     }
     window.mostrarSeccion = mostrarSeccion
 
@@ -839,10 +844,22 @@
       try {
         const reg = await swReady(3000)
         const sub = await reg.pushManager.getSubscription()
-        subActiva = !!sub
+        subActiva = !!sub && Notification.permission === 'granted'
+
+        // Si hay sub en el browser pero no en Supabase, sincronizar automáticamente
+        if (subActiva) {
+          const { data: row } = await supabase.from('push_subscriptions')
+            .select('id').eq('user_id', user.id).maybeSingle()
+          if (!row) {
+            console.log('🔄 Sincronizando suscripción push...')
+            const { error } = await supabase.from('push_subscriptions')
+              .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: 'user_id' })
+            if (error) console.error('Sync error:', error)
+            else console.log('✅ Push sincronizado')
+          }
+        }
       } catch(e) {
         console.warn('SW check:', e.message)
-        // Si SW no responde, usar solo el permiso como indicador
         subActiva = Notification.permission === 'granted'
       }
 
@@ -900,8 +917,13 @@
               applicationServerKey: b64ToUint8(VAPID_PUB)
             })
           }
-          await supabase.from('push_subscriptions')
+          const { error: dbError } = await supabase.from('push_subscriptions')
             .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: 'user_id' })
+          if (dbError) {
+            console.error('Push DB error:', dbError)
+            throw new Error('No se pudo guardar la suscripción: ' + dbError.message)
+          }
+          console.log('✅ Push suscripción guardada para', user.id)
           subActiva = true
           setActivo()
         } catch(e) {
@@ -910,6 +932,84 @@
           setInactivo()
         }
       }
+    }
+
+    // ─── ESCANEOS ─────────────────────────────────
+    async function cargarEscaneos() {
+      const loading = document.getElementById('escaneosLoading')
+      const empty   = document.getElementById('escaneosEmpty')
+      const list    = document.getElementById('escaneosList')
+      const filtro  = document.getElementById('escaneosFiltro')
+
+      loading.style.display = 'block'
+      empty.style.display   = 'none'
+      list.innerHTML        = ''
+
+      // Poblar filtro con mascotas del usuario
+      if (filtro.options.length === 1) {
+        mascotas.forEach(m => {
+          const opt = document.createElement('option')
+          opt.value       = m.id
+          opt.textContent = m.nombre_mascota
+          filtro.appendChild(opt)
+        })
+        filtro.onchange = cargarEscaneos
+      }
+
+      // Query escaneos
+      let query = supabase
+        .from('escaneos')
+        .select('*, perfiles(nombre_mascota)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (filtro.value) query = query.eq('perfil_id', filtro.value)
+
+      const { data, error } = await query
+      loading.style.display = 'none'
+
+      if (error || !data?.length) {
+        empty.style.display = 'block'
+        return
+      }
+
+      list.innerHTML = data.map(e => {
+        const fecha = new Date(e.created_at)
+        const fechaStr = fecha.toLocaleDateString('es-CL', { day:'2-digit', month:'short', year:'numeric' })
+        const horaStr  = fecha.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' })
+        const mascota  = e.perfiles?.nombre_mascota || '—'
+
+        const ubicacion = e.lat && e.lng
+          ? `<a href="https://maps.google.com/?q=${e.lat},${e.lng}" target="_blank"
+               style="display:inline-flex; align-items:center; gap:4px; color:var(--clay); font-size:13px; text-decoration:none; font-weight:500;">
+               📍 Ver en mapa
+             </a>${e.ciudad ? ` <span style="font-size:12px; color:var(--ink-muted);">· ${e.ciudad}</span>` : ''}`
+          : `<span style="font-size:13px; color:var(--ink-muted);">📍 Ubicación no compartida</span>`
+
+        return `
+        <div style="
+          background:var(--card-bg); border:1px solid var(--card-border);
+          border-radius:var(--radius); padding:16px 18px;
+          display:flex; align-items:flex-start; gap:14px;
+        ">
+          <div style="
+            width:40px; height:40px; border-radius:50%; flex-shrink:0;
+            background:var(--clay-bg); border:1px solid var(--clay-l);
+            display:flex; align-items:center; justify-content:center; font-size:18px;
+          ">📲</div>
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+              <span style="font-weight:600; font-size:14px; color:var(--ink);">${mascota}</span>
+              <span style="font-size:12px; color:var(--ink-muted); background:var(--cream-d); padding:2px 8px; border-radius:999px; border:1px solid var(--sand);">QR escaneado</span>
+            </div>
+            <div style="font-size:13px; color:var(--ink-muted); margin-bottom:6px;">
+              🕐 ${fechaStr} a las ${horaStr}
+            </div>
+            <div>${ubicacion}</div>
+          </div>
+        </div>`
+      }).join('')
     }
 
     // ─── INIT ────────────────────────────────────

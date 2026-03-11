@@ -262,6 +262,35 @@
   <script type="module">
     import { supabase } from '/js/supabase.js'
 
+    // ─── REGISTRAR ESCANEO ────────────────────────
+    async function registrarEscaneo(perfil) {
+      try {
+        // Intentar obtener GPS (sin bloquear — best effort)
+        let lat = null, lng = null, ciudad = null
+        try {
+          const pos = await new Promise((res, rej) =>
+            navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
+          )
+          lat = pos.coords.latitude
+          lng = pos.coords.longitude
+
+          // Geocoding inverso con API pública
+          const geo = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`
+          ).then(r => r.json()).catch(() => null)
+          if (geo?.address) {
+            ciudad = geo.address.city || geo.address.town || geo.address.village || geo.address.county || null
+          }
+        } catch(e) { /* GPS denegado o no disponible — igual guardamos el escaneo */ }
+
+        await supabase.from('escaneos').insert({
+          perfil_id: perfil.id,
+          user_id:   perfil.user_id,
+          lat, lng, ciudad
+        })
+      } catch(e) { console.warn('Escaneo no registrado:', e) }
+    }
+
     async function notificarDueno(data) {
       try {
         await fetch('/.netlify/functions/send-email', {
@@ -301,6 +330,7 @@
 
       if (error || !data) { mostrarNoEncontrado() }
       else {
+        registrarEscaneo(data)       // guardar escaneo (no await — no bloquea UI)
         if (data.email_dueno) notificarDueno(data)
 
         const perdida = data.esta_perdida

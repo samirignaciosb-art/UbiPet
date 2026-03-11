@@ -809,7 +809,8 @@
     }
 
     // SW ready con timeout
-    function swReady(ms = 5000) {
+    function swReady(ms = 8000) {
+      if (!('serviceWorker' in navigator)) return Promise.reject(new Error('Sin SW'))
       return Promise.race([
         navigator.serviceWorker.ready,
         new Promise((_, rej) => setTimeout(() => rej(new Error('SW timeout')), ms))

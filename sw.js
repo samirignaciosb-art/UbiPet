@@ -1,60 +1,54 @@
-const CACHE_NAME = 'ubipet-v3'
+// UbiPet Service Worker v4
+const CACHE = 'ubipet-v4'
 
-const STATIC_FILES = [
-  '/',
-  '/index.html',
-  '/perfil.html',
-  '/rescate.html',
-  '/css/styles.css',
-  '/js/supabase.js',
-  '/js/pwa.js',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/favicon.png'
-]
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_FILES))
-  )
+self.addEventListener('install', e => {
   self.skipWaiting()
 })
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
+self.addEventListener('activate', e => {
+  e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   )
-  self.clients.claim()
 })
 
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url)
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)))
+})
 
-  if (url.hostname.includes('supabase') ||
-      url.hostname.includes('esm.sh') ||
-      url.hostname.includes('qrserver') ||
-      url.hostname.includes('wa.me') ||
-      url.hostname.includes('fonts.googleapis') ||
-      url.hostname.includes('cdnjs')) {
-    return
-  }
+// ── PUSH ──────────────────────────────────────────────────────────────────
+self.addEventListener('push', e => {
+  let data = { title: 'UbiPet 🐾', body: 'Tienes una notificación', url: '/perfil.html' }
+  try { data = { ...data, ...e.data.json() } } catch {}
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request).then(response => {
-        if (response.ok && url.origin === self.location.origin) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone))
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:               data.body,
+      icon:               '/icon-192.png',
+      badge:              '/icon-192.png',
+      data:               { url: data.url },
+      vibrate:            [200, 100, 200],
+      requireInteraction: true,
+      tag:                'ubipet-push',
+      renotify:           true,
+    })
+  )
+})
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close()
+  e.waitUntil(
+    clients.matchAll({ type: 'window' }).then(list => {
+      const url = e.notification.data?.url || '/perfil.html'
+      for (const client of list) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.navigate(url)
+          return client.focus()
         }
-        return response
-      })
-    }).catch(() => {
-      if (event.request.destination === 'document') {
-        return caches.match('/index.html')
       }
+      return clients.openWindow(url)
     })
   )
 })

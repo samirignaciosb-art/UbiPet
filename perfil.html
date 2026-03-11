@@ -1022,6 +1022,13 @@
 
   <!-- PWA -->
   <script>
+    // Registrar Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registrado:', reg.scope))
+        .catch(err => console.error('SW error:', err))
+    }
+
     let deferredPrompt = null
     const banner = document.getElementById('installBanner')
     window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; banner.style.display = 'flex' })

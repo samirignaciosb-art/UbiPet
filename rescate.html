@@ -291,31 +291,6 @@
       } catch(e) { console.warn('Escaneo no registrado:', e) }
     }
 
-    async function notificarDueno(data) {
-      try {
-        await fetch('/.netlify/functions/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email_dueno: data.email_dueno, nombre_mascota: data.nombre_mascota,
-            nombre_dueno: data.nombre_dueno, telefono: data.telefono
-          })
-        })
-      } catch(e) { console.log('Email error:', e) }
-      try {
-        await fetch('https://ubipet-push.samirignaciosb.workers.dev/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: data.user_id,
-            title: '🐾 ¡Escanearon el QR de ' + (data.nombre_mascota || 'tu mascota') + '!',
-            body:  'Alguien encontró a ' + (data.nombre_mascota || 'tu mascota') + '. Revisá la app.',
-            url:   '/perfil.html'
-          })
-        })
-      } catch(e) { console.log('Push error:', e) }
-    }
-
     const perfilId = new URLSearchParams(window.location.search).get('id')
 
     function mostrarNoEncontrado() {
@@ -330,8 +305,17 @@
 
       if (error || !data) { mostrarNoEncontrado() }
       else {
-        registrarEscaneo(data)       // guardar escaneo (no await — no bloquea UI)
-        if (data.email_dueno) notificarDueno(data)
+        registrarEscaneo(data)
+        fetch('https://ubipet-push.samirignaciosb.workers.dev/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: data.user_id,
+            title: '🐾 ¡Escanearon el QR de ' + (data.nombre_mascota || 'tu mascota') + '!',
+            body:  'Alguien encontró a ' + (data.nombre_mascota || 'tu mascota') + '. Revisá la app.',
+            url:   '/perfil.html'
+          })
+        }).catch(e => console.warn('Push error:', e))
 
         const perdida = data.esta_perdida
 

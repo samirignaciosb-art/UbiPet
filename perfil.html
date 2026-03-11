@@ -270,7 +270,7 @@
         <div id="emptyState" class="card" style="display:none; text-align:center; padding:56px 24px;">
           <div style="font-size:56px; margin-bottom:16px;">🐾</div>
           <h2 style="margin-bottom:8px;">¡Bienvenido a UbiPet!</h2>
-          <p style="margin-bottom:24px; max-width:280px; margin-left:auto; margin-right:auto;">Agregá tu primera mascota para empezar a protegerla</p>
+          <p style="margin-bottom:24px; max-width:280px; margin-left:auto; margin-right:auto;">Agrega tu primera mascota para comenzar a protegerla</p>
           <button class="btn btn-primary" id="btnPrimeraMascota">➕ Agregar mascota</button>
         </div>
 
@@ -381,7 +381,7 @@
 
       <div class="config-section">
         <h3>🎨 Tema</h3>
-        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:12px;">Elegí cómo se ve UbiPet en tu dispositivo</p>
+        <p style="font-size:13px; color:var(--ink-muted); margin-bottom:12px;">Elige cómo se ve UbiPet en tu dispositivo</p>
         <div class="theme-options">
           <button class="theme-btn" id="themeLight" onclick="setTema('light')">☀️<br>Claro</button>
           <button class="theme-btn" id="themeDark"  onclick="setTema('dark')">🌙<br>Oscuro</button>
@@ -407,7 +407,7 @@
       <div class="config-section">
         <h3>🔔 Notificaciones push</h3>
         <p style="font-size:13px; color:var(--ink-muted); margin-bottom:14px;">
-          Recibí un aviso en tu celular cuando alguien escanee el QR de tu mascota, incluso con la app cerrada.
+          Recibe un aviso en tu celular cuando alguien escanee el QR de tu mascota, incluso con la app cerrada.
         </p>
         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
           <div id="pushBadge" style="
@@ -438,7 +438,7 @@
       <div class="pwa-banner-icon"><img src="/icon-192.png" alt="UbiPet"></div>
       <div class="pwa-banner-text">
         <div class="title">Instalá UbiPet</div>
-        <div class="sub">Accedé más rápido desde tu celular</div>
+        <div class="sub">Accede más rápido desde tu celular</div>
       </div>
     </div>
     <div class="pwa-banner-actions">
@@ -588,7 +588,7 @@
         sec.innerHTML = `
           <div class="placa-box">
             <p style="font-weight:700; color:var(--clay); margin-bottom:6px;">🏷️ Asociar placa física</p>
-            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">Ingresá el código que aparece en tu placa UbiPet</p>
+            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">Ingresa el código que aparece en tu placa UbiPet</p>
             <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
               <input type="text" id="codigoPlaca" placeholder="UBI-001"
                 style="max-width:150px; text-transform:uppercase; font-weight:700; letter-spacing:2px; text-align:center;">
@@ -719,7 +719,7 @@
     // ─── ELIMINAR ────────────────────────────────
     document.getElementById('btnEliminar').addEventListener('click', async () => {
       if (!mascotaActual) return
-      if (!confirm(`¿Seguro que querés eliminar a ${mascotaActual.nombre_mascota}? Esta acción no se puede deshacer.`)) return
+      if (!confirm(`¿Seguro que quieres eliminar a ${mascotaActual.nombre_mascota}? Esta acción no se puede deshacer.`)) return
 
       const btn = document.getElementById('btnEliminar')
       btn.disabled = true; btn.innerHTML = '<span class="spinner spinner-sm"></span>'
@@ -800,7 +800,7 @@
     }
 
     // ─── PUSH NOTIFICATIONS ───────────────────────
-    const VAPID_PUB = 'BDmBum_TYjmFdIwJPWNuQS6X-8QZWwxpGG2lZg8iI7dS09Z5XfXiIzBMs1oben9IU8IKfo1pXx9-z2Owuigin8A'
+    const VAPID_PUB = 'BLouiaUiuj1zFK_ABfecnDTIGVpguFjjfV1jj3bz48Hjkzu3TsBhQcHMzP0pAAZsrfpDaTvTrxsImB1WPeorl58'
 
     function b64ToUint8(b64) {
       const pad = '='.repeat((4 - b64.length % 4) % 4)

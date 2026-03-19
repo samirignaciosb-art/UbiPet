@@ -38,6 +38,18 @@
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
     @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
 
+    /* ── FORM TABS ── */
+    .form-tab {
+      flex: 1; padding: 8px 12px; border: none; border-radius: calc(var(--radius) - 2px);
+      background: transparent; color: var(--ink-muted); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s var(--ease); font-family: 'DM Sans', sans-serif;
+    }
+    .form-tab.active {
+      background: var(--card-bg); color: var(--ink);
+      box-shadow: 0 1px 4px rgba(31,24,16,0.10); font-weight: 600;
+    }
+    .form-tab:hover:not(.active) { color: var(--ink-soft); }
+
     /* ── SECTION TITLE ── */
     .section-title {
       font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600;
@@ -281,119 +293,130 @@
           <!-- Placa -->
           <div id="placaSection"></div>
 
-          <!-- Foto -->
-          <div class="section-title">📸 Foto de la mascota</div>
-          <div class="foto-upload-area">
-            <div id="fotoPlaceholder" class="foto-placeholder" onclick="document.getElementById('fotoInput').click()">🐾</div>
-            <img id="fotoPreview" class="foto-preview" src="" alt="Foto" style="display:none;" onclick="document.getElementById('fotoInput').click()">
-            <div class="foto-upload-info">
-              <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('fotoInput').click()">📷 Subir foto</button>
-              <p>JPG o PNG, máx 5MB.<br>Visible cuando alguien escanea el QR.</p>
+          <!-- Header mascota: foto + nombre + estado -->
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+            <div style="position:relative; flex-shrink:0;">
+              <div id="fotoPlaceholder" class="foto-placeholder" onclick="document.getElementById('fotoInput').click()" style="width:72px;height:72px;font-size:28px;cursor:pointer;">🐾</div>
+              <img id="fotoPreview" class="foto-preview" src="" alt="Foto" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;cursor:pointer;" onclick="document.getElementById('fotoInput').click()">
+              <div onclick="document.getElementById('fotoInput').click()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--clay);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;">📷</div>
               <input type="file" id="fotoInput" accept="image/*" style="display:none;">
             </div>
-          </div>
-
-          <!-- Datos mascota -->
-          <div class="section-title">🐾 Datos de la mascota</div>
-          <div class="form-grid">
-            <div>
-              <div class="input-group">
-                <label>Nombre *</label>
-                <input type="text" id="nombreMascota" placeholder="Firulais">
-              </div>
-              <div class="input-group">
-                <label>Especie</label>
-                <select id="especie" class="input">
+            <div style="flex:1;">
+              <input type="text" id="nombreMascota" placeholder="Nombre de la mascota *"
+                style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;border:none;background:transparent;color:var(--ink);width:100%;padding:0;outline:none;border-bottom:2px solid var(--sand);">
+              <div style="display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
+                <select id="especie" class="input" style="padding:4px 10px;font-size:13px;width:auto;">
                   <option value="perro">🐶 Perro</option>
                   <option value="gato">🐱 Gato</option>
                 </select>
+                <div class="toggle-wrap" style="margin:0;">
+                  <button class="toggle-custom" id="togglePerdida" type="button"></button>
+                  <span class="toggle-label" id="toggleLabel" style="font-size:13px;">Está en casa ✅</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs del formulario -->
+          <div style="display:flex; gap:2px; margin-bottom:20px; background:var(--cream-d); border-radius:var(--radius); padding:4px;">
+            <button type="button" class="form-tab active" id="ftab-general" onclick="switchFormTab('general')">🐾 General</button>
+            <button type="button" class="form-tab" id="ftab-salud" onclick="switchFormTab('salud')">💉 Salud</button>
+            <button type="button" class="form-tab" id="ftab-clinica" onclick="switchFormTab('clinica')">🏥 Clínica</button>
+          </div>
+
+          <!-- TAB: GENERAL -->
+          <div id="ftab-content-general">
+            <div class="form-grid">
+              <div>
+                <div class="input-group">
+                  <label>Raza</label>
+                  <input type="text" id="raza" placeholder="Labrador, mestizo...">
+                </div>
+                <div class="input-group">
+                  <label>Fecha de nacimiento aproximada</label>
+                  <input type="date" id="fechaNacimiento">
+                  <div id="etapaVida" style="font-size:12px; color:var(--clay); margin-top:4px; font-weight:500;"></div>
+                </div>
+                <div class="input-group">
+                  <label>Peso (kg)</label>
+                  <input type="number" id="peso" step="0.1" placeholder="12.5">
+                </div>
+              </div>
+              <div>
+                <div class="input-group">
+                  <label>Descripción</label>
+                  <textarea id="descripcion" placeholder="Color, señas particulares..." style="height:120px;"></textarea>
+                </div>
+                <div class="input-group">
+                  <label>Tu nombre *</label>
+                  <input type="text" id="nombreDueno" placeholder="Juan Pérez">
+                </div>
+                <div class="input-group">
+                  <label>WhatsApp * (+569...)</label>
+                  <input type="tel" id="telefono" placeholder="+56912345678">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: SALUD -->
+          <div id="ftab-content-salud" style="display:none;">
+
+            <!-- Vacunas -->
+            <div style="margin-bottom:20px;">
+              <div style="font-size:13px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">💉 Vacunas</div>
+              <div id="vacunasList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;"></div>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="agregarVacuna()">➕ Agregar vacuna</button>
+            </div>
+
+            <!-- Alergias -->
+            <div style="margin-bottom:20px;">
+              <div style="font-size:13px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">⚠️ Alergias</div>
+              <div id="alergiasList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; min-height:28px;"></div>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="alergiaNueva" placeholder="Ej: penicilina, pollo... (Enter para agregar)" style="flex:1;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="agregarAlergia()">➕</button>
+              </div>
+            </div>
+
+            <!-- Remedios -->
+            <div style="margin-bottom:20px;">
+              <div style="font-size:13px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">💊 Remedios</div>
+              <div id="remediosList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; min-height:28px;"></div>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="remedioNuevo" placeholder="Ej: omeprazol, enalapril... (Enter para agregar)" style="flex:1;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="agregarRemedio()">➕</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TAB: CLÍNICA -->
+          <div id="ftab-content-clinica" style="display:none;">
+            <div class="form-grid" style="margin-bottom:20px;">
+              <div class="input-group">
+                <label>Nombre de la clínica</label>
+                <input type="text" id="clinicaNombre" placeholder="Clínica Veterinaria...">
               </div>
               <div class="input-group">
-                <label>Raza</label>
-                <input type="text" id="raza" placeholder="Labrador, mestizo...">
+                <label>Teléfono de la clínica</label>
+                <input type="tel" id="clinicaTelefono" placeholder="+56912345678">
               </div>
-              <div class="input-group">
-                <label>Edad (años)</label>
-                <input type="number" id="edad" min="0" max="30" placeholder="3">
-                <div id="etapaVida" style="font-size:12px; color:var(--ink-muted); margin-top:4px;"></div>
-              </div>
-            </div>
-            <div>
-              <div class="input-group">
-                <label>Peso (kg)</label>
-                <input type="number" id="peso" step="0.1" placeholder="12.5">
-              </div>
-              <div class="input-group">
-                <label>Descripción</label>
-                <textarea id="descripcion" placeholder="Color, señas particulares..."></textarea>
-              </div>
-              <div class="toggle-wrap">
-                <button class="toggle-custom" id="togglePerdida" type="button"></button>
-                <span class="toggle-label" id="toggleLabel">Está en casa ✅</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Salud -->
-          <div class="section-title">💉 Salud</div>
-
-          <!-- Vacunas -->
-          <div class="input-group">
-            <label>Vacunas</label>
-            <div id="vacunasList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;"></div>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="agregarVacuna()">➕ Agregar vacuna</button>
-          </div>
-
-          <!-- Alergias -->
-          <div class="input-group">
-            <label>Alergias</label>
-            <div id="alergiasList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
-            <div style="display:flex; gap:8px;">
-              <input type="text" id="alergiaNueva" placeholder="Ej: penicilina, pollo..." style="flex:1;">
-              <button type="button" class="btn btn-ghost btn-sm" onclick="agregarAlergia()">➕</button>
-            </div>
-          </div>
-
-          <!-- Clínica veterinaria -->
-          <div class="section-title">🏥 Clínica veterinaria</div>
-          <div class="form-grid">
-            <div class="input-group">
-              <label>Nombre de la clínica</label>
-              <input type="text" id="clinicaNombre" placeholder="Clínica Veterinaria...">
             </div>
             <div class="input-group">
-              <label>Teléfono de la clínica</label>
-              <input type="tel" id="clinicaTelefono" placeholder="+56912345678">
-            </div>
-          </div>
-
-          <!-- Carnet veterinario -->
-          <div class="input-group">
-            <label>Carnet veterinario</label>
-            <div id="carnetActual" style="margin-bottom:8px; display:none;">
-              <a id="carnetLink" href="#" target="_blank" style="font-size:13px; color:var(--clay); text-decoration:none;">📄 Ver carnet actual</a>
-              <button type="button" onclick="eliminarCarnet()" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:12px;margin-left:8px;">✕ Quitar</button>
-            </div>
-            <input type="file" id="carnetInput" accept="image/*,application/pdf" style="display:none;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('carnetInput').click()">📎 Subir carnet (imagen o PDF)</button>
-            <div id="carnetNombre" style="font-size:12px; color:var(--ink-muted); margin-top:4px;"></div>
-          </div>
-
-          <!-- Datos dueño -->
-          <div class="section-title">👤 Datos del dueño</div>
-          <div class="form-grid">
-            <div class="input-group">
-              <label>Tu nombre *</label>
-              <input type="text" id="nombreDueno" placeholder="Juan Pérez">
-            </div>
-            <div class="input-group">
-              <label>WhatsApp * (+569...)</label>
-              <input type="tel" id="telefono" placeholder="+56912345678">
+              <label>Carnet veterinario</label>
+              <div id="carnetActual" style="margin-bottom:8px; display:none; padding:10px 14px; background:var(--sage-bg); border-radius:var(--radius); border:1px solid var(--sage-l);">
+                <a id="carnetLink" href="#" target="_blank" style="font-size:13px; color:var(--sage-d); text-decoration:none; font-weight:500;">📄 Ver carnet actual</a>
+                <button type="button" onclick="eliminarCarnet()" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:12px;margin-left:10px;">✕ Quitar</button>
+              </div>
+              <input type="file" id="carnetInput" accept="image/*,application/pdf" style="display:none;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('carnetInput').click()">📎 Subir carnet (imagen o PDF)</button>
+              <div id="carnetNombre" style="font-size:12px; color:var(--ink-muted); margin-top:6px;"></div>
             </div>
           </div>
 
           <!-- Acciones -->
-          <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+          <div style="display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--sand);">
             <button class="btn btn-primary" style="flex:1; min-width:150px;" id="btnGuardar">💾 Guardar</button>
             <button class="btn btn-ghost" id="btnCancelar">Cancelar</button>
             <button class="btn btn-danger" id="btnEliminar" style="display:none; opacity:0.85;">🗑️ Eliminar</button>
@@ -689,7 +712,7 @@
       document.getElementById('nombreMascota').value   = m.nombre_mascota || ''
       document.getElementById('especie').value         = m.especie || 'perro'
       document.getElementById('raza').value            = m.raza || ''
-      document.getElementById('edad').value            = m.edad || ''
+      document.getElementById('fechaNacimiento').value = m.fecha_nacimiento || ''
       document.getElementById('peso').value            = m.peso || ''
       document.getElementById('descripcion').value     = m.descripcion || ''
       document.getElementById('nombreDueno').value     = m.nombre_dueno || ''
@@ -705,24 +728,23 @@
       hideAlert()
       if (m.foto_url) mostrarFotoPreview(m.foto_url)
       else limpiarFotoPreview()
-      // Carnet
       if (m.carnet_url) {
         document.getElementById('carnetActual').style.display = 'block'
         document.getElementById('carnetLink').href = m.carnet_url
       } else {
         document.getElementById('carnetActual').style.display = 'none'
       }
-      // Vacunas
       renderVacunas(m.vacunas || [])
-      // Alergias
       renderAlergias(m.alergias || [])
-      // Etapa de vida
+      renderRemedios(m.remedios || [])
       actualizarEtapaVida()
+      switchFormTab('general')
     }
     function limpiarCampos() {
-      ['nombreMascota','raza','edad','peso','descripcion','nombreDueno','telefono','clinicaNombre','clinicaTelefono']
+      ['nombreMascota','raza','peso','descripcion','nombreDueno','telefono','clinicaNombre','clinicaTelefono']
         .forEach(id => { document.getElementById(id).value = '' })
       document.getElementById('especie').value = 'perro'
+      document.getElementById('fechaNacimiento').value = ''
       document.getElementById('togglePerdida').classList.remove('on')
       document.getElementById('toggleLabel').textContent = 'Está en casa ✅'
       document.getElementById('carnetActual').style.display = 'none'
@@ -730,7 +752,9 @@
       document.getElementById('etapaVida').textContent = ''
       renderVacunas([])
       renderAlergias([])
+      renderRemedios([])
       limpiarFotoPreview()
+      switchFormTab('general')
     }
 
     document.getElementById('togglePerdida').addEventListener('click', function() {
@@ -756,7 +780,8 @@
         nombre_mascota:    nombre,
         especie:           document.getElementById('especie').value,
         raza:              document.getElementById('raza').value,
-        edad:              parseInt(document.getElementById('edad').value) || null,
+        fecha_nacimiento:  document.getElementById('fechaNacimiento').value || null,
+        edad:              calcularEdad(document.getElementById('fechaNacimiento').value),
         peso:              parseFloat(document.getElementById('peso').value) || null,
         descripcion:       document.getElementById('descripcion').value,
         nombre_dueno:      dueno,
@@ -767,6 +792,7 @@
         clinica_telefono:  document.getElementById('clinicaTelefono').value.trim() || null,
         vacunas:           getVacunas(),
         alergias:          getAlergias(),
+        remedios:          getRemedios(),
       }
 
       let error
@@ -1032,25 +1058,44 @@
       }
     }
 
+    // ─── TABS FORMULARIO ─────────────────────────
+    function switchFormTab(tab) {
+      ['general','salud','clinica'].forEach(t => {
+        document.getElementById(`ftab-${t}`).classList.toggle('active', t === tab)
+        document.getElementById(`ftab-content-${t}`).style.display = t === tab ? 'block' : 'none'
+      })
+    }
+
     // ─── ETAPA DE VIDA ───────────────────────────
+    function calcularEdad(fecha) {
+      if (!fecha) return null
+      const hoy   = new Date()
+      const nac   = new Date(fecha)
+      let edad    = hoy.getFullYear() - nac.getFullYear()
+      const m     = hoy.getMonth() - nac.getMonth()
+      if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--
+      return edad >= 0 ? edad : 0
+    }
     function actualizarEtapaVida() {
-      const edad    = parseInt(document.getElementById('edad').value)
+      const fecha   = document.getElementById('fechaNacimiento').value
       const especie = document.getElementById('especie').value
       const el      = document.getElementById('etapaVida')
-      if (!edad && edad !== 0) { el.textContent = ''; return }
+      const edad    = calcularEdad(fecha)
+      if (edad === null) { el.textContent = ''; return }
+      const meses = Math.floor((new Date() - new Date(fecha)) / (1000 * 60 * 60 * 24 * 30))
       let etapa
       if (especie === 'perro') {
-        if (edad < 1)      etapa = '🐶 Cachorro'
-        else if (edad < 7) etapa = '🐕 Adulto'
-        else               etapa = '🦮 Senior'
+        if (meses < 12)    etapa = '🐶 Cachorro · ' + meses + ' meses'
+        else if (edad < 7) etapa = '🐕 Adulto · ' + edad + ' años'
+        else               etapa = '🦮 Senior · ' + edad + ' años'
       } else {
-        if (edad < 1)      etapa = '🐱 Cachorro'
-        else if (edad < 10) etapa = '🐈 Adulto'
-        else               etapa = '😸 Senior'
+        if (meses < 12)    etapa = '🐱 Cachorro · ' + meses + ' meses'
+        else if (edad < 10) etapa = '🐈 Adulto · ' + edad + ' años'
+        else               etapa = '😸 Senior · ' + edad + ' años'
       }
       el.textContent = etapa
     }
-    document.getElementById('edad').addEventListener('input', actualizarEtapaVida)
+    document.getElementById('fechaNacimiento').addEventListener('input', actualizarEtapaVida)
     document.getElementById('especie').addEventListener('change', actualizarEtapaVida)
 
     // ─── VACUNAS ─────────────────────────────────
@@ -1099,6 +1144,32 @@
     })
     window.eliminarAlergia = (i) => { alergias.splice(i, 1); renderAlergias(alergias) }
     function getAlergias() { return alergias.filter(a => a.trim()) }
+
+    // ─── REMEDIOS ────────────────────────────────
+    let remedios = []
+    function renderRemedios(data) {
+      remedios = data || []
+      const el = document.getElementById('remediosList')
+      el.innerHTML = remedios.map((r, i) => `
+        <span style="display:inline-flex; align-items:center; gap:4px; background:var(--sage-bg); border:1px solid var(--sage-l); border-radius:999px; padding:4px 10px; font-size:13px; color:var(--sage-d);">
+          💊 ${r}
+          <button type="button" onclick="eliminarRemedio(${i})"
+            style="background:none;border:none;cursor:pointer;color:var(--sage-d);font-size:12px;line-height:1;padding:0 2px;">✕</button>
+        </span>`).join('')
+    }
+    window.agregarRemedio = () => {
+      const input = document.getElementById('remedioNuevo')
+      const val = input.value.trim()
+      if (!val) return
+      remedios.push(val)
+      renderRemedios(remedios)
+      input.value = ''
+    }
+    document.getElementById('remedioNuevo').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); window.agregarRemedio() }
+    })
+    window.eliminarRemedio = (i) => { remedios.splice(i, 1); renderRemedios(remedios) }
+    function getRemedios() { return remedios.filter(r => r.trim()) }
 
     // ─── CARNET ──────────────────────────────────
     document.getElementById('carnetInput').addEventListener('change', function() {

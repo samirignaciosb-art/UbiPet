@@ -55,27 +55,31 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --cream:        #13100D;
-    --cream-d:      #1A1510;
-    --sand:         #2A2018;
-    --sand-d:       #352820;
-    --stone:        #6A5848;
-    --ink:          #F2E8DF;
-    --ink-soft:     #C4A898;
-    --ink-muted:    #806858;
-    --white:        #1E1814;
-    --card-bg:      #1E1814;
-    --card-border:  rgba(208,140,97,0.10);
-    --input-bg:     #13100D;
-    --input-border: #2A2018;
-    --nav-bg:       rgba(19,16,13,0.95);
-    --success-bg:   #0E2415;
-    --error-bg:     #2A0E0E;
-    --warning-bg:   #2A1A08;
-    --info-bg:      #0E1A2A;
-    --shadow:       0 4px 20px rgba(0,0,0,0.35);
-    --shadow-lg:    0 8px 40px rgba(0,0,0,0.45);
-    --shadow-xl:    0 16px 60px rgba(0,0,0,0.55);
+    --cream:        #161718;
+    --cream-d:      #1E2022;
+    --sand:         #2C2E31;
+    --sand-d:       #35383C;
+    --stone:        #6B7280;
+    --ink:          #F0F1F2;
+    --ink-soft:     #B8BCC4;
+    --ink-muted:    #6B7280;
+    --white:        #1E2022;
+    --card-bg:      #242628;
+    --card-border:  rgba(255,255,255,0.07);
+    --input-bg:     #1E2022;
+    --input-border: #2C2E31;
+    --nav-bg:       rgba(22,23,24,0.95);
+    --clay-bg:      rgba(208,140,97,0.10);
+    --clay-l:       rgba(208,140,97,0.25);
+    --sage-bg:      rgba(111,132,108,0.10);
+    --sage-l:       rgba(111,132,108,0.25);
+    --success-bg:   rgba(90,138,106,0.12);
+    --error-bg:     rgba(192,57,43,0.12);
+    --warning-bg:   rgba(212,129,26,0.12);
+    --info-bg:      rgba(36,113,163,0.12);
+    --shadow:       0 4px 20px rgba(0,0,0,0.40);
+    --shadow-lg:    0 8px 40px rgba(0,0,0,0.50);
+    --shadow-xl:    0 16px 60px rgba(0,0,0,0.60);
   }
 }
 
@@ -88,12 +92,15 @@
   --shadow:0 4px 20px rgba(31,24,16,0.10); --shadow-lg:0 8px 40px rgba(31,24,16,0.14);
 }
 [data-theme="dark"] {
-  --cream:#13100D; --cream-d:#1A1510; --sand:#2A2018; --sand-d:#352820;
-  --stone:#6A5848; --ink:#F2E8DF; --ink-soft:#C4A898; --ink-muted:#806858;
-  --white:#1E1814; --card-bg:#1E1814; --card-border:rgba(208,140,97,0.10);
-  --input-bg:#13100D; --input-border:#2A2018; --nav-bg:rgba(19,16,13,0.95);
-  --success-bg:#0E2415; --error-bg:#2A0E0E; --warning-bg:#2A1A08; --info-bg:#0E1A2A;
-  --shadow:0 4px 20px rgba(0,0,0,0.35); --shadow-lg:0 8px 40px rgba(0,0,0,0.45);
+  --cream:#161718; --cream-d:#1E2022; --sand:#2C2E31; --sand-d:#35383C;
+  --stone:#6B7280; --ink:#F0F1F2; --ink-soft:#B8BCC4; --ink-muted:#6B7280;
+  --white:#1E2022; --card-bg:#242628; --card-border:rgba(255,255,255,0.07);
+  --input-bg:#1E2022; --input-border:#2C2E31; --nav-bg:rgba(22,23,24,0.95);
+  --clay-bg:rgba(208,140,97,0.10); --clay-l:rgba(208,140,97,0.25);
+  --sage-bg:rgba(111,132,108,0.10); --sage-l:rgba(111,132,108,0.25);
+  --success-bg:rgba(90,138,106,0.12); --error-bg:rgba(192,57,43,0.12);
+  --warning-bg:rgba(212,129,26,0.12); --info-bg:rgba(36,113,163,0.12);
+  --shadow:0 4px 20px rgba(0,0,0,0.40); --shadow-lg:0 8px 40px rgba(0,0,0,0.50);
 }
 
 /* BASE */
@@ -231,9 +238,9 @@ select { cursor: pointer; }
   .alert-err { background: #2A0E0E; color: #EF8080; }
   .alert-info{ background: #0E1A2A; color: #6FB0EF; }
 }
-[data-theme="dark"] .alert-ok  { background: #0E2415; color: #7EC89A; }
-[data-theme="dark"] .alert-err { background: #2A0E0E; color: #EF8080; }
-[data-theme="dark"] .alert-info{ background: #0E1A2A; color: #6FB0EF; }
+[data-theme="dark"] .alert-ok  { background: rgba(90,138,106,0.15); color: #7EC89A; }
+[data-theme="dark"] .alert-err { background: rgba(192,57,43,0.15);  color: #EF8080; }
+[data-theme="dark"] .alert-info{ background: rgba(36,113,163,0.15); color: #6FB0EF; }
 
 /* BADGES */
 .badge {
@@ -251,8 +258,8 @@ select { cursor: pointer; }
   .badge-ok   { background: #0E2415; color: #7EC89A; }
   .badge-warn { background: #2A1A08; color: #F0A040; }
 }
-[data-theme="dark"] .badge-ok   { background: #0E2415; color: #7EC89A; }
-[data-theme="dark"] .badge-warn { background: #2A1A08; color: #F0A040; }
+[data-theme="dark"] .badge-ok   { background: rgba(90,138,106,0.15); color: #7EC89A; }
+[data-theme="dark"] .badge-warn { background: rgba(212,129,26,0.15);  color: #F0A040; }
 
 /* SPINNER */
 .spinner {

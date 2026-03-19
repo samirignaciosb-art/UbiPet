@@ -1109,18 +1109,25 @@
       const el = document.getElementById('vacunasList')
       el.innerHTML = vacunas.map((v, i) => `
         <div style="display:flex; gap:8px; align-items:center;">
-          <input type="text" value="${v.nombre || ''}" placeholder="Nombre vacuna"
-            oninput="vacunas[${i}].nombre=this.value"
+          <input type="text" value="${v.nombre || ''}" placeholder="Nombre vacuna" data-vac-nombre="${i}"
             style="flex:2; padding:8px 12px; border:1px solid var(--sand); border-radius:var(--radius); background:var(--input-bg); color:var(--ink); font-size:14px;">
-          <input type="date" value="${v.fecha || ''}"
-            oninput="vacunas[${i}].fecha=this.value"
+          <input type="date" value="${v.fecha || ''}" data-vac-fecha="${i}"
             style="flex:1; padding:8px 12px; border:1px solid var(--sand); border-radius:var(--radius); background:var(--input-bg); color:var(--ink); font-size:14px;">
-          <button type="button" onclick="eliminarVacuna(${i})"
+          <button type="button" data-vac-del="${i}"
             style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:16px;padding:4px;">✕</button>
         </div>`).join('')
+      // Eventos
+      el.querySelectorAll('[data-vac-nombre]').forEach(inp => {
+        inp.addEventListener('input', e => { vacunas[e.target.dataset.vacNombre].nombre = e.target.value })
+      })
+      el.querySelectorAll('[data-vac-fecha]').forEach(inp => {
+        inp.addEventListener('input', e => { vacunas[e.target.dataset.vacFecha].fecha = e.target.value })
+      })
+      el.querySelectorAll('[data-vac-del]').forEach(btn => {
+        btn.addEventListener('click', e => { vacunas.splice(+e.target.dataset.vacDel, 1); renderVacunas(vacunas) })
+      })
     }
     window.agregarVacuna = () => { vacunas.push({ nombre: '', fecha: '' }); renderVacunas(vacunas) }
-    window.eliminarVacuna = (i) => { vacunas.splice(i, 1); renderVacunas(vacunas) }
     function getVacunas() { return vacunas.filter(v => v.nombre.trim()) }
 
     // ─── ALERGIAS ────────────────────────────────

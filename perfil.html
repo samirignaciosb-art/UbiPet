@@ -794,6 +794,10 @@
         alergias:          getAlergias(),
         remedios:          getRemedios(),
       }
+      // Supabase necesita los campos jsonb como string JSON
+      payload.vacunas  = JSON.parse(JSON.stringify(payload.vacunas))
+      payload.alergias = JSON.parse(JSON.stringify(payload.alergias))
+      payload.remedios = JSON.parse(JSON.stringify(payload.remedios))
 
       let error
       if (modoNueva) {

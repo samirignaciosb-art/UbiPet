@@ -302,12 +302,20 @@
                 <input type="text" id="nombreMascota" placeholder="Firulais">
               </div>
               <div class="input-group">
+                <label>Especie</label>
+                <select id="especie" class="input">
+                  <option value="perro">🐶 Perro</option>
+                  <option value="gato">🐱 Gato</option>
+                </select>
+              </div>
+              <div class="input-group">
                 <label>Raza</label>
                 <input type="text" id="raza" placeholder="Labrador, mestizo...">
               </div>
               <div class="input-group">
                 <label>Edad (años)</label>
                 <input type="number" id="edad" min="0" max="30" placeholder="3">
+                <div id="etapaVida" style="font-size:12px; color:var(--ink-muted); margin-top:4px;"></div>
               </div>
             </div>
             <div>
@@ -324,6 +332,51 @@
                 <span class="toggle-label" id="toggleLabel">Está en casa ✅</span>
               </div>
             </div>
+          </div>
+
+          <!-- Salud -->
+          <div class="section-title">💉 Salud</div>
+
+          <!-- Vacunas -->
+          <div class="input-group">
+            <label>Vacunas</label>
+            <div id="vacunasList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;"></div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="agregarVacuna()">➕ Agregar vacuna</button>
+          </div>
+
+          <!-- Alergias -->
+          <div class="input-group">
+            <label>Alergias</label>
+            <div id="alergiasList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="alergiaNueva" placeholder="Ej: penicilina, pollo..." style="flex:1;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="agregarAlergia()">➕</button>
+            </div>
+          </div>
+
+          <!-- Clínica veterinaria -->
+          <div class="section-title">🏥 Clínica veterinaria</div>
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Nombre de la clínica</label>
+              <input type="text" id="clinicaNombre" placeholder="Clínica Veterinaria...">
+            </div>
+            <div class="input-group">
+              <label>Teléfono de la clínica</label>
+              <input type="tel" id="clinicaTelefono" placeholder="+56912345678">
+            </div>
+          </div>
+
+          <!-- Carnet veterinario -->
+          <div class="input-group">
+            <label>Carnet veterinario</label>
+            <div id="carnetActual" style="margin-bottom:8px; display:none;">
+              <a id="carnetLink" href="#" target="_blank" style="font-size:13px; color:var(--clay); text-decoration:none;">📄 Ver carnet actual</a>
+              <button type="button" onclick="eliminarCarnet()" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:12px;margin-left:8px;">✕ Quitar</button>
+            </div>
+            <input type="file" id="carnetInput" accept="image/*,application/pdf" style="display:none;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('carnetInput').click()">📎 Subir carnet (imagen o PDF)</button>
+            <div id="carnetNombre" style="font-size:12px; color:var(--ink-muted); margin-top:4px;"></div>
           </div>
 
           <!-- Datos dueño -->
@@ -633,13 +686,16 @@
 
     // ─── CAMPOS ──────────────────────────────────
     function cargarCampos(m) {
-      document.getElementById('nombreMascota').value = m.nombre_mascota || ''
-      document.getElementById('raza').value          = m.raza || ''
-      document.getElementById('edad').value          = m.edad || ''
-      document.getElementById('peso').value          = m.peso || ''
-      document.getElementById('descripcion').value   = m.descripcion || ''
-      document.getElementById('nombreDueno').value   = m.nombre_dueno || ''
-      document.getElementById('telefono').value      = m.telefono || ''
+      document.getElementById('nombreMascota').value   = m.nombre_mascota || ''
+      document.getElementById('especie').value         = m.especie || 'perro'
+      document.getElementById('raza').value            = m.raza || ''
+      document.getElementById('edad').value            = m.edad || ''
+      document.getElementById('peso').value            = m.peso || ''
+      document.getElementById('descripcion').value     = m.descripcion || ''
+      document.getElementById('nombreDueno').value     = m.nombre_dueno || ''
+      document.getElementById('telefono').value        = m.telefono || ''
+      document.getElementById('clinicaNombre').value   = m.clinica_nombre || ''
+      document.getElementById('clinicaTelefono').value = m.clinica_telefono || ''
       const toggle = document.getElementById('togglePerdida')
       const label  = document.getElementById('toggleLabel')
       toggle.classList.toggle('on', !!m.esta_perdida)
@@ -649,12 +705,31 @@
       hideAlert()
       if (m.foto_url) mostrarFotoPreview(m.foto_url)
       else limpiarFotoPreview()
+      // Carnet
+      if (m.carnet_url) {
+        document.getElementById('carnetActual').style.display = 'block'
+        document.getElementById('carnetLink').href = m.carnet_url
+      } else {
+        document.getElementById('carnetActual').style.display = 'none'
+      }
+      // Vacunas
+      renderVacunas(m.vacunas || [])
+      // Alergias
+      renderAlergias(m.alergias || [])
+      // Etapa de vida
+      actualizarEtapaVida()
     }
     function limpiarCampos() {
-      ['nombreMascota','raza','edad','peso','descripcion','nombreDueno','telefono']
+      ['nombreMascota','raza','edad','peso','descripcion','nombreDueno','telefono','clinicaNombre','clinicaTelefono']
         .forEach(id => { document.getElementById(id).value = '' })
+      document.getElementById('especie').value = 'perro'
       document.getElementById('togglePerdida').classList.remove('on')
       document.getElementById('toggleLabel').textContent = 'Está en casa ✅'
+      document.getElementById('carnetActual').style.display = 'none'
+      document.getElementById('carnetNombre').textContent = ''
+      document.getElementById('etapaVida').textContent = ''
+      renderVacunas([])
+      renderAlergias([])
       limpiarFotoPreview()
     }
 
@@ -678,15 +753,20 @@
 
       const payload = {
         user_id: user.id,
-        nombre_mascota: nombre,
-        raza:           document.getElementById('raza').value,
-        edad:           parseInt(document.getElementById('edad').value) || null,
-        peso:           parseFloat(document.getElementById('peso').value) || null,
-        descripcion:    document.getElementById('descripcion').value,
-        nombre_dueno:   dueno,
-        email_dueno:    user.email,
-        telefono:       telefono,
-        esta_perdida:   document.getElementById('togglePerdida').classList.contains('on')
+        nombre_mascota:    nombre,
+        especie:           document.getElementById('especie').value,
+        raza:              document.getElementById('raza').value,
+        edad:              parseInt(document.getElementById('edad').value) || null,
+        peso:              parseFloat(document.getElementById('peso').value) || null,
+        descripcion:       document.getElementById('descripcion').value,
+        nombre_dueno:      dueno,
+        email_dueno:       user.email,
+        telefono:          telefono,
+        esta_perdida:      document.getElementById('togglePerdida').classList.contains('on'),
+        clinica_nombre:    document.getElementById('clinicaNombre').value.trim() || null,
+        clinica_telefono:  document.getElementById('clinicaTelefono').value.trim() || null,
+        vacunas:           getVacunas(),
+        alergias:          getAlergias(),
       }
 
       let error
@@ -705,6 +785,23 @@
           await supabase.from('perfiles').update({ foto_url: fotoUrl }).eq('id', mascotaActual.id)
           mascotaActual.foto_url = fotoUrl
         } catch(e) { console.error('Error foto:', e) }
+      }
+
+      // Subir carnet si se seleccionó uno
+      const carnetFile = document.getElementById('carnetInput').files[0]
+      if (!error && carnetFile && mascotaActual?.id) {
+        try {
+          const ext  = carnetFile.name.split('.').pop()
+          const path = `carnets/${mascotaActual.id}.${ext}`
+          const { error: upErr } = await supabase.storage.from('mascotas').upload(path, carnetFile, { upsert: true })
+          if (!upErr) {
+            const { data: urlData } = supabase.storage.from('mascotas').getPublicUrl(path)
+            await supabase.from('perfiles').update({ carnet_url: urlData.publicUrl }).eq('id', mascotaActual.id)
+            mascotaActual.carnet_url = urlData.publicUrl
+            document.getElementById('carnetActual').style.display = 'block'
+            document.getElementById('carnetLink').href = urlData.publicUrl
+          }
+        } catch(e) { console.error('Error carnet:', e) }
       }
 
       btn.disabled = false; btn.textContent = '💾 Guardar cambios'
@@ -800,7 +897,7 @@
     }
 
     // ─── PUSH NOTIFICATIONS ───────────────────────
-    const VAPID_PUB = 'BLouiaUiuj1zFK_ABfecnDTIGVpguFjjfV1jj3bz48Hjkzu3TsBhQcHMzP0pAAZsrfpDaTvTrxsImB1WPeorl58'
+    const VAPID_PUB = 'BHfHyFKCUrhJyJUCJbRfCp5vOXu98uVTe_ZMd5S3qyDjlCgYh4qNafoUuORFuC1OC49DncWisdSiVC7g1uYXjec'
 
     function b64ToUint8(b64) {
       const pad = '='.repeat((4 - b64.length % 4) % 4)
@@ -933,6 +1030,86 @@
           setInactivo()
         }
       }
+    }
+
+    // ─── ETAPA DE VIDA ───────────────────────────
+    function actualizarEtapaVida() {
+      const edad    = parseInt(document.getElementById('edad').value)
+      const especie = document.getElementById('especie').value
+      const el      = document.getElementById('etapaVida')
+      if (!edad && edad !== 0) { el.textContent = ''; return }
+      let etapa
+      if (especie === 'perro') {
+        if (edad < 1)      etapa = '🐶 Cachorro'
+        else if (edad < 7) etapa = '🐕 Adulto'
+        else               etapa = '🦮 Senior'
+      } else {
+        if (edad < 1)      etapa = '🐱 Cachorro'
+        else if (edad < 10) etapa = '🐈 Adulto'
+        else               etapa = '😸 Senior'
+      }
+      el.textContent = etapa
+    }
+    document.getElementById('edad').addEventListener('input', actualizarEtapaVida)
+    document.getElementById('especie').addEventListener('change', actualizarEtapaVida)
+
+    // ─── VACUNAS ─────────────────────────────────
+    let vacunas = []
+    function renderVacunas(data) {
+      vacunas = data || []
+      const el = document.getElementById('vacunasList')
+      el.innerHTML = vacunas.map((v, i) => `
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" value="${v.nombre || ''}" placeholder="Nombre vacuna"
+            oninput="vacunas[${i}].nombre=this.value"
+            style="flex:2; padding:8px 12px; border:1px solid var(--sand); border-radius:var(--radius); background:var(--input-bg); color:var(--ink); font-size:14px;">
+          <input type="date" value="${v.fecha || ''}"
+            oninput="vacunas[${i}].fecha=this.value"
+            style="flex:1; padding:8px 12px; border:1px solid var(--sand); border-radius:var(--radius); background:var(--input-bg); color:var(--ink); font-size:14px;">
+          <button type="button" onclick="eliminarVacuna(${i})"
+            style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:16px;padding:4px;">✕</button>
+        </div>`).join('')
+    }
+    window.agregarVacuna = () => { vacunas.push({ nombre: '', fecha: '' }); renderVacunas(vacunas) }
+    window.eliminarVacuna = (i) => { vacunas.splice(i, 1); renderVacunas(vacunas) }
+    function getVacunas() { return vacunas.filter(v => v.nombre.trim()) }
+
+    // ─── ALERGIAS ────────────────────────────────
+    let alergias = []
+    function renderAlergias(data) {
+      alergias = data || []
+      const el = document.getElementById('alergiasList')
+      el.innerHTML = alergias.map((a, i) => `
+        <span style="display:inline-flex; align-items:center; gap:4px; background:var(--clay-bg); border:1px solid var(--clay-l); border-radius:999px; padding:4px 10px; font-size:13px; color:var(--ink-soft);">
+          ${a}
+          <button type="button" onclick="eliminarAlergia(${i})"
+            style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:12px;line-height:1;padding:0 2px;">✕</button>
+        </span>`).join('')
+    }
+    window.agregarAlergia = () => {
+      const input = document.getElementById('alergiaNueva')
+      const val = input.value.trim()
+      if (!val) return
+      alergias.push(val)
+      renderAlergias(alergias)
+      input.value = ''
+    }
+    document.getElementById('alergiaNueva').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); window.agregarAlergia() }
+    })
+    window.eliminarAlergia = (i) => { alergias.splice(i, 1); renderAlergias(alergias) }
+    function getAlergias() { return alergias.filter(a => a.trim()) }
+
+    // ─── CARNET ──────────────────────────────────
+    document.getElementById('carnetInput').addEventListener('change', function() {
+      const f = this.files[0]
+      document.getElementById('carnetNombre').textContent = f ? `📎 ${f.name}` : ''
+    })
+    window.eliminarCarnet = async () => {
+      if (!mascotaActual?.id) return
+      await supabase.from('perfiles').update({ carnet_url: null }).eq('id', mascotaActual.id)
+      mascotaActual.carnet_url = null
+      document.getElementById('carnetActual').style.display = 'none'
     }
 
     // ─── ESCANEOS ─────────────────────────────────

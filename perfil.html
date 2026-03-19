@@ -799,7 +799,6 @@
       payload.alergias = JSON.parse(JSON.stringify(payload.alergias))
       payload.remedios = JSON.parse(JSON.stringify(payload.remedios))
 
-      console.log('PAYLOAD:', JSON.stringify(payload))
       let error
       if (modoNueva) {
         const res = await supabase.from('perfiles').insert(payload).select().single()
@@ -1064,7 +1063,7 @@
     }
 
     // ─── TABS FORMULARIO ─────────────────────────
-    function switchFormTab(tab) {
+    window.switchFormTab = function(tab) {
       ['general','salud','clinica'].forEach(t => {
         document.getElementById(`ftab-${t}`).classList.toggle('active', t === tab)
         document.getElementById(`ftab-content-${t}`).style.display = t === tab ? 'block' : 'none'

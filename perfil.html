@@ -799,6 +799,7 @@
       payload.alergias = JSON.parse(JSON.stringify(payload.alergias))
       payload.remedios = JSON.parse(JSON.stringify(payload.remedios))
 
+      console.log('PAYLOAD:', JSON.stringify(payload))
       let error
       if (modoNueva) {
         const res = await supabase.from('perfiles').insert(payload).select().single()

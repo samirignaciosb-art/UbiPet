@@ -1239,24 +1239,16 @@
 
   <!-- PWA -->
   <script>
-    // Registrar Service Worker
+    // OneSignal maneja el Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => {
-          console.log('SW registrado:', reg.scope)
-          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' })
-          reg.addEventListener('updatefound', () => {
-            const sw = reg.installing
-            sw?.addEventListener('statechange', () => {
-              if (sw.state === 'installed' && navigator.serviceWorker.controller)
-                sw.postMessage({ type: 'SKIP_WAITING' })
-            })
-          })
+      // Desregistrar sw.js si existe para que OneSignal tome el control
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => {
+          if (reg.active?.scriptURL?.includes('/sw.js')) {
+            reg.unregister()
+          }
         })
-        .catch(err => console.error('SW error:', err))
-      // OneSignal necesita su propio SW
-      navigator.serviceWorker.register('/OneSignalSDKWorker.js', { scope: '/' })
-        .catch(() => {})
+      })
     }
 
     let deferredPrompt = null

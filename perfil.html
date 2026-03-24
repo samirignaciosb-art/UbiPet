@@ -1244,18 +1244,19 @@
       navigator.serviceWorker.register('/sw.js')
         .then(reg => {
           console.log('SW registrado:', reg.scope)
-          // Forzar activación si está en waiting
           if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' })
           reg.addEventListener('updatefound', () => {
             const sw = reg.installing
             sw?.addEventListener('statechange', () => {
-              if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+              if (sw.state === 'installed' && navigator.serviceWorker.controller)
                 sw.postMessage({ type: 'SKIP_WAITING' })
-              }
             })
           })
         })
         .catch(err => console.error('SW error:', err))
+      // OneSignal necesita su propio SW
+      navigator.serviceWorker.register('/OneSignalSDKWorker.js', { scope: '/' })
+        .catch(() => {})
     }
 
     let deferredPrompt = null

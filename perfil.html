@@ -209,18 +209,24 @@
       color: var(--ink-muted); font-size: 18px; padding: 4px; line-height: 1;
     }
   </style>
-  <!-- OneSignal -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || []
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: 'f4725b69-31bd-4dba-94fc-15df47cdf075',
-        safari_web_id: 'web.onesignal.auto.13d8bf97-93cf-4a09-b799-2a50baaf1ebd',
-        notifyButton: { enable: false },
-        autoResubscribe: true,
-      })
-    })
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
+    import { getMessaging, getToken, deleteToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js'
+
+    const firebaseConfig = {
+      apiKey:            'AIzaSyC2RYcFsBbmippii29V2LKTjCE7OY6yuy0',
+      authDomain:        'ubipet1push.firebaseapp.com',
+      projectId:         'ubipet1push',
+      storageBucket:     'ubipet1push.firebasestorage.app',
+      messagingSenderId: '149692115097',
+      appId:             '1:149692115097:web:d5233bca244d00af2e3008'
+    }
+    const app       = initializeApp(firebaseConfig)
+    const messaging = getMessaging(app)
+    window._fbMessaging  = messaging
+    window._fbGetToken   = getToken
+    window._fbDeleteToken = deleteToken
   </script>
 </head>
 <body>
@@ -939,8 +945,8 @@
       el.textContent = msg; el.className = `alert alert-${type} show`
     }
 
-    // ─── PUSH NOTIFICATIONS (OneSignal) ──────────
-    const ONESIGNAL_APP_ID = 'f4725b69-31bd-4dba-94fc-15df47cdf075'
+    // ─── PUSH NOTIFICATIONS (Firebase FCM) ───────
+    const FCM_VAPID = 'BFjCDYjrd6kC6Sm5V5EjhvuKoAslhOhhml10oiTqm24LaCa654646uX9IgPvSP4VJBnO3ZzfyrtcnoXgDtv_di8'
 
     async function setupPush() {
       const badge = document.getElementById('pushBadge')
@@ -978,40 +984,55 @@
         btn.disabled    = false
       }
 
-      // Esperar a que OneSignal esté listo
-      await new Promise(res => {
-        if (window.OneSignal) return res()
-        window.OneSignalDeferred = window.OneSignalDeferred || []
-        window.OneSignalDeferred.push(() => res())
-        setTimeout(res, 5000) // fallback
-      })
-
-      try {
-        const isSubscribed = await window.OneSignal?.User?.PushSubscription?.optedIn
-        isSubscribed ? setActivo() : setInactivo()
-      } catch(e) {
-        setInactivo()
-      }
+      // Verificar si ya hay token guardado
+      const { data: existing } = await supabase
+        .from('push_subscriptions').select('subscription').eq('user_id', user.id).maybeSingle()
+      existing?.subscription?.fcm_token ? setActivo() : setInactivo()
 
       btn.onclick = async () => {
         btn.disabled = true
 
-        try {
-          const isSubscribed = await window.OneSignal?.User?.PushSubscription?.optedIn
+        const hasToken = existing?.subscription?.fcm_token
 
-          if (isSubscribed) {
-            btn.textContent = '⏳ Desactivando...'
-            await window.OneSignal?.User?.PushSubscription?.optOut()
-            // Limpiar external_id en OneSignal
-            setInactivo()
-          } else {
-            btn.textContent = '⏳ Activando...'
-            await window.OneSignal?.User?.PushSubscription?.optIn()
-            // Vincular el user_id de Supabase con OneSignal
-            await window.OneSignal?.login(user.id)
-            setActivo()
-            showAlert('✅ ¡Notificaciones activadas!', 'ok')
+        if (hasToken) {
+          // Desactivar
+          btn.textContent = '⏳ Desactivando...'
+          try {
+            if (window._fbMessaging && window._fbDeleteToken)
+              await window._fbDeleteToken(window._fbMessaging)
+          } catch(e) {}
+          await supabase.from('push_subscriptions').delete().eq('user_id', user.id)
+          setInactivo()
+          return
+        }
+
+        // Activar
+        btn.textContent = '⏳ Activando...'
+        try {
+          const perm = await Notification.requestPermission()
+          if (perm === 'denied') { btn.style.display='none'; bloq.style.display='block'; return }
+          if (perm !== 'granted') { setInactivo(); return }
+
+          // Esperar que Firebase esté listo
+          let attempts = 0
+          while (!window._fbMessaging && attempts < 20) {
+            await new Promise(r => setTimeout(r, 250))
+            attempts++
           }
+          if (!window._fbMessaging) throw new Error('Firebase no disponible')
+
+          const token = await window._fbGetToken(window._fbMessaging, {
+            vapidKey:              FCM_VAPID,
+            serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
+          })
+          if (!token) throw new Error('No se obtuvo token FCM')
+
+          const { error } = await supabase.from('push_subscriptions')
+            .upsert({ user_id: user.id, subscription: { fcm_token: token } }, { onConflict: 'user_id' })
+          if (error) throw new Error(error.message)
+
+          setActivo()
+          showAlert('✅ ¡Notificaciones activadas!', 'ok')
         } catch(e) {
           console.error('Push error:', e)
           showAlert('❌ No se pudo activar. Intenta desde Chrome en Android.')
@@ -1239,16 +1260,11 @@
 
   <!-- PWA -->
   <script>
-    // OneSignal maneja el Service Worker
+    // Registrar Firebase Messaging SW
     if ('serviceWorker' in navigator) {
-      // Desregistrar sw.js si existe para que OneSignal tome el control
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => {
-          if (reg.active?.scriptURL?.includes('/sw.js')) {
-            reg.unregister()
-          }
-        })
-      })
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(reg => console.log('FCM SW registrado:', reg.scope))
+        .catch(err => console.warn('FCM SW error:', err))
     }
 
     let deferredPrompt = null

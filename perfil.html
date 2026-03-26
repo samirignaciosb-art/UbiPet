@@ -948,6 +948,42 @@
     // ─── PUSH NOTIFICATIONS (Firebase FCM) ───────
     const FCM_VAPID = 'BFjCDYjrd6kC6Sm5V5EjhvuKoAslhOhhml10oiTqm24LaCa654646uX9IgPvSP4VJBnO3ZzfyrtcnoXgDtv_di8'
 
+    async function getFCMToken() {
+      // Esperar Firebase
+      let attempts = 0
+      while (!window._fbMessaging && attempts < 20) {
+        await new Promise(r => setTimeout(r, 250))
+        attempts++
+      }
+      if (!window._fbMessaging) return null
+      try {
+        const swReg = await navigator.serviceWorker.getRegistration()
+        return await window._fbGetToken(window._fbMessaging, {
+          vapidKey: FCM_VAPID,
+          serviceWorkerRegistration: swReg
+        })
+      } catch(e) {
+        console.warn('FCM token error:', e)
+        return null
+      }
+    }
+
+    async function syncTokenIfNeeded() {
+      if (Notification.permission !== 'granted') return
+      const token = await getFCMToken()
+      if (!token) return
+      // Comparar con el guardado en Supabase
+      const { data } = await supabase
+        .from('push_subscriptions').select('subscription').eq('user_id', user.id).maybeSingle()
+      const savedToken = data?.subscription?.fcm_token
+      if (savedToken !== token) {
+        console.log('🔄 Actualizando token FCM...')
+        await supabase.from('push_subscriptions')
+          .upsert({ user_id: user.id, subscription: { fcm_token: token } }, { onConflict: 'user_id' })
+        console.log('✅ Token FCM actualizado')
+      }
+    }
+
     async function setupPush() {
       const badge = document.getElementById('pushBadge')
       const btn   = document.getElementById('btnPushToggle')
@@ -1026,10 +1062,7 @@
           }
           if (!window._fbMessaging) throw new Error('Firebase no disponible')
 
-          const token = await window._fbGetToken(window._fbMessaging, {
-            vapidKey: FCM_VAPID,
-            serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
-          })
+          const token = await getFCMToken()
           if (!token) throw new Error('No se obtuvo token FCM')
 
           const { error } = await supabase.from('push_subscriptions')
@@ -1261,6 +1294,7 @@
     await cargarMascotas()
     mostrarSeccion('mascotas')
     setupPush()
+    syncTokenIfNeeded() // refrescar token FCM silenciosamente
   </script>
 
   <!-- PWA -->

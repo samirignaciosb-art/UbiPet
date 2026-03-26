@@ -985,16 +985,21 @@
       }
 
       // Verificar si ya hay token guardado
-      const { data: existing } = await supabase
-        .from('push_subscriptions').select('subscription').eq('user_id', user.id).maybeSingle()
-      existing?.subscription?.fcm_token ? setActivo() : setInactivo()
+      const checkToken = async () => {
+        const { data } = await supabase
+          .from('push_subscriptions').select('subscription').eq('user_id', user.id).maybeSingle()
+        return data?.subscription?.fcm_token || null
+      }
+
+      const initialToken = await checkToken()
+      initialToken ? setActivo() : setInactivo()
 
       btn.onclick = async () => {
         btn.disabled = true
 
-        const hasToken = existing?.subscription?.fcm_token
+        const currentToken = await checkToken()
 
-        if (hasToken) {
+        if (currentToken) {
           // Desactivar
           btn.textContent = '⏳ Desactivando...'
           try {
@@ -1022,7 +1027,7 @@
           if (!window._fbMessaging) throw new Error('Firebase no disponible')
 
           const token = await window._fbGetToken(window._fbMessaging, {
-            vapidKey:              FCM_VAPID,
+            vapidKey: FCM_VAPID,
             serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
           })
           if (!token) throw new Error('No se obtuvo token FCM')

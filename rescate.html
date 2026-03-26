@@ -342,20 +342,15 @@
         document.getElementById('notFound').style.display = 'block'
       } else {
         registrarEscaneo(data)
-        fetch('https://onesignal.com/api/v1/notifications', {
+        // Notificar al dueño via Worker (que llama a OneSignal)
+        fetch('https://ubipet-push.samirignaciosb.workers.dev/send', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Basic pnssmqtclegjfeom72kdg7jy6'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            app_id: 'f4725b69-31bd-4dba-94fc-15df47cdf075',
-            include_aliases: { external_id: [data.user_id] },
-            target_channel: 'push',
-            headings: { en: '🐾 ¡Escanearon el QR de ' + (data.nombre_mascota || 'tu mascota') + '!' },
-            contents: { en: 'Alguien encontró a ' + (data.nombre_mascota || 'tu mascota') + '. Revisa la app.' },
-            url: 'https://app.ubipet.shop/perfil.html',
-            chrome_web_icon: 'https://app.ubipet.shop/icon-192.png',
+            user_id: data.user_id,
+            title:   '🐾 ¡Escanearon el QR de ' + (data.nombre_mascota || 'tu mascota') + '!',
+            body:    'Alguien encontró a ' + (data.nombre_mascota || 'tu mascota') + '. Revisa la app.',
+            url:     'https://app.ubipet.shop/perfil.html'
           })
         }).catch(() => {})
 

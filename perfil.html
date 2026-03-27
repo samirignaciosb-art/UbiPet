@@ -215,7 +215,7 @@
     import { getMessaging, getToken, deleteToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js'
 
     const firebaseConfig = {
-      apiKey:            'AIzaSyC9Qi0GjiNA1drGgRwyKxRbqUyRjzlaAtQ',
+      apiKey:            'AIzaSyC2RYcFsBbmippii29V2LKTjCE7OY6yuy0',
       authDomain:        'ubipet1push.firebaseapp.com',
       projectId:         'ubipet1push',
       storageBucket:     'ubipet1push.firebasestorage.app',
@@ -603,36 +603,14 @@
     }
 
     // ─── CARGAR MASCOTAS ─────────────────────────
-  async function cargarMascotas() {
-  // 1. Obtenemos la sesión actual para asegurar que el ID de usuario sea válido
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) {
-    console.warn("No hay sesión activa");
-    return;
-  }
-
-  // 2. Consulta con relación explícita para evitar ambigüedad
-  const { data, error } = await supabase
-    .from('perfiles')
-    .select(`
-      *,
-      placas!id_placa (
-        codigo
-      )
-    `)
-    .eq('user_id', session.user.id) // Usamos el ID de la sesión activa
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error("Error en Supabase:", error.message);
-    return;
-  }
-
-  // 3. Guardamos y renderizamos
-  mascotas = data || [];
-  renderTabs();
-}
+    async function cargarMascotas() {
+      const { data, error } = await supabase
+        .from('perfiles').select('*, placas(codigo)')
+        .eq('user_id', user.id).order('created_at')
+      if (error) { console.error(error); return }
+      mascotas = data || []
+      renderTabs()
+    }
 
     // ─── TABS ────────────────────────────────────
     function renderTabs() {
@@ -731,14 +709,19 @@
       const alertEl = document.getElementById('alertPlaca')
       alertEl.className = 'alert alert-info show'; alertEl.textContent = '🔍 Verificando...'
 
-      const { data: placa, error } = await supabase.from('placas').select('*').eq('codigo', codigo).single()
+      const { data: placa, error } = await supabase.from('placas').select('id, estado, perfil_id').eq('codigo', codigo).single()
       if (error || !placa) { alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ Código no encontrado'; return }
       if (placa.estado === 'activa') { alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ Esta placa ya está en uso'; return }
 
-      const { error: errUpdate } = await supabase.from('perfiles').update({ placa_id: placa.id }).eq('id', mascotaActual.id)
+      // Verificar que la mascota pertenece al usuario actual
+      if (mascotaActual.user_id !== user.id) {
+        alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ No tienes permiso para modificar esta mascota'; return
+      }
+
+      const { error: errUpdate } = await supabase.from('perfiles').update({ placa_id: placa.id }).eq('id', mascotaActual.id).eq('user_id', user.id)
       if (errUpdate) { alertEl.className = 'alert alert-err show'; alertEl.textContent = '❌ Error: ' + errUpdate.message; return }
 
-      await supabase.from('placas').update({ estado: 'activa' }).eq('id', placa.id)
+      await supabase.from('placas').update({ estado: 'activa', perfil_id: mascotaActual.id }).eq('id', placa.id)
       alertEl.className = 'alert alert-ok show'; alertEl.textContent = '✅ ¡Placa asociada!'
       setTimeout(async () => {
         await cargarMascotas()

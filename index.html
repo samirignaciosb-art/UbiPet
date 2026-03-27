@@ -290,6 +290,11 @@
         </div>
         <div id="alertReg" class="alert"></div>
         <div class="input-group">
+          <label>Código de tu placa UbiPet *</label>
+          <input type="text" id="regCodigo" placeholder="Ej: UBI-K7X2M9" autocomplete="off" style="text-transform:uppercase;">
+          <div style="font-size:12px; color:var(--ink-muted); margin-top:4px;">El código está grabado en tu placa física.</div>
+        </div>
+        <div class="input-group">
           <label>Email</label>
           <input type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email">
         </div>
@@ -409,12 +414,30 @@
       document.getElementById('registerBoxWrap').style.display = 'block'
     })
     document.getElementById('btnDoRegister').addEventListener('click', async () => {
-      const email = document.getElementById('regEmail').value.trim()
-      const pass  = document.getElementById('regPass').value
-      if (!email || !pass) return showAlert('alertReg', 'Completá todos los campos')
-      if (pass.length < 6)  return showAlert('alertReg', 'La contraseña debe tener al menos 6 caracteres')
+      const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
+      const email  = document.getElementById('regEmail').value.trim()
+      const pass   = document.getElementById('regPass').value
+      if (!codigo) return showAlert('alertReg', 'Ingresa el código de tu placa')
+      if (!email || !pass) return showAlert('alertReg', 'Completa todos los campos')
+      if (pass.length < 6) return showAlert('alertReg', 'La contraseña debe tener al menos 6 caracteres')
+
       const btn = document.getElementById('btnDoRegister')
       setLoading(btn, true, 'Crear cuenta')
+
+      // Validar que la placa existe y está disponible
+      const { data: placa, error: placaErr } = await supabase
+        .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
+
+      if (placaErr || !placa) {
+        setLoading(btn, false, 'Crear cuenta')
+        return showAlert('alertReg', '❌ Código de placa no válido. Verifica que esté bien escrito.')
+      }
+      if (placa.estado !== 'disponible') {
+        setLoading(btn, false, 'Crear cuenta')
+        return showAlert('alertReg', '❌ Esta placa ya está registrada. Si crees que es un error, contáctanos.')
+      }
+
+      // Crear cuenta
       const { error } = await supabase.auth.signUp({ email, password: pass })
       setLoading(btn, false, 'Crear cuenta')
       if (error) return showAlert('alertReg', '❌ ' + error.message)

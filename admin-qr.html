@@ -146,6 +146,14 @@
   <script type="module">
     import { supabase } from '/js/supabase.js'
 
+    // ─── VERIFICAR ADMIN ─────────────────────────
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { window.location.href = '/index.html'; throw new Error('No session') }
+
+    const { data: adminData } = await supabase
+      .from('admins').select('rol, activo').eq('email', session.user.email).maybeSingle()
+    if (!adminData?.activo) { window.location.href = '/index.html'; throw new Error('No admin') }
+
     let todasLasPlacas = []
     let filtroActual   = 'todas'
 

@@ -603,14 +603,36 @@
     }
 
     // ─── CARGAR MASCOTAS ─────────────────────────
-    async function cargarMascotas() {
-      const { data, error } = await supabase
-        .from('perfiles').select('*, placas(codigo)')
-        .eq('user_id', user.id).order('created_at')
-      if (error) { console.error(error); return }
-      mascotas = data || []
-      renderTabs()
-    }
+  async function cargarMascotas() {
+  // 1. Obtenemos la sesión actual para asegurar que el ID de usuario sea válido
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    console.warn("No hay sesión activa");
+    return;
+  }
+
+  // 2. Consulta con relación explícita para evitar ambigüedad
+  const { data, error } = await supabase
+    .from('perfiles')
+    .select(`
+      *,
+      placas!id_placa (
+        codigo
+      )
+    `)
+    .eq('user_id', session.user.id) // Usamos el ID de la sesión activa
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error("Error en Supabase:", error.message);
+    return;
+  }
+
+  // 3. Guardamos y renderizamos
+  mascotas = data || [];
+  renderTabs();
+}
 
     // ─── TABS ────────────────────────────────────
     function renderTabs() {

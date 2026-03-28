@@ -454,7 +454,7 @@
       const { data, error } = await supabase.from('admins').select('rol,activo').eq('email', email).single()
       if (error || !data || !data.activo) {
         await supabase.auth.signOut()
-        return showAlert('loginAlert', '❌ No tenés permisos de administrador')
+        return showAlert('loginAlert', '❌ No tienes permisos de administrador')
       }
       document.getElementById('loginWrap').style.display = 'none'
       document.getElementById('dashWrap').style.display  = 'block'

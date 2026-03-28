@@ -605,7 +605,7 @@
     // ─── CARGAR MASCOTAS ─────────────────────────
     async function cargarMascotas() {
       const { data, error } = await supabase
-        .from('perfiles').select('*, placas(codigo)')
+        .from('perfiles').select('*, placas!perfiles_placa_id_fkey(codigo)')
         .eq('user_id', user.id).order('created_at')
       if (error) { console.error(error); return }
       mascotas = data || []

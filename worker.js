@@ -6,12 +6,6 @@
 const FIREBASE_PROJECT = 'ubipet1push'
 const FIREBASE_CLIENT_EMAIL = 'firebase-adminsdk-fbsvc@ubipet1push.iam.gserviceaccount.com'
 
-// Clave privada desde variable de entorno (configurar en Cloudflare Dashboard)
-// FIREBASE_PRIVATE_KEY = contenido del PEM sin headers, con \n como separador
-const PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
-${env.FIREBASE_PRIVATE_KEY}
------END PRIVATE KEY-----`
-
 // ── JWT para OAuth2 ────────────────────────────────────────────────────────
 async function getAccessToken(env) {
   const now = Math.floor(Date.now() / 1000)

@@ -1,4 +1,4 @@
-// ═════════════════════════════════════════════════════════════════════════════
+ // ═════════════════════════════════════════════════════════════════════════════
 // UbiPet Push Worker — Firebase FCM V1
 // Deploy: ubipet-push.samirignaciosb.workers.dev
 // ═════════════════════════════════════════════════════════════════════════════
@@ -111,7 +111,7 @@ export default {
                 token: fcmToken,
                 notification: {
                   title: title   || '🐾 UbiPet',
-                  body:  msgBody || 'Tienes una notificación nueva',
+                  body:  msgBody || 'Han escaneado la placa de tu peludito, revisa el historial si esta extraviado y no te ha llegado la ubicacion del rescatista',
                 },
                 webpush: {
                   fcm_options: { link: notifUrl || 'https://app.ubipet.shop/perfil.html' },

@@ -615,7 +615,7 @@
       document.getElementById(listaId).innerHTML = '<div class="spinner" style="margin:24px auto;display:block;"></div>'
       const { data, error } = await supabase
         .from('placas')
-        .select('*, perfiles!placas_perfil_id_fkey(nombre_mascota, nombre_dueno)')
+        .select('id, codigo, estado, perfil_id, perfiles!placas_perfil_id_fkey(nombre_mascota, nombre_dueno)')
         .eq('estado', estado).order('codigo')
       if (error) {
         console.error('cargarPlacas:', error)
@@ -648,14 +648,15 @@
           <th>Código</th><th>Mascota</th><th>Dueño</th><th>Acciones</th>
         </tr></thead><tbody>
         ${data.map(p => {
-          const pf = Array.isArray(p.perfiles) ? p.perfiles[0] : p.perfiles
-          const qr = window.location.origin + '/rescate.html?id=' + p.id
+          const pf       = Array.isArray(p.perfiles) ? p.perfiles[0] : p.perfiles
+          const perfilId = p.perfil_id
+          const qr       = perfilId ? `${window.location.origin}/rescate.html?id=${perfilId}` : null
           return `<tr>
             <td><span class="code-badge">${p.codigo}</span></td>
             <td>${pf?.nombre_mascota || '—'}</td>
             <td>${pf?.nombre_dueno || '—'}</td>
             <td style="display:flex; gap:6px; flex-wrap:wrap;">
-              <a href="${qr}" target="_blank" class="btn btn-ghost btn-sm">🔗 Ver</a>
+              ${qr ? `<a href="${qr}" target="_blank" class="btn btn-ghost btn-sm">🔗 Ver</a>` : '<span style="font-size:12px;color:var(--ink-muted);">Sin perfil</span>'}
               ${estado === 'disponible' ? `<button onclick="eliminarPlaca('${p.id}')" class="btn btn-sm" style="background:var(--error-bg);color:var(--error);border:none;">🗑️</button>` : ''}
             </td>
           </tr>`

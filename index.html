@@ -482,6 +482,28 @@
         ? 'Tocá el botón compartir <strong>⬆️</strong> en Safari y luego <strong>"Agregar a pantalla de inicio"</strong>'
         : 'Tocá los <strong>3 puntos ⋮</strong> de Chrome y luego <strong>"Agregar a pantalla de inicio"</strong>'
       instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none'
+      // VERIFICACIÓN PLACA OBLIGATORIA para TODOS los métodos
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    // Verificar si tiene placa asociada
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('placa_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+    
+    if (!perfil?.placa_id) {
+      // Sin placa → logout + mostrar registro
+      await supabase.auth.signOut()
+      showAlert('alert', '❌ Para usar UbiPet necesitás una placa activa primero')
+      document.getElementById('registerBoxWrap').scrollIntoView()
+      return false
+    }
+    
+    // Con placa → ir a perfil
+    window.location.href = 'perfil.html'
+  }
+})
     })
   </script>
 

@@ -350,22 +350,24 @@
     }
     // VERIFICACIÓN PLACA OBLIGATORIA para TODOS los métodos
 supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    // Verificar si tiene placa asociada
-    const { data: perfil } = await supabase
+  // Solo interceptar OAuth (Google) — el login normal maneja su propia redirección
+  if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
+    // Verificar si tiene al menos un perfil con placa asociada
+    const { data: perfiles } = await supabase
       .from('perfiles')
       .select('placa_id')
       .eq('user_id', session.user.id)
-      .maybeSingle()
-    
-    if (!perfil?.placa_id) {
-      // Sin placa → logout + mostrar registro
+      .not('placa_id', 'is', null)
+      .limit(1)
+
+    if (!perfiles?.length) {
+      // Usuario Google sin placa → logout + mostrar mensaje
       await supabase.auth.signOut()
-      showAlert('alert', '❌ Para usar UbiPet necesitás una placa activa primero')
+      showAlert('alert', '❌ Para usar UbiPet necesitás una placa activa. Registrate con tu código de placa.')
       document.getElementById('registerBoxWrap').scrollIntoView()
-      return false
+      return
     }
-    
+
     // Con placa → ir a perfil
     window.location.href = 'perfil.html'
   }

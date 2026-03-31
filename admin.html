@@ -306,6 +306,17 @@
 
     <div id="sec-mascotas" class="sec" style="display:none;">
       <div class="section-header">🐾 Mascotas registradas</div>
+      <!-- Filtros -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center;">
+        <input type="text" id="buscarMascotas" placeholder="Buscar por nombre, dueño o placa..."
+          style="flex:1; min-width:200px; max-width:340px;">
+        <select id="filtroEstado" class="input" style="width:auto; padding:9px 12px;">
+          <option value="">Todas</option>
+          <option value="perdida">🚨 Perdidas</option>
+          <option value="casa">✅ En casa</option>
+        </select>
+        <span id="contadorMascotas" style="font-size:13px; color:var(--ink-muted); white-space:nowrap;"></span>
+      </div>
       <div id="clientesLista"><div class="spinner"></div></div>
     </div>
 
@@ -521,14 +532,12 @@
       const mi  = document.getElementById('mi-' + nombre)
       if (sec) sec.style.display = 'block'
       if (mi)  mi.classList.add('active')
-      if (!cache[nombre]) {
-        cache[nombre] = true
-        if (nombre === 'activas')     await cargarPlacas('activa')
-        if (nombre === 'disponibles') await cargarPlacas('disponible')
-        if (nombre === 'mascotas')    await cargarClientes()
-        if (nombre === 'usuarios')    await cargarUsuarios()
-        if (nombre === 'enlaces')     await cargarConfig()
-      }
+      // Siempre recargar datos frescos al navegar
+      if (nombre === 'activas')     await cargarPlacas('activa')
+      if (nombre === 'disponibles') await cargarPlacas('disponible')
+      if (nombre === 'mascotas')    await cargarClientes()
+      if (nombre === 'usuarios' && !cache['usuarios']) { cache['usuarios'] = true; await cargarUsuarios() }
+      if (nombre === 'enlaces'  && !cache['enlaces'])  { cache['enlaces']  = true; await cargarConfig() }
     }
 
     // ─── ROL ──────────────────────────────────────
@@ -603,19 +612,29 @@
     async function cargarPlacas(estado) {
       const listaId  = estado === 'activa' ? 'listaActivas' : 'listaDisponibles'
       const buscarId = estado === 'activa' ? 'buscarActivas' : 'buscarDisponibles'
+      document.getElementById(listaId).innerHTML = '<div class="spinner" style="margin:24px auto;display:block;"></div>'
       const { data, error } = await supabase
-        .from('placas').select('*, perfiles(nombre_mascota,nombre_dueno)')
+        .from('placas')
+        .select('*, perfiles!placas_perfil_id_fkey(nombre_mascota, nombre_dueno)')
         .eq('estado', estado).order('codigo')
-      if (error || !data?.length) {
+      if (error) {
+        console.error('cargarPlacas:', error)
+        document.getElementById(listaId).innerHTML = `<p style="color:#e57373;padding:20px 16px;">❌ ${error.message}</p>`
+        return
+      }
+      if (!data?.length) {
         document.getElementById(listaId).innerHTML = `<p style="color:var(--ink-muted);padding:20px 16px;">Sin placas aún.</p>`
         return
       }
       let todas = data
       renderTabla(listaId, todas, estado)
+      const buscarEl = document.getElementById(buscarId)
+      const nuevoEl  = buscarEl.cloneNode(true)
+      buscarEl.parentNode.replaceChild(nuevoEl, buscarEl)
       document.getElementById(buscarId).addEventListener('input', e => {
         const q = e.target.value.toLowerCase()
         renderTabla(listaId, todas.filter(p => {
-          const pf = p.perfiles?.[0] || p.perfiles || null
+          const pf = Array.isArray(p.perfiles) ? p.perfiles[0] : p.perfiles
           return p.codigo.toLowerCase().includes(q) ||
                  (pf?.nombre_mascota||'').toLowerCase().includes(q) ||
                  (pf?.nombre_dueno||'').toLowerCase().includes(q)
@@ -629,7 +648,7 @@
           <th>Código</th><th>Mascota</th><th>Dueño</th><th>Acciones</th>
         </tr></thead><tbody>
         ${data.map(p => {
-          const pf = p.perfiles?.[0] || p.perfiles || null
+          const pf = Array.isArray(p.perfiles) ? p.perfiles[0] : p.perfiles
           const qr = window.location.origin + '/rescate.html?id=' + p.id
           return `<tr>
             <td><span class="code-badge">${p.codigo}</span></td>
@@ -678,25 +697,80 @@
     })
 
     // ─── MASCOTAS ─────────────────────────────────
+    let todasMascotas = []
+
     async function cargarClientes() {
-      const { data, error } = await supabase.from('perfiles').select('*,placas(codigo)').order('created_at', { ascending: false })
-      if (error || !data?.length) {
+      document.getElementById('clientesLista').innerHTML = '<div class="spinner"></div>'
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*, placas!perfiles_placa_id_fkey(codigo)')
+        .order('created_at', { ascending: false })
+      if (error) {
+        console.error('cargarClientes:', error)
+        document.getElementById('clientesLista').innerHTML = `<p style="color:#e57373;padding:20px 0;">❌ ${error.message}</p>`
+        return
+      }
+      if (!data?.length) {
         document.getElementById('clientesLista').innerHTML = '<p style="color:var(--ink-muted);padding:20px 0;">Sin mascotas aún.</p>'
         return
       }
-      document.getElementById('clientesLista').innerHTML = data.map(c => `
+      todasMascotas = data
+      renderMascotas()
+
+      // Listeners de filtro (solo la primera vez)
+      const buscar = document.getElementById('buscarMascotas')
+      const filtro = document.getElementById('filtroEstado')
+      const nb = buscar.cloneNode(true); buscar.parentNode.replaceChild(nb, buscar)
+      const nf = filtro.cloneNode(true); filtro.parentNode.replaceChild(nf, filtro)
+      document.getElementById('buscarMascotas').addEventListener('input', renderMascotas)
+      document.getElementById('filtroEstado').addEventListener('change', renderMascotas)
+    }
+
+    function renderMascotas() {
+      const q      = (document.getElementById('buscarMascotas')?.value || '').toLowerCase()
+      const estado = document.getElementById('filtroEstado')?.value || ''
+      let lista = todasMascotas
+
+      if (q) lista = lista.filter(c =>
+        (c.nombre_mascota||'').toLowerCase().includes(q) ||
+        (c.nombre_dueno||'').toLowerCase().includes(q) ||
+        (c.placas?.codigo||'').toLowerCase().includes(q)
+      )
+      if (estado === 'perdida') lista = lista.filter(c => c.esta_perdida)
+      if (estado === 'casa')    lista = lista.filter(c => !c.esta_perdida)
+
+      const contador = document.getElementById('contadorMascotas')
+      if (contador) contador.textContent = `${lista.length} mascota${lista.length !== 1 ? 's' : ''}`
+
+      if (!lista.length) {
+        document.getElementById('clientesLista').innerHTML = '<p style="color:var(--ink-muted);padding:20px 0;">Sin resultados.</p>'
+        return
+      }
+
+      document.getElementById('clientesLista').innerHTML = lista.map(c => `
         <div class="cliente-row">
           <div style="display:flex; align-items:center; gap:14px;">
-            <div style="font-size:32px;">${c.foto_url ? `<img src="${c.foto_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--clay-l);">` : '🐾'}</div>
+            <div style="flex-shrink:0;">
+              ${c.foto_url
+                ? `<img src="${c.foto_url}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--clay-l);">`
+                : `<div style="width:48px;height:48px;border-radius:50%;background:var(--clay-bg);border:2px solid var(--clay-l);display:flex;align-items:center;justify-content:center;font-size:22px;">${c.especie === 'gato' ? '🐱' : '🐶'}</div>`}
+            </div>
             <div>
-              <div style="font-weight:700; color:var(--ink); font-size:15px;">
+              <div style="font-weight:700; color:var(--ink); font-size:15px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                 ${c.nombre_mascota || '—'}
-                ${c.esta_perdida ? '<span style="color:#e57373; font-size:12px; font-weight:700; margin-left:6px; background:var(--error-bg); padding:2px 8px; border-radius:20px;">🚨 PERDIDA</span>' : ''}
+                ${c.esta_perdida
+                  ? '<span style="color:#e57373;font-size:11px;font-weight:700;background:var(--error-bg);padding:2px 8px;border-radius:20px;border:1px solid rgba(229,115,115,0.3);">🚨 PERDIDA</span>'
+                  : '<span style="color:var(--sage-d);font-size:11px;font-weight:600;background:var(--sage-bg);padding:2px 8px;border-radius:20px;border:1px solid var(--sage-l);">✅ En casa</span>'}
               </div>
-              <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;">👤 ${c.nombre_dueno || '—'} &nbsp;·&nbsp; 📱 ${c.telefono || '—'}</div>
-              <div style="font-size:12px; color:var(--ink-muted); margin-top:2px;">
+              <div style="font-size:13px; color:var(--ink-soft); margin-top:3px;">
+                👤 ${c.nombre_dueno || '—'} &nbsp;·&nbsp; 📱 ${c.telefono || '—'}
+              </div>
+              <div style="font-size:12px; color:var(--ink-muted); margin-top:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                 <span class="code-badge" style="font-size:11px;">${c.placas?.codigo || 'Sin placa'}</span>
-                &nbsp;·&nbsp; ${new Date(c.created_at).toLocaleDateString('es-CL')}
+                <span>·</span>
+                <span>${c.especie === 'gato' ? '🐱 Gato' : '🐶 Perro'}${c.raza ? ' · ' + c.raza : ''}</span>
+                <span>·</span>
+                <span>${new Date(c.created_at).toLocaleDateString('es-CL')}</span>
               </div>
             </div>
           </div>

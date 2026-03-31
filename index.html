@@ -278,7 +278,7 @@
     <div class="register-section">
       <div class="register-box" id="registerBoxWrap">
         <div class="register-label">¿Primera vez?</div>
-        <p>Si compraste una placa UbiPet, creá tu cuenta aquí:</p>
+        <p>Si compraste una placa UbiPet, crea tu cuenta aquí:</p>
         <button class="btn btn-success btn-full" id="btnRegister">✨ Crear cuenta nueva</button>
       </div>
 
@@ -309,10 +309,10 @@
       <div class="welcome-card" id="welcomePanel" style="display:none;">
         <span class="welcome-emoji">🎉</span>
         <h3>¡Bienvenido a UbiPet!</h3>
-        <p>Tu cuenta fue creada exitosamente. Ya podés asociar tu placa y crear el perfil de tu mascota.</p>
+        <p>Tu cuenta fue creada exitosamente. Ya puedes asociar tu placa y crear el perfil de tu mascota.</p>
         <div class="welcome-steps">
-          <div class="step"><div class="step-num">1</div><span>Ingresá el código de tu placa</span></div>
-          <div class="step"><div class="step-num">2</div><span>Completá el perfil de tu mascota</span></div>
+          <div class="step"><div class="step-num">1</div><span>Ingresa el código de tu placa</span></div>
+          <div class="step"><div class="step-num">2</div><span>Completa el perfil de tu mascota</span></div>
           <div class="step"><div class="step-num">3</div><span>¡Listo! Tu peludito ya está protegido 🐾</span></div>
         </div>
         <button class="btn btn-primary btn-full" id="btnIrPerfil">Ir a mi perfil →</button>
@@ -326,8 +326,8 @@
     <div class="pwa-banner-info">
       <div class="pwa-banner-icon"><img src="/icon-192.png" alt="UbiPet"></div>
       <div class="pwa-banner-text">
-        <div class="title">Instalá UbiPet</div>
-        <div class="sub">Accedé más rápido desde tu celular</div>
+        <div class="title">Instala UbiPet</div>
+        <div class="sub">Accede más rápido desde tu celular</div>
       </div>
     </div>
     <div class="pwa-banner-actions">
@@ -348,32 +348,51 @@
       btn.disabled = loading
       btn.innerHTML = loading ? '<span class="spinner spinner-sm"></span>' : label
     }
-    // VERIFICACIÓN PLACA OBLIGATORIA para TODOS los métodos
-supabase.auth.onAuthStateChange(async (event, session) => {
-  // Solo interceptar OAuth (Google) — el login normal maneja su propia redirección
-  if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
-    // Verificar si tiene al menos un perfil con placa asociada
-    const { data: perfiles } = await supabase
-      .from('perfiles')
-      .select('placa_id')
-      .eq('user_id', session.user.id)
-      .not('placa_id', 'is', null)
-      .limit(1)
 
-    if (!perfiles?.length) {
-      // Usuario Google sin placa → logout + mostrar mensaje
-      await supabase.auth.signOut()
-      showAlert('alert', '❌ Para usar UbiPet necesitás una placa activa. Registrate con tu código de placa.')
-      document.getElementById('registerBoxWrap').scrollIntoView()
-      return
+    // ─── VERIFICACIÓN DE PLACA ────────────────────
+    // Función central: verifica si el usuario tiene al menos un perfil con placa
+    async function tienePlacaActiva(userId) {
+      const { data } = await supabase
+        .from('perfiles')
+        .select('id')
+        .eq('user_id', userId)
+        .not('placa_id', 'is', null)
+        .limit(1)
+      return !!(data?.length)
     }
 
-    // Con placa → ir a perfil
-    window.location.href = 'perfil.html'
-  }
-})
+    function mostrarErrorSinPlaca(alertId = 'alert') {
+      showAlert(alertId, '❌ Para usar UbiPet necesitas tener una placa activa. Regístrate con tu código de placa.')
+      document.getElementById('registerBoxWrap').scrollIntoView({ behavior: 'smooth' })
+    }
 
-    // GOOGLE
+    // ─── SESIÓN PERSISTENTE ───────────────────────
+    // Si ya hay sesión activa al cargar la página, verificar placa y redirigir
+    const { data: { session: sessionActual } } = await supabase.auth.getSession()
+    if (sessionActual) {
+      const tieneAcceso = await tienePlacaActiva(sessionActual.user.id)
+      if (tieneAcceso) {
+        window.location.href = 'perfil.html'
+      } else {
+        await supabase.auth.signOut()
+        mostrarErrorSinPlaca()
+      }
+    }
+
+    // ─── GOOGLE OAUTH ─────────────────────────────
+    // Intercepta el redirect de vuelta después del login con Google
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
+        const tieneAcceso = await tienePlacaActiva(session.user.id)
+        if (tieneAcceso) {
+          window.location.href = 'perfil.html'
+        } else {
+          await supabase.auth.signOut()
+          mostrarErrorSinPlaca()
+        }
+      }
+    })
+
     document.getElementById('btnGoogle').addEventListener('click', async () => {
       const btn = document.getElementById('btnGoogle')
       btn.disabled = true
@@ -389,7 +408,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
       }
     })
 
-    // FORGOT
+    // ─── OLVIDÉ CONTRASEÑA ────────────────────────
     document.getElementById('btnForgot').addEventListener('click', () => {
       document.getElementById('forgotPanel').style.display = 'block'
       document.getElementById('btnForgot').style.display = 'none'
@@ -401,34 +420,58 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     })
     document.getElementById('btnSendReset').addEventListener('click', async () => {
       const email = document.getElementById('forgotEmail').value.trim()
-      if (!email) return showAlert('alertForgot', 'Ingresá tu email')
+      if (!email) return showAlert('alertForgot', 'Ingresa tu email')
       const btn = document.getElementById('btnSendReset')
-      setLoading(btn, true, 'Enviar link')
+      setLoading(btn, true, 'Enviar enlace')
+
+      // Verificar que el email tiene una cuenta activa con placa antes de enviar reset
+      // (resetPasswordForEmail crearía el usuario si no existe)
+      const { data: perfil } = await supabase
+        .from('perfiles')
+        .select('id')
+        .eq('email_dueno', email)
+        .not('placa_id', 'is', null)
+        .limit(1)
+
+      if (!perfil?.length) {
+        setLoading(btn, false, 'Enviar enlace')
+        return showAlert('alertForgot', '❌ No encontramos una cuenta activa con ese email.')
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'https://app.ubipet.shop/reset-password.html'
       })
-      setLoading(btn, false, 'Enviar link')
+      setLoading(btn, false, 'Enviar enlace')
       if (error) return showAlert('alertForgot', '❌ ' + error.message)
-      showAlert('alertForgot', '✅ ¡Listo! Revisá tu email.', 'ok')
+      showAlert('alertForgot', '✅ ¡Listo! Revisa tu email.', 'ok')
     })
 
-    // LOGIN
+    // ─── LOGIN EMAIL/PASSWORD ─────────────────────
     document.getElementById('btnLogin').addEventListener('click', async () => {
       const email    = document.getElementById('email').value.trim()
       const password = document.getElementById('password').value
-      if (!email || !password) return showAlert('alert', 'Completá email y contraseña')
+      if (!email || !password) return showAlert('alert', 'Completa el email y la contraseña')
       const btn = document.getElementById('btnLogin')
       setLoading(btn, true, '🚀 Iniciar sesión')
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setLoading(btn, false, '🚀 Iniciar sesión')
+        return showAlert('alert', '❌ ' + error.message)
+      }
+      // Verificar placa antes de redirigir
+      const tieneAcceso = await tienePlacaActiva(loginData.user.id)
       setLoading(btn, false, '🚀 Iniciar sesión')
-      if (error) return showAlert('alert', '❌ ' + error.message)
+      if (!tieneAcceso) {
+        await supabase.auth.signOut()
+        return mostrarErrorSinPlaca()
+      }
       window.location.href = 'perfil.html'
     })
     document.getElementById('password').addEventListener('keypress', e => {
       if (e.key === 'Enter') document.getElementById('btnLogin').click()
     })
 
-    // REGISTER
+    // ─── REGISTRO ─────────────────────────────────
     document.getElementById('btnRegister').addEventListener('click', () => {
       document.getElementById('registerPanel').style.display = 'block'
       document.getElementById('registerBoxWrap').style.display = 'none'
@@ -436,6 +479,9 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('btnCancelRegister').addEventListener('click', () => {
       document.getElementById('registerPanel').style.display = 'none'
       document.getElementById('registerBoxWrap').style.display = 'block'
+    })
+    document.getElementById('regCodigo').addEventListener('input', e => {
+      e.target.value = e.target.value.toUpperCase()
     })
     document.getElementById('btnDoRegister').addEventListener('click', async () => {
       const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
@@ -461,10 +507,14 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         return showAlert('alertReg', '❌ Esta placa ya está registrada. Si crees que es un error, contáctanos.')
       }
 
+      // Guardar código en sesión para asociarlo en perfil.html
+      sessionStorage.setItem('placa_pendiente', codigo)
+
       // Crear cuenta
       const { error } = await supabase.auth.signUp({ email, password: pass })
       setLoading(btn, false, 'Crear cuenta')
       if (error) return showAlert('alertReg', '❌ ' + error.message)
+
       const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pass })
       document.getElementById('registerPanel').style.display = 'none'
       if (loginErr) {
@@ -503,8 +553,8 @@ supabase.auth.onAuthStateChange(async (event, session) => {
       const text = document.getElementById('installText')
       const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
       text.innerHTML = isIOS
-        ? 'Tocá el botón compartir <strong>⬆️</strong> en Safari y luego <strong>"Agregar a pantalla de inicio"</strong>'
-        : 'Tocá los <strong>3 puntos ⋮</strong> de Chrome y luego <strong>"Agregar a pantalla de inicio"</strong>'
+        ? 'Toca el botón compartir <strong>⬆️</strong> en Safari y luego <strong>"Agregar a pantalla de inicio"</strong>'
+        : 'Toca los <strong>3 puntos ⋮</strong> de Chrome y luego <strong>"Agregar a pantalla de inicio"</strong>'
       instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none'
     })
   </script>

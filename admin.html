@@ -28,6 +28,7 @@
       background: var(--nav-bg); border-right: 1px solid var(--card-border);
       display: flex; flex-direction: column; z-index: 50; overflow-y: auto;
       backdrop-filter: blur(16px);
+      padding-bottom: env(safe-area-inset-bottom, 16px);
     }
     .menu-item {
       width: 100%; text-align: left; background: none; border: none;
@@ -217,9 +218,10 @@
     <div class="menu-label solo-superadmin">Configuración</div>
     <button class="menu-item solo-superadmin" id="mi-enlaces" onclick="ir('enlaces')">🔗 Enlaces</button>
     <button class="menu-item" id="mi-tema"               onclick="ir('tema')">🎨 Tema</button>
-    <div style="flex:1;"></div>
-    <div class="menu-divider"></div>
-    <button class="menu-item" id="btnLogout" style="color:#e57373; margin-bottom:8px;">🚪 Cerrar sesión</button>
+    <div style="flex:1; min-height:16px;"></div>
+    <div style="position:sticky; bottom:0; background:var(--nav-bg); border-top:1px solid var(--card-border); padding:6px 0; flex-shrink:0;">
+      <button class="menu-item" id="btnLogout" style="color:#e57373;">🚪 Cerrar sesión</button>
+    </div>
   </div>
 
   <!-- LOGIN -->
@@ -387,6 +389,98 @@
 
     let rolActual = null
 
+    // ─── TIMEOUT DE SESIÓN (30 min inactividad) ───
+    const TIMEOUT_MS = 30 * 60 * 1000
+    let timeoutId = null
+    let timeoutBannerShown = false
+
+    function resetTimeout() {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(async () => {
+        // Mostrar aviso 1 minuto antes
+        timeoutBannerShown = true
+        showTimeoutBanner()
+      }, TIMEOUT_MS - 60000)
+    }
+
+    function showTimeoutBanner() {
+      let banner = document.getElementById('timeoutBanner')
+      if (!banner) {
+        banner = document.createElement('div')
+        banner.id = 'timeoutBanner'
+        banner.style.cssText = `
+          position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+          background:var(--card-bg); border:1px solid var(--clay-l);
+          border-radius:var(--radius-lg); padding:14px 20px;
+          box-shadow:var(--shadow-xl); z-index:9999;
+          display:flex; align-items:center; gap:14px;
+          max-width:380px; width:calc(100% - 32px);
+          animation:fadeUp 0.3s ease both;
+        `
+        banner.innerHTML = `
+          <span style="font-size:22px;">⏱️</span>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:14px; color:var(--ink);">Sesión por expirar</div>
+            <div style="font-size:13px; color:var(--ink-muted);" id="timeoutCountdown">La sesión cerrará en 60 segundos</div>
+          </div>
+          <button onclick="extenderSesion()" style="
+            background:var(--clay); color:white; border:none;
+            border-radius:var(--radius-sm); padding:8px 14px;
+            font-weight:700; font-size:13px; cursor:pointer;
+            font-family:'DM Sans',sans-serif; white-space:nowrap;
+          ">Seguir</button>
+        `
+        document.body.appendChild(banner)
+      }
+      banner.style.display = 'flex'
+      let secs = 60
+      const interval = setInterval(() => {
+        secs--
+        const cd = document.getElementById('timeoutCountdown')
+        if (cd) cd.textContent = `La sesión cerrará en ${secs} segundo${secs !== 1 ? 's' : ''}`
+        if (secs <= 0) {
+          clearInterval(interval)
+          cerrarSesionPorTimeout()
+        }
+      }, 1000)
+      banner._interval = interval
+    }
+
+    async function cerrarSesionPorTimeout() {
+      await supabase.auth.signOut()
+      document.getElementById('dashWrap').style.display = 'none'
+      document.getElementById('loginWrap').style.display = 'flex'
+      document.getElementById('adminEmail').value = ''
+      document.getElementById('adminPass').value = ''
+      const banner = document.getElementById('timeoutBanner')
+      if (banner) banner.remove()
+      showAlert('loginAlert', '⏱️ Sesión cerrada por inactividad', 'info')
+    }
+
+    window.extenderSesion = () => {
+      const banner = document.getElementById('timeoutBanner')
+      if (banner) {
+        clearInterval(banner._interval)
+        banner.style.display = 'none'
+      }
+      timeoutBannerShown = false
+      resetTimeout()
+    }
+
+    // Detectar actividad del usuario
+    ;['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(ev =>
+      document.addEventListener(ev, () => {
+        if (document.getElementById('dashWrap')?.style.display !== 'none') {
+          const banner = document.getElementById('timeoutBanner')
+          if (banner && banner.style.display !== 'none') {
+            window.extenderSesion()
+          } else {
+            resetTimeout()
+          }
+        }
+      }, { passive: true })
+    )
+
     // ─── TEMA ─────────────────────────────────────
     function aplicarTema(t) {
       document.documentElement.removeAttribute('data-theme')
@@ -461,6 +555,7 @@
       document.getElementById('sidebarEmail').textContent = email
       aplicarRol(data.rol)
       await cargarStats()
+      resetTimeout() // iniciar contador de inactividad
     }
 
     // ─── SESIÓN ───────────────────────────────────
@@ -482,6 +577,7 @@
       if (e.key === 'Enter') document.getElementById('btnAdminLogin').click()
     })
     document.getElementById('btnLogout').addEventListener('click', async () => {
+      clearTimeout(timeoutId)
       await supabase.auth.signOut()
       document.getElementById('loginWrap').style.display = 'flex'
       document.getElementById('dashWrap').style.display  = 'none'

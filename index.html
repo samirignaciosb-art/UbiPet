@@ -378,7 +378,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
       btn.innerHTML = '<span class="spinner spinner-sm"></span> Conectando...'
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: 'https://app.ubipet.shop/perfil.html' }
+        options: { redirectTo: window.location.origin }
       })
       if (error) {
         btn.disabled = false

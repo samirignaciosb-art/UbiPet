@@ -221,6 +221,8 @@
     <div class="menu-label solo-superadmin">Configuración</div>
     <button class="menu-item solo-superadmin" id="mi-enlaces" onclick="ir('enlaces')">🔗 Enlaces</button>
     <button class="menu-item" id="mi-tema"               onclick="ir('tema')">🎨 Tema</button>
+    <div class="menu-label">Contenido</div>
+    <button class="menu-item" id="mi-contenido"          onclick="ir('contenido')">✍️ Post del día</button>
     <div style="flex:1; min-height:16px;"></div>
     <div style="position:sticky; bottom:0; background:var(--nav-bg); border-top:1px solid var(--card-border); padding:6px 0; flex-shrink:0;">
       <button class="menu-item" id="btnLogout" style="color:#e57373;">🚪 Cerrar sesión</button>
@@ -382,6 +384,74 @@
       </div>
     </div>
 
+    <!-- SECCIÓN: POST DEL DÍA -->
+    <div id="sec-contenido" class="sec" style="display:none;">
+      <div class="section-header">✍️ Post del día</div>
+
+      <!-- Estado del día -->
+      <div id="contenido-loading" style="text-align:center; padding:32px; color:var(--ink-muted);">
+        <span class="spinner"></span>
+      </div>
+
+      <div id="contenido-panel" style="display:none;">
+
+        <!-- Efeméride del día -->
+        <div class="config-section" style="margin-bottom:16px;">
+          <h3 style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span id="contenido-fecha"></span>
+            <span id="contenido-categoria-badge" style="font-size:11px; font-weight:700; padding:3px 12px; border-radius:999px; background:var(--clay-bg); color:var(--clay); border:1px solid var(--clay-l);"></span>
+          </h3>
+          <div id="contenido-evento" style="font-size:16px; font-weight:600; color:var(--ink); margin-bottom:4px;"></div>
+          <div id="contenido-fuente" style="font-size:12px; color:var(--ink-muted);"></div>
+        </div>
+
+        <!-- Copy generado -->
+        <div class="config-section" style="margin-bottom:16px;">
+          <h3>📸 Caption para Instagram</h3>
+          <div id="contenido-copy-wrap" style="min-height:120px; display:flex; align-items:center; justify-content:center;">
+            <span class="spinner"></span>
+          </div>
+          <div id="contenido-copy" style="display:none;">
+            <div id="contenido-copy-text" style="
+              background:var(--cream-d); border:1px solid var(--card-border);
+              border-radius:var(--radius); padding:16px; font-size:14px;
+              color:var(--ink); line-height:1.7; white-space:pre-wrap;
+              margin-bottom:12px; min-height:100px;
+            "></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" id="btnCopiarCopy">📋 Copiar caption</button>
+              <button class="btn btn-ghost btn-sm" id="btnRegenerarCopy">🔄 Regenerar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hashtags -->
+        <div class="config-section" style="margin-bottom:16px;">
+          <h3>🏷️ Hashtags</h3>
+          <div id="contenido-hashtags" style="
+            font-size:13px; color:var(--sage-d); line-height:1.8;
+            background:var(--sage-bg); border:1px solid var(--sage-l);
+            border-radius:var(--radius); padding:14px;
+          ">#ubipet #mascotas #perros #gatos #placaqr #mascotasperdidas #saludanimal #proteccionmascotas #chile #mascotaschile</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:10px;" id="btnCopiarHashtags">📋 Copiar hashtags</button>
+        </div>
+
+        <!-- Calendario próximas fechas -->
+        <div class="config-section">
+          <h3>📅 Próximas efemérides</h3>
+          <div id="contenido-proximas" style="display:flex; flex-direction:column; gap:8px; margin-top:4px;"></div>
+        </div>
+
+      </div>
+
+      <!-- Sin datos -->
+      <div id="contenido-empty" style="display:none; text-align:center; padding:32px; color:var(--ink-muted);">
+        <div style="font-size:40px; margin-bottom:12px;">📭</div>
+        <p>No hay efemérides cargadas. Ejecuta el SQL de setup primero.</p>
+      </div>
+
+    </div>
+
     <div id="sec-tema" class="sec" style="display:none;">
       <div class="section-header">🎨 Tema</div>
       <div class="config-section">
@@ -539,6 +609,7 @@
       if (nombre === 'activas')     await cargarPlacas('activa')
       if (nombre === 'disponibles') await cargarPlacas('disponible')
       if (nombre === 'mascotas')    await cargarClientes()
+      if (nombre === 'contenido')   await cargarContenido()
       if (nombre === 'usuarios' && !cache['usuarios']) { cache['usuarios'] = true; await cargarUsuarios() }
       if (nombre === 'enlaces'  && !cache['enlaces'])  { cache['enlaces']  = true; await cargarConfig() }
     }
@@ -840,6 +911,146 @@
       cache['usuarios'] = false
       await cargarUsuarios()
     }
+
+    // ─── CONTENIDO / POST DEL DÍA ───────────────────
+    async function cargarContenido() {
+      document.getElementById('contenido-loading').style.display = 'block'
+      document.getElementById('contenido-panel').style.display   = 'none'
+      document.getElementById('contenido-empty').style.display   = 'none'
+
+      const hoy   = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }))
+      const dia   = hoy.getDate()
+      const mes   = hoy.getMonth() + 1
+      const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
+      // Buscar efeméride del día
+      const { data: evento } = await supabase
+        .from('pet_calendar')
+        .select('*')
+        .eq('day', dia)
+        .eq('month', mes)
+        .maybeSingle()
+
+      // Buscar próximas 5 efemérides
+      const { data: proximas } = await supabase
+        .from('pet_calendar')
+        .select('day, month, event_name')
+        .or(`and(month.eq.${mes},day.gt.${dia}),month.gt.${mes}`)
+        .order('month').order('day')
+        .limit(5)
+
+      document.getElementById('contenido-loading').style.display = 'none'
+
+      if (!evento && (!proximas || !proximas.length)) {
+        document.getElementById('contenido-empty').style.display = 'block'
+        return
+      }
+
+      // Mostrar panel
+      document.getElementById('contenido-panel').style.display = 'block'
+      document.getElementById('contenido-fecha').textContent = `${dia} de ${meses[mes]} ${hoy.getFullYear()}`
+
+      const categoriaLabels = { efemeride: '📅 Efeméride', dato_curioso: '🐾 Dato curioso', consejo: '💡 Consejo' }
+
+      if (evento) {
+        document.getElementById('contenido-evento').textContent = evento.event_name
+        document.getElementById('contenido-categoria-badge').textContent = categoriaLabels[evento.categoria] || evento.categoria
+        document.getElementById('contenido-fuente').textContent = 'Fecha clave registrada en tu calendario'
+        generarCopyIA(evento.event_name, evento.categoria)
+      } else {
+        document.getElementById('contenido-evento').textContent = 'Sin efeméride hoy — generando contenido de marca'
+        document.getElementById('contenido-categoria-badge').textContent = '🤖 Generado con IA'
+        document.getElementById('contenido-fuente').textContent = 'Contenido original creado por IA con el tono de UbiPet'
+        generarCopyIA('dato curioso sobre mascotas y la importancia de la identificación con placa QR', 'dato_curioso')
+      }
+
+      // Próximas efemérides
+      if (proximas?.length) {
+        document.getElementById('contenido-proximas').innerHTML = proximas.map(p => `
+          <div style="display:flex; align-items:center; gap:12px; padding:10px 14px;
+            background:var(--card-bg); border:1px solid var(--card-border);
+            border-radius:var(--radius-sm);">
+            <div style="font-family:monospace; font-size:13px; font-weight:700;
+              color:var(--clay); min-width:50px;">${p.day}/${p.month}</div>
+            <div style="font-size:13px; color:var(--ink-soft);">${p.event_name}</div>
+          </div>`).join('')
+      }
+    }
+
+    // ─── GENERADOR DE COPY CON IA ─────────────────────
+    async function generarCopyIA(tema, categoria) {
+      const copyWrap = document.getElementById('contenido-copy-wrap')
+      const copyDiv  = document.getElementById('contenido-copy')
+      const copyText = document.getElementById('contenido-copy-text')
+      copyWrap.style.display = 'flex'
+      copyDiv.style.display  = 'none'
+
+      const tipoPost = {
+        efemeride:    'post conmemorativo de una fecha especial para mascotas',
+        dato_curioso: 'dato curioso sorprendente sobre mascotas',
+        consejo:      'consejo útil de cuidado animal',
+      }[categoria] || 'post de marketing'
+
+      const prompt = `Eres el asistente de marketing de UbiPet, una marca chilena que vende placas QR inteligentes para mascotas.
+Tu tono es: cercano, emotivo, informativo y siempre termina con un recordatorio sutil de que tener una placa QR UbiPet protege a tu mascota.
+NO uses la palabra "peludito" ni argentinismos.
+
+Escribe un ${tipoPost} para Instagram sobre: "${tema}"
+
+El post debe:
+- Tener máximo 150 palabras
+- Empezar con un hook emocional o dato sorprendente en la primera línea
+- Incluir 2-3 emojis relevantes integrados en el texto (no al final)
+- Terminar con una llamada a la acción suave relacionada con UbiPet
+- NO incluir hashtags (van separados)
+- Sonar natural, no corporativo
+
+Responde SOLO con el texto del post, sin comillas ni explicaciones.`
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 400,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        })
+        const data  = await response.json()
+        const texto = data.content?.[0]?.text?.trim() || 'No se pudo generar el copy.'
+        copyText.textContent = texto
+        copyWrap.style.display = 'none'
+        copyDiv.style.display  = 'block'
+
+        // Botones
+        document.getElementById('btnCopiarCopy').onclick = () => {
+          navigator.clipboard.writeText(texto)
+          const btn = document.getElementById('btnCopiarCopy')
+          btn.textContent = '✅ Copiado!'
+          setTimeout(() => btn.textContent = '📋 Copiar caption', 2000)
+        }
+        document.getElementById('btnRegenerarCopy').onclick = () => {
+          generarCopyIA(tema, categoria)
+        }
+
+      } catch(e) {
+        copyText.textContent = 'Error generando el copy. Verifica la conexión.'
+        copyWrap.style.display = 'none'
+        copyDiv.style.display  = 'block'
+        console.error(e)
+      }
+    }
+
+    // Copiar hashtags
+    document.addEventListener('click', e => {
+      if (e.target.id === 'btnCopiarHashtags') {
+        const txt = document.getElementById('contenido-hashtags').textContent
+        navigator.clipboard.writeText(txt)
+        e.target.textContent = '✅ Copiado!'
+        setTimeout(() => e.target.textContent = '📋 Copiar hashtags', 2000)
+      }
+    })
 
     // ─── CONFIG ───────────────────────────────────
     async function cargarConfig() {

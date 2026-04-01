@@ -438,9 +438,11 @@
 
         // SALUD — solo si perdida y privacidad lo permite
         if (mostrarSalud) {
-          const vacunas  = Array.isArray(data.vacunas)  ? data.vacunas  : []
-          const alergias = Array.isArray(data.alergias) ? data.alergias : []
-          const remedios = Array.isArray(data.remedios) ? data.remedios : []
+          // Filtrar valores vacíos o string 'No' guardados por error
+          const invalidos = v => !v || ['no','no tiene','ninguno','ninguna','-'].includes(String(v).toLowerCase().trim())
+          const vacunas  = (Array.isArray(data.vacunas)  ? data.vacunas  : []).filter(v => v?.nombre && !invalidos(v.nombre))
+          const alergias = (Array.isArray(data.alergias) ? data.alergias : []).filter(v => !invalidos(v))
+          const remedios = (Array.isArray(data.remedios) ? data.remedios : []).filter(v => !invalidos(v))
           const alim     = data.alimentacion || {}
 
           const tieneSalud = vacunas.length || alergias.length || remedios.length || alim.tipo

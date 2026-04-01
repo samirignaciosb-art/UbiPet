@@ -3,599 +3,561 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UbiPet — La identidad digital de tu mascota</title>
-  <meta name="description" content="Placa inteligente con QR para mascotas. Perfil médico completo, notificaciones en tiempo real y control total de tu información.">
-  <link rel="icon" href="https://app.ubipet.shop/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>UbiPet — Iniciar sesión</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#D08C61">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="UbiPet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --clay: #D08C61; --clay-d: #B8734A; --clay-l: #EAC4A8; --clay-bg: #FAF0E8;
-      --sage: #6F846C; --sage-d: #4E6250; --sage-l: #A8BDA6; --sage-bg: #EEF3EE;
-      --cream: #F9F4EE; --cream-d: #F0E9DF; --sand: #E8DDD1;
-      --ink: #1F1810; --ink-soft: #5C4A3A; --ink-muted: #9C8878; --white: #FFFFFF;
-      --shadow: 0 4px 20px rgba(31,24,16,0.10); --shadow-lg: 0 8px 40px rgba(31,24,16,0.14);
-      --radius: 14px; --radius-lg: 20px; --radius-xl: 28px;
-      --ease: cubic-bezier(0.25,0.46,0.45,0.94);
-    }
-    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; background: rgba(249,244,238,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(208,140,97,0.12); }
-    .nav-logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--clay); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-    .nav-logo span { color: var(--sage); }
-    .nav-logo img { height: 36px; width: auto; }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .nav-link { color: var(--ink-soft); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 999px; transition: all 0.2s; display: none; }
-    @media (min-width: 640px) { .nav-link { display: inline-flex; } }
-    .nav-link:hover { color: var(--clay); background: var(--clay-bg); }
-    .nav-cta { background: var(--clay); color: white; border: none; padding: 10px 22px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.2s var(--ease); box-shadow: 0 2px 12px rgba(208,140,97,0.3); }
-    .nav-cta:hover { background: var(--clay-d); transform: translateY(-1px); }
-    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 130px 24px 90px; position: relative; overflow: hidden; }
-    .hero-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-    .hero-bg::before { content: ''; position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(208,140,97,0.11) 0%, transparent 65%); top: 50%; left: 50%; transform: translate(-50%,-55%); }
-    .hero-bg::after { content: ''; position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(111,132,108,0.09) 0%, transparent 65%); bottom: 5%; right: 5%; }
-    .hero > * { position: relative; z-index: 1; }
-    .hero-logo-img { width: 90px; height: auto; margin-bottom: 24px; filter: drop-shadow(0 8px 24px rgba(111,132,108,0.2)); animation: float 4s ease-in-out infinite; }
-    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--clay-bg); border: 1px solid var(--clay-l); border-radius: 999px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: var(--clay); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 24px; animation: fadeUp 0.5s var(--ease) both; }
-    .hero h1 { font-family: 'Fraunces', serif; font-size: clamp(38px, 6.5vw, 80px); font-weight: 700; line-height: 1.06; letter-spacing: -0.03em; color: var(--ink); max-width: 860px; margin-bottom: 24px; animation: fadeUp 0.5s var(--ease) 0.05s both; }
-    .hero h1 em { font-style: italic; color: var(--clay); }
-    .hero-sub { font-size: clamp(16px, 2.2vw, 19px); color: var(--ink-soft); max-width: 520px; line-height: 1.7; margin-bottom: 44px; font-weight: 400; animation: fadeUp 0.5s var(--ease) 0.1s both; }
-    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.5s var(--ease) 0.15s both; }
-    .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--clay); color: white; padding: 15px 30px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px; text-decoration: none; border: none; cursor: pointer; transition: all 0.25s var(--ease); box-shadow: 0 6px 24px rgba(208,140,97,0.38); }
-    .btn-primary:hover { background: var(--clay-d); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(208,140,97,0.48); }
-    .btn-secondary { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--ink-soft); padding: 15px 28px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 16px; text-decoration: none; border: 1.5px solid var(--sand); cursor: pointer; transition: all 0.25s var(--ease); }
-    .btn-secondary:hover { border-color: var(--clay); color: var(--clay); transform: translateY(-2px); }
-    .hero-trust { margin-top: 56px; display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; animation: fadeUp 0.5s var(--ease) 0.2s both; }
-    .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted); font-weight: 500; }
-    .trust-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--sand); }
-    .section { padding: 100px 24px; max-width: 1100px; margin: 0 auto; }
-    .section-eyebrow { display: inline-block; background: var(--clay-bg); color: var(--clay); font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border-radius: 999px; margin-bottom: 16px; border: 1px solid var(--clay-l); }
-    .section-title { font-family: 'Fraunces', serif; font-size: clamp(28px, 4vw, 50px); font-weight: 700; color: var(--ink); line-height: 1.12; letter-spacing: -0.02em; margin-bottom: 16px; }
-    .section-sub { color: var(--ink-soft); font-size: 17px; max-width: 480px; line-height: 1.65; margin-bottom: 56px; }
-    .momento-wrap { padding: 0 24px; max-width: 1100px; margin: 0 auto; }
-    .momento { background: linear-gradient(145deg, #1F1810 0%, #2C1F14 100%); border-radius: var(--radius-xl); padding: 80px 40px; text-align: center; overflow: hidden; position: relative; }
-    .momento::before { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(208,140,97,0.12) 0%, transparent 60%); top: -150px; left: 50%; transform: translateX(-50%); pointer-events: none; }
-    .momento > * { position: relative; z-index: 1; }
-    .momento-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(208,140,97,0.15); border: 1px solid rgba(208,140,97,0.3); border-radius: 999px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: var(--clay-l); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 28px; }
-    .momento h2 { font-family: 'Fraunces', serif; font-size: clamp(26px, 4vw, 46px); font-weight: 700; color: white; line-height: 1.15; letter-spacing: -0.02em; max-width: 640px; margin: 0 auto 20px; }
-    .momento h2 em { font-style: italic; color: var(--clay-l); }
-    .momento p { color: rgba(255,255,255,0.6); font-size: 17px; max-width: 440px; margin: 0 auto 56px; line-height: 1.65; }
-    .momento-steps { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 0; max-width: 900px; margin: 0 auto; background: rgba(255,255,255,0.06); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
-    @media (max-width: 700px) { .momento-steps { grid-template-columns: 1fr 1fr; } .momento-arrow { display: none; } }
-    .momento-step { padding: 28px 20px; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; transition: background 0.3s; }
-    .momento-step:hover { background: rgba(208,140,97,0.08); }
-    .momento-step-icon { width: 50px; height: 50px; border-radius: 50%; background: rgba(208,140,97,0.15); border: 1px solid rgba(208,140,97,0.25); display: flex; align-items: center; justify-content: center; font-size: 22px; }
-    .momento-step-title { font-weight: 700; font-size: 14px; color: white; }
-    .momento-step-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.6; }
-    .momento-arrow { color: rgba(208,140,97,0.4); font-size: 18px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
-    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-    .step-card { background: var(--white); border-radius: var(--radius-xl); padding: 36px 30px; position: relative; overflow: hidden; border: 1px solid rgba(208,140,97,0.1); transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); box-shadow: var(--shadow); }
-    .step-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-    .step-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--clay), var(--clay-l)); }
-    .step-num { font-family: 'Fraunces', serif; font-size: 72px; font-weight: 700; color: var(--cream-d); line-height: 1; margin-bottom: 4px; letter-spacing: -0.03em; }
-    .step-icon { font-size: 32px; margin-bottom: 14px; display: block; }
-    .step-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
-    .step-desc { color: var(--ink-soft); font-size: 15px; line-height: 1.65; }
-    .postcompra-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-    .postcompra-card { background: var(--white); border-radius: var(--radius-lg); padding: 28px; border: 1px solid var(--sand); display: flex; gap: 18px; align-items: flex-start; box-shadow: 0 1px 4px rgba(31,24,16,0.05); transition: all 0.25s var(--ease); }
-    .postcompra-card:hover { border-color: var(--clay-l); transform: translateY(-3px); box-shadow: var(--shadow); }
-    .postcompra-num { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; background: var(--clay); color: white; font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-    .postcompra-num.done { background: var(--sage); }
-    .postcompra-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
-    .postcompra-desc { font-size: 14px; color: var(--ink-muted); line-height: 1.6; }
-    .postcompra-tag { display: inline-flex; align-items: center; gap: 5px; background: var(--clay-bg); color: var(--clay); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--clay-l); margin-top: 10px; letter-spacing: 0.04em; }
-    .postcompra-tag.verde { background: var(--sage-bg); color: var(--sage-d); border-color: var(--sage-l); }
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-    .feature-card { background: var(--white); border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--sand); box-shadow: 0 1px 4px rgba(31,24,16,0.05); transition: all 0.25s var(--ease); }
-    .feature-card:hover { border-color: var(--clay-l); transform: translateY(-3px); box-shadow: var(--shadow); }
-    .feature-icon { font-size: 28px; margin-bottom: 12px; display: block; }
-    .feature-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
-    .feature-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
-    .cta-section { background: linear-gradient(145deg, #2A2018 0%, #1A1310 100%); border-radius: var(--radius-xl); padding: 80px 40px; text-align: center; margin: 0 24px 100px; max-width: 1052px; margin-left: auto; margin-right: auto; position: relative; overflow: hidden; }
-    .cta-section::before { content: ''; position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(208,140,97,0.15) 0%, transparent 60%); top: -100px; right: -100px; pointer-events: none; }
-    .cta-section::after { content: ''; position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(111,132,108,0.1) 0%, transparent 60%); bottom: -50px; left: -50px; pointer-events: none; }
-    .cta-section h2 { font-family: 'Fraunces', serif; font-size: clamp(28px, 4vw, 48px); font-weight: 700; color: white; margin-bottom: 14px; letter-spacing: -0.02em; position: relative; z-index: 1; }
-    .cta-section h2 em { font-style: italic; color: var(--clay-l); }
-    .cta-section > p { color: rgba(255,255,255,0.6); font-size: 17px; margin-bottom: 36px; position: relative; z-index: 1; }
-    .cta-price { display: inline-flex; flex-direction: column; align-items: center; background: rgba(208,140,97,0.12); border: 1px solid rgba(208,140,97,0.3); border-radius: var(--radius-lg); padding: 18px 36px; color: white; margin-bottom: 36px; position: relative; z-index: 1; }
-    .precio-tachado { font-size: 14px; color: rgba(255,255,255,0.35); text-decoration: line-through; margin-bottom: 4px; }
-    .precio-off { display: flex; align-items: center; gap: 10px; }
-    .amount { font-family: 'Fraunces', serif; font-size: 44px; font-weight: 700; color: var(--clay-l); line-height: 1; }
-    .off-badge { background: var(--clay); color: white; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
-    .price-detail { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 8px; }
-    .btn-wsp { display: inline-flex; align-items: center; gap: 12px; background: #25D366; color: white; padding: 17px 38px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px; text-decoration: none; transition: all 0.25s var(--ease); box-shadow: 0 6px 24px rgba(37,211,102,0.35); position: relative; z-index: 1; }
-    .btn-wsp:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(37,211,102,0.5); background: #20ba5a; }
-    footer { padding: 48px 24px 40px; border-top: 1px solid var(--sand); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
-    .footer-logo { font-family: 'Fraunces', serif; font-size: 20px; color: var(--clay); display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .footer-logo span { color: var(--sage); }
-    .footer-logo img { height: 32px; width: auto; }
-    .footer-links { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    .footer-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-muted); text-decoration: none; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--sand); transition: all 0.2s var(--ease); }
-    .footer-link:hover { border-color: var(--clay-l); color: var(--clay); }
-    footer p { font-size: 12px; color: var(--ink-muted); }
-    /* ── MOCKUP RESCATE ── */
-    .mockup-section { padding: 100px 24px 0; }
-    .mockup-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-    @media (max-width: 768px) { .mockup-inner { grid-template-columns: 1fr; gap: 40px; } }
-    .mockup-text {}
-    .mockup-phone {
-      position: relative; display: flex; justify-content: center;
-    }
-    .phone-frame {
-      width: 280px; background: #1a1a1a; border-radius: 40px;
-      padding: 12px; box-shadow: 0 40px 80px rgba(31,24,16,0.25), 0 0 0 1px rgba(255,255,255,0.08);
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px 100px;
+      background: var(--cream);
       position: relative;
-    }
-    .phone-frame::before {
-      content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 80px; height: 6px; background: #2a2a2a; border-radius: 999px; z-index: 2;
-    }
-    .phone-screen {
-      background: #F9F4EE; border-radius: 30px; overflow: hidden;
-      min-height: 520px; position: relative;
-    }
-    .phone-hero-red {
-      background: linear-gradient(150deg, #c0392b 0%, #8b1a10 100%);
-      padding: 28px 20px 24px; text-align: center; position: relative;
-    }
-    .phone-foto {
-      width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.15);
-      border: 3px solid rgba(255,255,255,0.8); margin: 0 auto 12px;
-      display: flex; align-items: center; justify-content: center; font-size: 36px;
-    }
-    .phone-name { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: white; margin-bottom: 4px; }
-    .phone-sub  { font-size: 12px; color: rgba(255,255,255,0.75); }
-    .phone-badges { display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
-    .phone-badge { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 999px; padding: 3px 10px; font-size: 10px; font-weight: 500; }
-    .phone-urgente { background: #FDF2F1; padding: 12px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(192,57,43,0.12); }
-    .phone-urgente-icon { width: 30px; height: 30px; border-radius: 50%; background: #C0392B; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-    .phone-urgente-text { font-size: 11px; color: #C0392B; font-weight: 600; line-height: 1.4; }
-    .phone-contacto { padding: 14px 16px; }
-    .phone-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9C8878; margin-bottom: 10px; }
-    .phone-dueno { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .phone-avatar { width: 36px; height: 36px; border-radius: 50%; background: #FAF0E8; border: 1.5px solid #EAC4A8; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .phone-dueno-nombre { font-weight: 700; font-size: 13px; color: #1F1810; }
-    .phone-dueno-tel    { font-size: 11px; color: #9C8878; }
-    .phone-btn-wsp { background: #25D366; color: white; border: none; border-radius: 10px; padding: 11px 14px; font-size: 12px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; }
-    .phone-btn-call { background: #1a73e8; color: white; border: none; border-radius: 10px; padding: 9px 14px; font-size: 12px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .phone-glow {
-      position: absolute; top: -20px; right: -20px;
-      width: 120px; height: 120px;
-      background: radial-gradient(circle, rgba(208,140,97,0.3) 0%, transparent 70%);
-      pointer-events: none;
+      overflow-x: hidden;
     }
 
-    /* ── URGENCIA CTA ── */
-    .urgencia-strip {
-      display: flex; align-items: center; justify-content: center;
-      gap: 24px; flex-wrap: wrap; margin-bottom: 36px;
+    /* Gradientes decorativos */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -150px; right: -150px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(208,140,97,0.08) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -100px; left: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(111,132,108,0.07) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .login-wrap {
+      width: 100%; max-width: 400px;
       position: relative; z-index: 1;
     }
-    .urgencia-item {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500;
-    }
-    .urgencia-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(208,140,97,0.5); }
 
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.08s; }
-    .reveal-delay-2 { transition-delay: 0.16s; }
-    .reveal-delay-3 { transition-delay: 0.24s; }
-    @media (max-width: 600px) { nav { padding: 12px 20px; } .section { padding: 72px 20px; } .cta-section { padding: 56px 24px; margin: 0 16px 72px; border-radius: var(--radius-lg); } .hero { padding: 110px 20px 70px; } .momento { padding: 48px 20px; border-radius: var(--radius-lg); } }
+    /* HERO */
+    .hero {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeUp 0.5s var(--ease) both;
+    }
+    .hero-logo {
+      width: 80px; height: auto;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 6px 16px rgba(111,132,108,0.18));
+    }
+    .hero-title {
+      font-family: 'Fraunces', serif;
+      font-size: 48px; font-weight: 700;
+      line-height: 1; letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+    .hero-title .ubi { color: var(--clay); }
+    .hero-title .pet { color: var(--sage); }
+    .hero-sub {
+      font-size: 14px; color: var(--ink-muted);
+      font-weight: 400; letter-spacing: 0.03em;
+    }
+
+    /* LOGIN CARD */
+    .login-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-lg);
+      padding: 32px 28px;
+      animation: fadeUp 0.5s var(--ease) 0.08s both;
+    }
+
+    /* GOOGLE */
+    .btn-google {
+      background: var(--card-bg);
+      color: var(--ink); border: 1.5px solid var(--input-border);
+      font-weight: 600; gap: 10px;
+    }
+    .btn-google:hover { background: var(--cream-d); border-color: var(--sand-d); }
+
+    /* FORGOT */
+    .forgot-link {
+      background: none; border: none;
+      color: var(--ink-muted); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; cursor: pointer; padding: 0;
+      transition: color var(--duration-fast);
+    }
+    .forgot-link:hover { color: var(--clay); text-decoration: underline; }
+
+    .forgot-panel {
+      background: var(--cream-d);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 18px;
+      margin-top: 4px;
+      animation: fadeUp 0.2s var(--ease) both;
+    }
+    .forgot-panel p { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; }
+
+    /* INSTALL */
+    .install-hint {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; background: none; border: none;
+      color: var(--ink-muted); font-family: 'DM Sans', sans-serif;
+      font-size: 12px; cursor: pointer; padding: 4px 10px;
+      border-radius: var(--radius-full);
+      transition: all var(--duration-fast);
+      margin: 0 auto;
+    }
+    .install-hint:hover { color: var(--sage); background: var(--sage-bg); }
+    .install-box {
+      background: var(--sage-bg); border: 1px solid rgba(111,132,108,0.18);
+      border-radius: var(--radius); padding: 13px 16px;
+      font-size: 13px; color: var(--ink-soft); line-height: 1.7;
+      animation: fadeUp 0.2s var(--ease) both;
+    }
+
+    /* REGISTER */
+    .register-section {
+      margin-top: 16px;
+      animation: fadeUp 0.5s var(--ease) 0.16s both;
+    }
+    .register-box {
+      background: var(--sage-bg);
+      border: 1px solid rgba(111,132,108,0.16);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px; text-align: center;
+    }
+    .register-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--sage); margin-bottom: 6px;
+    }
+    .register-box p {
+      font-size: 14px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5;
+    }
+
+    .register-panel {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl); border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-lg); padding: 28px; margin-top: 16px;
+      animation: scaleIn 0.25s var(--ease-bounce) both;
+    }
+    .register-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .register-panel-header h3 { font-family: 'Fraunces', serif; font-size: 20px; }
+
+    /* WELCOME */
+    .welcome-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl); border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-lg); padding: 32px 28px;
+      text-align: center; margin-top: 16px;
+      animation: scaleIn 0.3s var(--ease-bounce) both;
+    }
+    .welcome-emoji { font-size: 48px; display: block; margin-bottom: 16px; }
+    .welcome-card h3 {
+      font-family: 'Fraunces', serif; font-size: 24px;
+      margin-bottom: 10px; color: var(--ink);
+    }
+    .welcome-card p { font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+    .welcome-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; text-align: left; }
+    .step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--ink-soft); }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--clay-bg); color: var(--clay);
+      font-weight: 800; font-size: 13px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* PWA BANNER */
+    .pwa-banner {
+      position: fixed; bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 400px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      padding: 14px 16px;
+      display: none;
+      align-items: center; gap: 12px;
+      z-index: 999;
+      animation: fadeUp 0.3s var(--ease-bounce) both;
+    }
+    .pwa-banner-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+    .pwa-banner-icon { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .pwa-banner-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .pwa-banner-text .title { font-weight: 700; font-size: 14px; color: var(--ink); }
+    .pwa-banner-text .sub   { font-size: 12px; color: var(--ink-muted); }
+    .pwa-banner-actions { display: flex; gap: 8px; align-items: center; }
+    .pwa-btn-install {
+      background: var(--clay); color: white;
+      border: none; border-radius: var(--radius-sm);
+      padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .pwa-btn-dismiss {
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-muted); font-size: 16px; padding: 4px;
+    }
   </style>
 </head>
 <body>
 
-  <nav>
-    <a href="#" class="nav-logo">
-      <img src="https://app.ubipet.shop/img/logo.png" alt="UbiPet">
-      <span style="color:var(--clay);">Ubi</span><span>Pet</span>
-    </a>
-    <div class="nav-right">
-      <a href="#como-funciona" class="nav-link">Cómo funciona</a>
-      <a href="#que-incluye" class="nav-link">Qué incluye</a>
-      <a href="https://wa.me/56979928352?text=Hola!%20Quiero%20comprar%20una%20placa%20UbiPet%20🐾" target="_blank" class="nav-cta">Quiero mi placa</a>
-    </div>
-  </nav>
+  <div class="login-wrap">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg"></div>
-    <img src="https://app.ubipet.shop/img/logo.png" alt="UbiPet" class="hero-logo-img">
-    <div class="hero-badge">🐾 Identidad digital para mascotas</div>
-    <h1>Si alguien la encuentra,<br>sabrá <em>exactamente</em> qué hacer</h1>
-    <p class="hero-sub">Una placa con QR en el collar. Quien la escanee ve su perfil médico completo, te contacta por WhatsApp con su ubicación y tú recibes una notificación al instante.</p>
-    <div class="hero-actions">
-      <a href="https://wa.me/56979928352?text=Hola!%20Quiero%20comprar%20una%20placa%20UbiPet%20🐾" target="_blank" class="btn-primary">🐾 Quiero mi placa</a>
-      <a href="#como-funciona" class="btn-secondary">Ver cómo funciona ↓</a>
+    <!-- HERO -->
+    <div class="hero">
+      <img src="/img/logo.png" alt="UbiPet" class="hero-logo">
+      <div class="hero-title"><span class="ubi">Ubi</span><span class="pet">Pet</span></div>
+      <div class="hero-sub">La placa inteligente para tu mascota</div>
     </div>
-    <div class="hero-trust">
-      <div class="trust-item">✅ Sin app para el rescatista</div>
-      <div class="trust-dot"></div>
-      <div class="trust-item">📍 Ubicación GPS en tiempo real</div>
-      <div class="trust-dot"></div>
-      <div class="trust-item">💉 Perfil médico completo</div>
-      <div class="trust-dot"></div>
-      <div class="trust-item">💳 Pago único, sin mensualidades</div>
-    </div>
-  </section>
 
-  <!-- EL MOMENTO EMOCIONAL -->
-  <div class="momento-wrap">
-    <div class="momento reveal">
-      <div class="momento-eyebrow">El momento que cambia todo</div>
-      <h2>Tu mascota está perdida.<br><em>Alguien la encontró.</em></h2>
-      <p>En segundos, ese desconocido sabe cómo cuidarla y cómo encontrarte. Eso es UbiPet.</p>
-      <div class="momento-steps">
-        <div class="momento-step">
-          <div class="momento-step-icon">📲</div>
-          <div class="momento-step-title">Escanean el QR</div>
-          <div class="momento-step-desc">Sin app, sin registro. Solo la cámara del celular.</div>
-        </div>
-        <div class="momento-arrow">→</div>
-        <div class="momento-step">
-          <div class="momento-step-icon">🐾</div>
-          <div class="momento-step-title">Ven su perfil</div>
-          <div class="momento-step-desc">Nombre, foto, alergias, medicamentos y contacto.</div>
-        </div>
-        <div class="momento-arrow">→</div>
-        <div class="momento-step">
-          <div class="momento-step-icon">📍</div>
-          <div class="momento-step-title">Te envían ubicación</div>
-          <div class="momento-step-desc">Un botón de WhatsApp con su GPS exacto.</div>
-        </div>
-        <div class="momento-arrow">→</div>
-        <div class="momento-step">
-          <div class="momento-step-icon">🔔</div>
-          <div class="momento-step-title">Tú recibes aviso</div>
-          <div class="momento-step-desc">Notificación push al instante, incluso con la app cerrada.</div>
+    <!-- LOGIN CARD -->
+    <div class="login-card">
+      <div id="alert" class="alert"></div>
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="input-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn btn-primary btn-full" id="btnLogin">🚀 Iniciar sesión</button>
+
+      <div class="divider">o</div>
+
+      <button class="btn btn-google btn-full" id="btnGoogle">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuar con Google
+      </button>
+
+      <!-- FORGOT -->
+      <div style="text-align:center; margin-top:16px;">
+        <button class="forgot-link" id="btnForgot">¿Olvidaste tu contraseña?</button>
+        <div id="forgotPanel" style="display:none;" class="forgot-panel">
+          <p>Te enviamos un link para restablecer tu contraseña.</p>
+          <div id="alertForgot" class="alert"></div>
+          <div class="input-group" style="margin-bottom:12px;">
+            <label>Tu email</label>
+            <input type="email" id="forgotEmail" placeholder="tu@email.com">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost btn-sm" id="btnCancelForgot">Cancelar</button>
+            <button class="btn btn-primary btn-sm" id="btnSendReset" style="flex:1;">Enviar link</button>
+          </div>
         </div>
       </div>
+
+      <!-- INSTALL MANUAL -->
+      <div style="margin-top:12px; text-align:center;">
+        <button class="install-hint" id="btnInstallManual">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+          Instalar app
+        </button>
+        <div id="installInstructions" style="display:none; margin-top:10px;">
+          <div class="install-box"><span id="installText"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTER SECTION -->
+    <div class="register-section">
+      <div class="register-box" id="registerBoxWrap">
+        <div class="register-label">¿Primera vez?</div>
+        <p>Si compraste una placa UbiPet, crea tu cuenta aquí:</p>
+        <button class="btn btn-success btn-full" id="btnRegister">✨ Crear cuenta nueva</button>
+      </div>
+
+      <!-- REGISTER PANEL -->
+      <div class="register-panel" id="registerPanel" style="display:none;">
+        <div class="register-panel-header">
+          <h3>Crear cuenta</h3>
+          <button class="btn btn-ghost btn-sm" id="btnCancelRegister" style="padding:6px 12px;">✕</button>
+        </div>
+        <div id="alertReg" class="alert"></div>
+        <div class="input-group">
+          <label>Código de tu placa UbiPet *</label>
+          <input type="text" id="regCodigo" placeholder="Ej: UBI-K7X2M9" autocomplete="off" style="text-transform:uppercase;">
+          <div style="font-size:12px; color:var(--ink-muted); margin-top:4px;">El código está grabado en tu placa física.</div>
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email">
+        </div>
+        <div class="input-group">
+          <label>Contraseña (mínimo 6 caracteres)</label>
+          <input type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <button class="btn btn-success btn-full" id="btnDoRegister">Crear cuenta</button>
+      </div>
+
+      <!-- WELCOME -->
+      <div class="welcome-card" id="welcomePanel" style="display:none;">
+        <span class="welcome-emoji">🎉</span>
+        <h3>¡Bienvenido a UbiPet!</h3>
+        <p>Tu cuenta fue creada exitosamente. Ya puedes asociar tu placa y crear el perfil de tu mascota.</p>
+        <div class="welcome-steps">
+          <div class="step"><div class="step-num">1</div><span>Ingresa el código de tu placa</span></div>
+          <div class="step"><div class="step-num">2</div><span>Completa el perfil de tu mascota</span></div>
+          <div class="step"><div class="step-num">3</div><span>¡Listo! Tu peludito ya está protegido 🐾</span></div>
+        </div>
+        <button class="btn btn-primary btn-full" id="btnIrPerfil">Ir a mi perfil →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PWA BANNER -->
+  <div class="pwa-banner" id="installBanner">
+    <div class="pwa-banner-info">
+      <div class="pwa-banner-icon"><img src="/icon-192.png" alt="UbiPet"></div>
+      <div class="pwa-banner-text">
+        <div class="title">Instala UbiPet</div>
+        <div class="sub">Accede más rápido desde tu celular</div>
+      </div>
+    </div>
+    <div class="pwa-banner-actions">
+      <button class="pwa-btn-install" id="btnInstallApp">Instalar</button>
+      <button class="pwa-btn-dismiss" id="btnDismissInstall">✕</button>
     </div>
   </div>
 
-  <!-- CÓMO FUNCIONA -->
-  <section class="section" id="como-funciona">
-    <div style="text-align:center;">
-      <span class="section-eyebrow reveal">¿Cómo funciona?</span>
-      <h2 class="section-title reveal">Tres pasos.<br>Sin complicaciones.</h2>
-      <p class="section-sub reveal" style="margin:0 auto 56px;">Cualquier persona puede ayudarte a recuperar a tu mascota, sin instalar nada.</p>
-    </div>
-    <div class="steps">
-      <div class="step-card reveal">
-        <div class="step-num">01</div>
-        <span class="step-icon">🏷️</span>
-        <div class="step-title">Recibes tu placa</div>
-        <p class="step-desc">Placa física con QR único grabado. Resistente al agua, diseñada para el collar. Llega lista para activar.</p>
-      </div>
-      <div class="step-card reveal reveal-delay-1">
-        <div class="step-num">02</div>
-        <span class="step-icon">📱</span>
-        <div class="step-title">Creas el perfil digital</div>
-        <p class="step-desc">Foto, vacunas, alergias, alimentación, clínica veterinaria y más. Tú decides qué comparte y qué no.</p>
-      </div>
-      <div class="step-card reveal reveal-delay-2">
-        <div class="step-num">03</div>
-        <span class="step-icon">🏠</span>
-        <div class="step-title">Tu mascota está protegida</div>
-        <p class="step-desc">Desde ese momento, cualquier persona que encuentre a tu mascota tiene todo lo que necesita para cuidarla y contactarte.</p>
-      </div>
-    </div>
-  </section>
+  <script type="module">
+    import { supabase } from '/js/supabase.js'
 
-  <!-- FLUJO POST-COMPRA -->
-  <section class="section" style="padding-top:0;" id="post-compra">
-    <div style="text-align:center;">
-      <span class="section-eyebrow reveal">Después de comprar</span>
-      <h2 class="section-title reveal">De la compra a la<br>protección total</h2>
-      <p class="section-sub reveal" style="margin:0 auto 56px;">En menos de 10 minutos tu mascota ya está completamente protegida. Así funciona:</p>
-    </div>
-    <div class="postcompra-grid">
-      <div class="postcompra-card reveal">
-        <div class="postcompra-num">1</div>
-        <div>
-          <div class="postcompra-title">Coordinamos la entrega</div>
-          <p class="postcompra-desc">Nos contactas por WhatsApp y coordinamos el envío. La placa llega con el QR grabado y listo para activar. Enviamos a todo Chile.</p>
-          <span class="postcompra-tag">📦 Envío a todo Chile</span>
-        </div>
-      </div>
-      <div class="postcompra-card reveal reveal-delay-1">
-        <div class="postcompra-num">2</div>
-        <div>
-          <div class="postcompra-title">Ingresas el código de tu placa</div>
-          <p class="postcompra-desc">Cada placa tiene un código único impreso. Lo usas para crear tu cuenta en <strong>app.ubipet.shop</strong>. Este código vincula la placa física con el perfil digital.</p>
-          <span class="postcompra-tag">🔗 Activación en 1 minuto</span>
-        </div>
-      </div>
-      <div class="postcompra-card reveal">
-        <div class="postcompra-num">3</div>
-        <div>
-          <div class="postcompra-title">Completas el perfil de tu mascota</div>
-          <p class="postcompra-desc">Nombre, foto, vacunas, alergias, medicamentos, dieta y veterinaria. Puedes completarlo en etapas, no necesitas hacerlo todo de una vez.</p>
-          <span class="postcompra-tag">✏️ 5–10 minutos</span>
-        </div>
-      </div>
-      <div class="postcompra-card reveal reveal-delay-1">
-        <div class="postcompra-num">4</div>
-        <div>
-          <div class="postcompra-title">Configuras tu privacidad</div>
-          <p class="postcompra-desc">Decides qué puede ver el rescatista. Puedes mostrar u ocultar el historial médico y los datos de tu veterinaria con un solo interruptor.</p>
-          <span class="postcompra-tag">🔒 Control total</span>
-        </div>
-      </div>
-      <div class="postcompra-card reveal">
-        <div class="postcompra-num">5</div>
-        <div>
-          <div class="postcompra-title">Activas las notificaciones</div>
-          <p class="postcompra-desc">Desde la app en tu celular, activas las notificaciones push. Cuando alguien escanee la placa, recibirás un aviso al instante, incluso con la pantalla apagada.</p>
-          <span class="postcompra-tag">🔔 Tiempo real</span>
-        </div>
-      </div>
-      <div class="postcompra-card reveal reveal-delay-1">
-        <div class="postcompra-num done">✓</div>
-        <div>
-          <div class="postcompra-title">Listo. Protección activa.</div>
-          <p class="postcompra-desc">Coloca la placa en el collar. El perfil se actualiza cuando quieras y está disponible las 24 horas. Cualquier persona en cualquier parte puede ayudarte.</p>
-          <span class="postcompra-tag verde">🐾 Protección activa</span>
-        </div>
-      </div>
-    </div>
-  </section>
+    function showAlert(id, msg, type = 'err') {
+      const el = document.getElementById(id)
+      el.textContent = msg
+      el.className = `alert alert-${type} show`
+    }
+    function setLoading(btn, loading, label) {
+      btn.disabled = loading
+      btn.innerHTML = loading ? '<span class="spinner spinner-sm"></span>' : label
+    }
 
-  <!-- QUÉ INCLUYE -->
-  <section class="section" style="padding-top:0;" id="que-incluye">
-    <div style="text-align:center;">
-      <span class="section-eyebrow reveal">¿Qué incluye?</span>
-      <h2 class="section-title reveal">El perfil más completo<br>del mercado.</h2>
-      <p class="section-sub reveal" style="margin:0 auto 48px;">No es solo una placa. Es la identidad digital completa de tu mascota.</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature-card reveal">
-        <span class="feature-icon">💉</span>
-        <div class="feature-title">Historial de vacunas</div>
-        <p class="feature-desc">Registra cada vacuna con nombre y fecha. El rescatista o veterinario puede verlo al instante.</p>
-      </div>
-      <div class="feature-card reveal reveal-delay-1">
-        <span class="feature-icon">⚠️</span>
-        <div class="feature-title">Alergias y medicamentos</div>
-        <p class="feature-desc">Información crítica en una emergencia. Que quien cuide a tu mascota sepa qué puede y qué no puede darle.</p>
-      </div>
-      <div class="feature-card reveal reveal-delay-2">
-        <span class="feature-icon">🍽️</span>
-        <div class="feature-title">Dieta y alimentación</div>
-        <p class="feature-desc">Tipo de dieta, marca de alimento y notas especiales. Para que cualquier persona pueda cuidarla exactamente como tú.</p>
-      </div>
-      <div class="feature-card reveal reveal-delay-3">
-        <span class="feature-icon">🏥</span>
-        <div class="feature-title">Clínica veterinaria</div>
-        <p class="feature-desc">Nombre y teléfono de tu veterinaria de confianza, con carnet digital adjunto.</p>
-      </div>
-      <div class="feature-card reveal">
-        <span class="feature-icon">🔔</span>
-        <div class="feature-title">Notificación en tiempo real</div>
-        <p class="feature-desc">Recibe un aviso en tu celular cada vez que alguien escanea el QR, con fecha, hora y ubicación GPS.</p>
-      </div>
-      <div class="feature-card reveal reveal-delay-1">
-        <span class="feature-icon">🔒</span>
-        <div class="feature-title">Control de privacidad</div>
-        <p class="feature-desc">Decide bloque por bloque qué puede ver el rescatista. Tu email y datos sensibles nunca son visibles.</p>
-      </div>
-      <div class="feature-card reveal reveal-delay-2">
-        <span class="feature-icon">📊</span>
-        <div class="feature-title">Historial de escaneos</div>
-        <p class="feature-desc">Ve cuándo y desde dónde escanearon la placa. Un registro completo con mapa GPS de cada evento.</p>
-      </div>
-      <div class="feature-card reveal reveal-delay-3">
-        <span class="feature-icon">🐾</span>
-        <div class="feature-title">Múltiples mascotas</div>
-        <p class="feature-desc">Gestiona todos tus animales desde una sola cuenta. Cada uno con su placa y perfil propio.</p>
-      </div>
-    </div>
-  </section>
+    // ─── VERIFICACIÓN DE PLACA ────────────────────
+    // Función central: verifica si el usuario tiene al menos un perfil con placa
+    async function tienePlacaActiva(userId) {
+      const { data } = await supabase
+        .from('perfiles')
+        .select('id')
+        .eq('user_id', userId)
+        .not('placa_id', 'is', null)
+        .limit(1)
+      return !!(data?.length)
+    }
 
-  <!-- QUIÉNES SOMOS -->
-  <!-- MOCKUP RESCATE — Lo que verá quien encuentre a tu mascota -->
-  <div class="mockup-section" id="mockup-rescate">
-    <div class="mockup-inner">
+    function mostrarErrorSinPlaca(alertId = 'alert') {
+      showAlert(alertId, '❌ Para usar UbiPet necesitas tener una placa activa. Regístrate con tu código de placa.')
+      document.getElementById('registerBoxWrap').scrollIntoView({ behavior: 'smooth' })
+    }
 
-      <div class="mockup-text reveal">
-        <span style="display:inline-block; background:var(--clay-bg); color:var(--clay); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:5px 14px; border-radius:999px; margin-bottom:16px; border:1px solid var(--clay-l);">La pantalla del rescatista</span>
-        <h2 style="font-family:'Fraunces',serif; font-size:clamp(28px,4vw,46px); font-weight:700; color:var(--ink); line-height:1.12; letter-spacing:-0.02em; margin-bottom:16px;">Esto es lo que ve<br>quien encuentra a tu mascota</h2>
-        <p style="color:var(--ink-soft); font-size:17px; line-height:1.65; margin-bottom:28px;">En segundos, la persona tiene toda la información que necesita para cuidarla y contactarte. Sin apps, sin registro, sin fricción.</p>
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:32px; height:32px; border-radius:50%; background:var(--clay-bg); border:1.5px solid var(--clay-l); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">✅</div>
-            <span style="font-size:15px; color:var(--ink-soft);">Foto, nombre y estado de la mascota al instante</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:32px; height:32px; border-radius:50%; background:var(--clay-bg); border:1.5px solid var(--clay-l); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">✅</div>
-            <span style="font-size:15px; color:var(--ink-soft);">Botón de WhatsApp que envía su ubicación GPS exacta</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:32px; height:32px; border-radius:50%; background:var(--clay-bg); border:1.5px solid var(--clay-l); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">✅</div>
-            <span style="font-size:15px; color:var(--ink-soft);">Alergias, medicamentos y dieta visibles en emergencias</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:32px; height:32px; border-radius:50%; background:var(--clay-bg); border:1.5px solid var(--clay-l); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">✅</div>
-            <span style="font-size:15px; color:var(--ink-soft);">Guía de qué hacer mientras espera al dueño</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="mockup-phone reveal reveal-delay-1">
-        <div class="phone-glow"></div>
-        <div class="phone-frame">
-          <div class="phone-screen">
-            <!-- Hero rojo perdida -->
-            <div class="phone-hero-red">
-              <div class="phone-foto">🐶</div>
-              <div class="phone-name">Max</div>
-              <div class="phone-sub">¡Mascota perdida! · El dueño lo está buscando</div>
-              <div class="phone-badges">
-                <span class="phone-badge">🐶 Perro</span>
-                <span class="phone-badge">Labrador</span>
-                <span class="phone-badge">Adulto · 3 años</span>
-              </div>
-            </div>
-            <!-- Urgente -->
-            <div class="phone-urgente">
-              <div class="phone-urgente-icon">🚨</div>
-              <div class="phone-urgente-text">Esta mascota está perdida y su dueño la está buscando. Por favor usa los botones abajo.</div>
-            </div>
-            <!-- Contacto -->
-            <div class="phone-contacto">
-              <div class="phone-label">Dueño</div>
-              <div class="phone-dueno">
-                <div class="phone-avatar">👤</div>
-                <div>
-                  <div class="phone-dueno-nombre">Carlos Mendoza</div>
-                  <div class="phone-dueno-tel">+56 9 1234 5678</div>
-                </div>
-              </div>
-              <button class="phone-btn-wsp">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Enviar mi ubicación al dueño
-              </button>
-              <button class="phone-btn-call">📞 Llamar al dueño</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <section class="section" id="nosotros" style="padding-top:0;">
-    <div style="max-width:800px; margin:0 auto;">
-      <span class="section-eyebrow reveal">Quiénes somos</span>
-      <h2 class="section-title reveal">Hecho con amor<br>por dueños de <em style="font-style:italic; color:var(--clay);">mascotas</em></h2>
-      <p class="section-sub reveal" style="margin:0 0 48px;">UbiPet nació de ver la desesperación de dueños buscando a su mascota. Sabíamos que podíamos hacer algo mejor.</p>
-
-      <div style="background:var(--white); border-radius:var(--radius-lg); padding:32px; border:1px solid var(--sand); margin-bottom:16px;" class="reveal">
-        <h3 style="font-family:'Fraunces',serif; font-size:20px; font-weight:700; margin-bottom:16px; color:var(--ink);">📖 Nuestra historia</h3>
-        <div style="display:flex; flex-direction:column; gap:12px; color:var(--ink-soft); line-height:1.8; font-size:15px;">
-          <p>UbiPet nació de ver una realidad que se repite todos los días: dueños desesperados buscando a su mascota, publicando en grupos de Facebook, pegando carteles, sin saber si alguien la va a encontrar.</p>
-          <p>Investigamos el mercado y vimos el problema: placas simples sin perfil digital, apps que el rescatista tiene que instalar, sistemas que no notifican en tiempo real. Ninguna solución era realmente completa.</p>
-          <p><strong style="color:var(--ink);">Así nació UbiPet — el perfil digital más completo para mascotas en Chile.</strong></p>
-        </div>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin-bottom:16px;">
-        <div style="background:var(--clay-bg); border-radius:var(--radius); padding:24px; border:1px solid var(--clay-l);" class="reveal">
-          <div style="font-size:28px; margin-bottom:10px;">🐾</div>
-          <div style="font-family:'Fraunces',serif; font-size:16px; font-weight:700; margin-bottom:8px; color:var(--ink);">Los animales primero</div>
-          <p style="font-size:13px; color:var(--ink-muted); line-height:1.6; margin:0;">Cada decisión la tomamos pensando en el bienestar de las mascotas y en dar tranquilidad a sus familias.</p>
-        </div>
-        <div style="background:var(--sage-bg); border-radius:var(--radius); padding:24px; border:1px solid rgba(111,132,108,0.3);" class="reveal reveal-delay-1">
-          <div style="font-size:28px; margin-bottom:10px;">✨</div>
-          <div style="font-family:'Fraunces',serif; font-size:16px; font-weight:700; margin-bottom:8px; color:var(--ink);">Simplicidad ante todo</div>
-          <p style="font-size:13px; color:var(--ink-muted); line-height:1.6; margin:0;">Diseñamos para que funcione para cualquier persona, sin importar qué tan tecnológica sea.</p>
-        </div>
-        <div style="background:var(--white); border-radius:var(--radius); padding:24px; border:1px solid var(--sand);" class="reveal reveal-delay-2">
-          <div style="font-size:28px; margin-bottom:10px;">🔒</div>
-          <div style="font-family:'Fraunces',serif; font-size:16px; font-weight:700; margin-bottom:8px; color:var(--ink);">Privacidad respetada</div>
-          <p style="font-size:13px; color:var(--ink-muted); line-height:1.6; margin:0;">Nunca compartimos tus datos. Tu información es tuya y solo tuya.</p>
-        </div>
-      </div>
-
-      <div style="background:var(--white); border-radius:var(--radius-lg); padding:28px 32px; border:1px solid var(--sand);" class="reveal">
-        <h3 style="font-family:'Fraunces',serif; font-size:18px; font-weight:700; margin-bottom:6px; color:var(--ink);">👋 El equipo</h3>
-        <p style="font-size:14px; color:var(--ink-muted); margin-bottom:20px;">Un equipo pequeño con mucho amor por los animales.</p>
-        <div style="display:flex; align-items:center; gap:16px; padding:20px; background:var(--cream); border-radius:var(--radius); border:1px solid var(--sand);">
-          <div style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--clay),var(--sage)); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">👨‍💻</div>
-          <div>
-            <div style="font-weight:700; color:var(--ink); font-size:15px;">Samir Ignacio</div>
-            <div style="font-size:13px; color:var(--ink-muted); margin-top:2px;">Fundador & Desarrollador · Santiago, Chile</div>
-            <div style="font-size:13px; color:var(--ink-soft); margin-top:8px; line-height:1.6;">Apasionado por construir tecnología que resuelva problemas reales para las personas y sus mascotas.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA FINAL -->
-  <div class="cta-section reveal">
-    <div class="urgencia-strip">
-      <div class="urgencia-item">🐾 +50 mascotas protegidas</div>
-      <div class="urgencia-dot"></div>
-      <div class="urgencia-item">⭐ Producto hecho en Chile</div>
-      <div class="urgencia-dot"></div>
-      <div class="urgencia-item">📦 Envío express disponible</div>
-    </div>
-    <h2>Una placa.<br><em>Tranquilidad para siempre.</em></h2>
-    <p>Pago único. Sin mensualidades. Sin complicaciones.</p>
-    <div class="cta-price">
-      <div class="precio-tachado">$12.990 CLP</div>
-      <div class="precio-off">
-        <span class="amount">$9.990</span>
-        <span class="off-badge">−23% OFF</span>
-      </div>
-      <span class="price-detail">CLP · Pago único · Envío a todo Chile</span>
-    </div>
-    <br>
-    <a href="https://wa.me/56979928352?text=Hola!%20Quiero%20comprar%20una%20placa%20UbiPet%20🐾" target="_blank" class="btn-wsp">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      Pedir por WhatsApp
-    </a>
-  </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <a href="#" class="footer-logo">
-      <img src="https://app.ubipet.shop/img/logo.png" alt="UbiPet">
-      <span style="color:var(--clay);">Ubi</span><span>Pet</span>
-    </a>
-    <div class="footer-links">
-      <a id="footer-instagram" href="https://instagram.com/ubipet.shop" target="_blank" class="footer-link">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-        @ubipet.shop
-      </a>
-      <a href="https://app.ubipet.shop" target="_blank" class="footer-link">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        app.ubipet.shop
-      </a>
-      <a href="https://app.ubipet.shop" class="footer-link">🔐 Iniciar sesión</a>
-    </div>
-    <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
-      <a href="#nosotros" style="font-size:12px; color:var(--ink-muted); text-decoration:none;">Quiénes somos</a>
-      <span style="color:var(--sand);">·</span>
-      <a href="https://app.ubipet.shop/terminos.html" style="font-size:12px; color:var(--ink-muted); text-decoration:none;">Términos y condiciones</a>
-      <span style="color:var(--sand);">·</span>
-      <a href="https://app.ubipet.shop/privacidad.html" style="font-size:12px; color:var(--ink-muted); text-decoration:none;">Política de privacidad</a>
-    </div>
-    <p>© 2026 UbiPet · La identidad digital de tu mascota</p>
-  </footer>
-
-  <script>
-    const SURL = 'https://hwkyvxzbheegxynoljrw.supabase.co'
-    const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a3l2eHpiaGVlZ3h5bm9sanJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzEyNzYsImV4cCI6MjA4NzU0NzI3Nn0.izGO-iK49rb-Rx5GRl2Rm55iDNj10sjCCq2QVEfuSXg'
-    fetch(`${SURL}/rest/v1/configuracion?select=clave,valor`, {
-      headers: { apikey: SKEY, Authorization: 'Bearer ' + SKEY }
-    }).then(r => r.json()).then(data => {
-      if (!Array.isArray(data)) return
-      const cfg = Object.fromEntries(data.map(r => [r.clave, r.valor]))
-      if (cfg.instagram) { const el = document.getElementById('footer-instagram'); if (el) el.href = cfg.instagram }
-      if (cfg.whatsapp) {
-        const wa = cfg.whatsapp.replace(/[^0-9]/g, '')
-        document.querySelectorAll('a[href*="wa.me"]').forEach(a => {
-          a.href = `https://wa.me/${wa}?text=Hola!%20Quiero%20comprar%20una%20placa%20UbiPet%20🐾`
-        })
+    // ─── SESIÓN PERSISTENTE ───────────────────────
+    // Si ya hay sesión activa al cargar la página, verificar placa y redirigir
+    const { data: { session: sessionActual } } = await supabase.auth.getSession()
+    if (sessionActual) {
+      const tieneAcceso = await tienePlacaActiva(sessionActual.user.id)
+      if (tieneAcceso) {
+        window.location.href = 'perfil.html'
+      } else {
+        await supabase.auth.signOut()
+        mostrarErrorSinPlaca()
       }
-    }).catch(() => {})
+    }
 
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach((entry, i) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => entry.target.classList.add('visible'), i * 70)
-          observer.unobserve(entry.target)
+    // ─── GOOGLE OAUTH ─────────────────────────────
+    // Intercepta el redirect de vuelta después del login con Google
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
+        const tieneAcceso = await tienePlacaActiva(session.user.id)
+        if (tieneAcceso) {
+          window.location.href = 'perfil.html'
+        } else {
+          await supabase.auth.signOut()
+          mostrarErrorSinPlaca()
         }
+      }
+    })
+
+    document.getElementById('btnGoogle').addEventListener('click', async () => {
+      const btn = document.getElementById('btnGoogle')
+      btn.disabled = true
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Conectando...'
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
       })
-    }, { threshold: 0.1 })
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+      if (error) {
+        btn.disabled = false
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Continuar con Google`
+        showAlert('alert', '❌ ' + error.message)
+      }
+    })
+
+    // ─── OLVIDÉ CONTRASEÑA ────────────────────────
+    document.getElementById('btnForgot').addEventListener('click', () => {
+      document.getElementById('forgotPanel').style.display = 'block'
+      document.getElementById('btnForgot').style.display = 'none'
+    })
+    document.getElementById('btnCancelForgot').addEventListener('click', () => {
+      document.getElementById('forgotPanel').style.display = 'none'
+      document.getElementById('btnForgot').style.display = 'block'
+      document.getElementById('alertForgot').className = 'alert'
+    })
+    document.getElementById('btnSendReset').addEventListener('click', async () => {
+      const email = document.getElementById('forgotEmail').value.trim()
+      if (!email) return showAlert('alertForgot', 'Ingresa tu email')
+      const btn = document.getElementById('btnSendReset')
+      setLoading(btn, true, 'Enviar enlace')
+
+      // Verificar que el email tiene una cuenta activa con placa antes de enviar reset
+      // (resetPasswordForEmail crearía el usuario si no existe)
+      const { data: perfil } = await supabase
+        .from('perfiles')
+        .select('id')
+        .eq('email_dueno', email)
+        .not('placa_id', 'is', null)
+        .limit(1)
+
+      if (!perfil?.length) {
+        setLoading(btn, false, 'Enviar enlace')
+        return showAlert('alertForgot', '❌ No encontramos una cuenta activa con ese email.')
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://app.ubipet.shop/reset-password.html'
+      })
+      setLoading(btn, false, 'Enviar enlace')
+      if (error) return showAlert('alertForgot', '❌ ' + error.message)
+      showAlert('alertForgot', '✅ ¡Listo! Revisa tu email.', 'ok')
+    })
+
+    // ─── LOGIN EMAIL/PASSWORD ─────────────────────
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const email    = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value
+      if (!email || !password) return showAlert('alert', 'Completa el email y la contraseña')
+      const btn = document.getElementById('btnLogin')
+      setLoading(btn, true, '🚀 Iniciar sesión')
+      const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setLoading(btn, false, '🚀 Iniciar sesión')
+        return showAlert('alert', '❌ ' + error.message)
+      }
+      // Verificar placa antes de redirigir
+      const tieneAcceso = await tienePlacaActiva(loginData.user.id)
+      setLoading(btn, false, '🚀 Iniciar sesión')
+      if (!tieneAcceso) {
+        await supabase.auth.signOut()
+        return mostrarErrorSinPlaca()
+      }
+      window.location.href = 'perfil.html'
+    })
+    document.getElementById('password').addEventListener('keypress', e => {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click()
+    })
+
+    // ─── REGISTRO ─────────────────────────────────
+    document.getElementById('btnRegister').addEventListener('click', () => {
+      document.getElementById('registerPanel').style.display = 'block'
+      document.getElementById('registerBoxWrap').style.display = 'none'
+    })
+    document.getElementById('btnCancelRegister').addEventListener('click', () => {
+      document.getElementById('registerPanel').style.display = 'none'
+      document.getElementById('registerBoxWrap').style.display = 'block'
+    })
+    document.getElementById('regCodigo').addEventListener('input', e => {
+      e.target.value = e.target.value.toUpperCase()
+    })
+    document.getElementById('btnDoRegister').addEventListener('click', async () => {
+      const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
+      const email  = document.getElementById('regEmail').value.trim()
+      const pass   = document.getElementById('regPass').value
+      if (!codigo) return showAlert('alertReg', 'Ingresa el código de tu placa')
+      if (!email || !pass) return showAlert('alertReg', 'Completa todos los campos')
+      if (pass.length < 6) return showAlert('alertReg', 'La contraseña debe tener al menos 6 caracteres')
+
+      const btn = document.getElementById('btnDoRegister')
+      setLoading(btn, true, 'Crear cuenta')
+
+      // Validar que la placa existe y está disponible
+      const { data: placa, error: placaErr } = await supabase
+        .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
+
+      if (placaErr || !placa) {
+        setLoading(btn, false, 'Crear cuenta')
+        return showAlert('alertReg', '❌ Código de placa no válido. Verifica que esté bien escrito.')
+      }
+      if (placa.estado !== 'disponible') {
+        setLoading(btn, false, 'Crear cuenta')
+        return showAlert('alertReg', '❌ Esta placa ya está registrada. Si crees que es un error, contáctanos.')
+      }
+
+      // Guardar código en sesión para asociarlo en perfil.html
+      sessionStorage.setItem('placa_pendiente', codigo)
+
+      // Crear cuenta
+      const { error } = await supabase.auth.signUp({ email, password: pass })
+      setLoading(btn, false, 'Crear cuenta')
+      if (error) return showAlert('alertReg', '❌ ' + error.message)
+
+      const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pass })
+      document.getElementById('registerPanel').style.display = 'none'
+      if (loginErr) {
+        document.getElementById('welcomePanel').style.display = 'block'
+        document.getElementById('btnIrPerfil').textContent = 'Iniciar sesión →'
+        document.getElementById('btnIrPerfil').onclick = () => {
+          document.getElementById('welcomePanel').style.display = 'none'
+        }
+        return
+      }
+      document.getElementById('welcomePanel').style.display = 'block'
+      document.getElementById('btnIrPerfil').onclick = () => window.location.href = 'perfil.html'
+    })
   </script>
+
+  <!-- PWA -->
+  <script>
+    let deferredPrompt = null
+    const banner = document.getElementById('installBanner')
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault(); deferredPrompt = e; banner.style.display = 'flex'
+    })
+    document.getElementById('btnInstallApp').addEventListener('click', async () => {
+      if (!deferredPrompt) return
+      deferredPrompt.prompt()
+      await deferredPrompt.userChoice
+      deferredPrompt = null; banner.style.display = 'none'
+    })
+    document.getElementById('btnDismissInstall').addEventListener('click', () => banner.style.display = 'none')
+    window.addEventListener('appinstalled', () => { banner.style.display = 'none'; deferredPrompt = null })
+    document.getElementById('btnInstallManual').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; return
+      }
+      const instructions = document.getElementById('installInstructions')
+      const text = document.getElementById('installText')
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+      text.innerHTML = isIOS
+        ? 'Toca el botón compartir <strong>⬆️</strong> en Safari y luego <strong>"Agregar a pantalla de inicio"</strong>'
+        : 'Toca los <strong>3 puntos ⋮</strong> de Chrome y luego <strong>"Agregar a pantalla de inicio"</strong>'
+      instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none'
+    })
+  </script>
+
 </body>
 </html>

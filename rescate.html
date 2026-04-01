@@ -426,17 +426,17 @@
             <div class="info-item-value" style="${i.full ? 'font-size:13px;font-weight:400;color:var(--ink-soft);white-space:pre-line;' : ''}">${i.value}</div>
           </div>`).join('')
 
-        // Secciones médicas — respetan configuración de privacidad del dueño
+        // Secciones médicas — solo cuando está perdida + respetan privacidad del dueño
         const priv = data.privacidad || {}
-        const mostrarSalud   = priv.salud   !== false
-        const mostrarClinica = priv.clinica !== false
+        const mostrarSalud   = perdida && priv.salud   !== false
+        const mostrarClinica = perdida && priv.clinica !== false
 
         if (perdida) {
           document.getElementById('secUrgente').style.display = 'flex'
           document.getElementById('secQueHacer').style.display = 'block'
         }
 
-        // SALUD — visible según privacidad
+        // SALUD — solo si perdida y privacidad lo permite
         if (mostrarSalud) {
           const vacunas  = Array.isArray(data.vacunas)  ? data.vacunas  : []
           const alergias = Array.isArray(data.alergias) ? data.alergias : []

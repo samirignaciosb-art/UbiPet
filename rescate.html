@@ -406,15 +406,24 @@
             <div class="info-item-value" style="${i.full ? 'font-size:13px;font-weight:400;color:var(--ink-soft);white-space:pre-line;' : ''}">${i.value}</div>
           </div>`).join('')
 
-        // Secciones médicas — SOLO si está perdida
+        // Secciones médicas — respetan configuración de privacidad del dueño
+        const priv = data.privacidad || {}
+        const mostrarSalud   = priv.salud   !== false
+        const mostrarClinica = priv.clinica !== false
+
         if (perdida) {
           document.getElementById('secUrgente').style.display = 'flex'
+        }
 
+        // SALUD — visible según privacidad
+        if (mostrarSalud) {
           const vacunas  = Array.isArray(data.vacunas)  ? data.vacunas  : []
           const alergias = Array.isArray(data.alergias) ? data.alergias : []
           const remedios = Array.isArray(data.remedios) ? data.remedios : []
+          const alim     = data.alimentacion || {}
 
-          if (vacunas.length || alergias.length || remedios.length) {
+          const tieneSalud = vacunas.length || alergias.length || remedios.length || alim.tipo
+          if (tieneSalud) {
             document.getElementById('secSalud').style.display = 'block'
             let html = ''
             if (vacunas.length) {
@@ -440,16 +449,28 @@
                 <div>${remedios.map(r => `<span class="tag tag-remedio">💊 ${r}</span>`).join('')}</div>
               </div>`
             }
+            if (alim.tipo) {
+              const tipoLabel = { balanceado: 'Balanceado / Croquetas', natural: 'Alimentación natural / BARF', mixta: 'Mixta', prescripcion: 'Dieta de prescripción' }[alim.tipo] || alim.tipo
+              html += `<div class="salud-bloque">
+                <div class="salud-bloque-label">🍽️ Alimentación</div>
+                <div>
+                  <span class="tag tag-vacuna">${tipoLabel}</span>
+                  ${alim.marca ? `<span class="tag tag-none">${alim.marca}</span>` : ''}
+                </div>
+                ${alim.notas ? `<div style="font-size:13px; color:var(--ink-muted); margin-top:6px; line-height:1.5;">${alim.notas}</div>` : ''}
+              </div>`
+            }
             document.getElementById('saludContenido').innerHTML = html
           }
+        }
 
-          if (data.clinica_nombre) {
-            document.getElementById('secClinica').style.display = 'block'
-            document.getElementById('clinicaNombre').textContent = data.clinica_nombre
-            if (data.clinica_telefono) {
-              document.getElementById('clinicaTel').innerHTML =
-                `<a href="tel:${data.clinica_telefono}">📞 ${data.clinica_telefono}</a>`
-            }
+        // CLÍNICA — visible según privacidad
+        if (mostrarClinica && data.clinica_nombre) {
+          document.getElementById('secClinica').style.display = 'block'
+          document.getElementById('clinicaNombre').textContent = data.clinica_nombre
+          if (data.clinica_telefono) {
+            document.getElementById('clinicaTel').innerHTML =
+              `<a href="tel:${data.clinica_telefono}">📞 ${data.clinica_telefono}</a>`
           }
         }
 

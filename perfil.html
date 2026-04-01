@@ -341,6 +341,7 @@
             <button type="button" class="form-tab active" id="ftab-general" onclick="switchFormTab('general')">🐾 General</button>
             <button type="button" class="form-tab" id="ftab-salud" onclick="switchFormTab('salud')">💉 Salud</button>
             <button type="button" class="form-tab" id="ftab-clinica" onclick="switchFormTab('clinica')">🏥 Clínica</button>
+            <button type="button" class="form-tab" id="ftab-privacidad" onclick="switchFormTab('privacidad')">🔒 Privacidad</button>
           </div>
 
           <!-- TAB: GENERAL -->
@@ -408,6 +409,31 @@
               </div>
             </div>
 
+            <!-- Alimentación -->
+            <div style="margin-bottom:20px;">
+              <div style="font-size:13px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">🍽️ Alimentación</div>
+              <div class="form-grid" style="margin-bottom:10px;">
+                <div class="input-group" style="margin-bottom:0;">
+                  <label>Tipo de dieta</label>
+                  <select id="tipoDieta">
+                    <option value="">Sin especificar</option>
+                    <option value="balanceado">Balanceado / Croquetas</option>
+                    <option value="natural">Alimentación natural / BARF</option>
+                    <option value="mixta">Mixta</option>
+                    <option value="prescripcion">Dieta de prescripción</option>
+                  </select>
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                  <label>Marca / alimento</label>
+                  <input type="text" id="marcaAlimento" placeholder="Ej: Royal Canin, pollo cocido...">
+                </div>
+              </div>
+              <div class="input-group">
+                <label>Notas de alimentación</label>
+                <textarea id="notasAlimentacion" placeholder="Porciones, horarios, restricciones..." style="height:80px;"></textarea>
+              </div>
+            </div>
+
           </div>
 
           <!-- TAB: CLÍNICA -->
@@ -432,6 +458,67 @@
               <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('carnetInput').click()">📎 Subir carnet (imagen o PDF)</button>
               <div id="carnetNombre" style="font-size:12px; color:var(--ink-muted); margin-top:6px;"></div>
             </div>
+          </div>
+
+          <!-- TAB: PRIVACIDAD -->
+          <div id="ftab-content-privacidad" style="display:none;">
+
+            <!-- Preview rescatista -->
+            <div style="background:var(--sage-bg); border:1px solid var(--sage-l); border-radius:var(--radius); padding:16px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:700; font-size:14px; color:var(--sage-d); margin-bottom:2px;">👁️ Ver como rescatista</div>
+                <div style="font-size:13px; color:var(--ink-muted);">Así ve el rescatista el perfil de tu mascota</div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnPreviewRescatista" style="white-space:nowrap;">Abrir preview</button>
+            </div>
+
+            <!-- Indicador de completitud -->
+            <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:16px 18px; margin-bottom:20px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <div style="font-weight:700; font-size:14px; color:var(--ink);">📊 Completitud del perfil</div>
+                <span id="pctCompletitud" style="font-weight:800; font-size:18px; color:var(--clay);">0%</span>
+              </div>
+              <div style="background:var(--cream-d); border-radius:999px; height:8px; overflow:hidden; margin-bottom:12px;">
+                <div id="barraCompletitud" style="height:100%; border-radius:999px; background:var(--clay); transition:width 0.4s ease; width:0%;"></div>
+              </div>
+              <div id="itemsCompletitud" style="display:flex; flex-direction:column; gap:6px; font-size:13px;"></div>
+            </div>
+
+            <!-- Controles de privacidad -->
+            <div style="font-size:13px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:14px;">Qué puede ver el rescatista</div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+
+              <!-- Bloque salud -->
+              <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div>
+                  <div style="font-weight:600; font-size:14px; color:var(--ink); margin-bottom:2px;">💉 Salud</div>
+                  <div style="font-size:12px; color:var(--ink-muted);">Vacunas, alergias, remedios y alimentación</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                  <span id="labelPrivSalud" style="font-size:12px; font-weight:600; color:var(--sage-d);">Visible</span>
+                  <button class="toggle-custom on" id="togglePrivSalud" type="button"></button>
+                </div>
+              </div>
+
+              <!-- Bloque clínica -->
+              <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div>
+                  <div style="font-weight:600; font-size:14px; color:var(--ink); margin-bottom:2px;">🏥 Clínica</div>
+                  <div style="font-size:12px; color:var(--ink-muted);">Nombre, teléfono y carnet veterinario</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                  <span id="labelPrivClinica" style="font-size:12px; font-weight:600; color:var(--sage-d);">Visible</span>
+                  <button class="toggle-custom on" id="togglePrivClinica" type="button"></button>
+                </div>
+              </div>
+
+            </div>
+
+            <p style="font-size:12px; color:var(--ink-muted); margin-top:14px; line-height:1.6;">
+              💡 Cuando tu mascota está perdida, compartir la información médica ayuda al rescatista a cuidarla mejor.
+            </p>
+
           </div>
 
           <!-- Acciones -->
@@ -493,7 +580,7 @@
         </div>
         <div class="input-group">
           <label>Confirmar contraseña</label>
-          <input type="password" id="confirmPass" placeholder="Repetí la contraseña">
+          <input type="password" id="confirmPass" placeholder="Repite la contraseña">
         </div>
         <button class="btn btn-primary" id="btnCambiarPass">🔐 Guardar contraseña</button>
       </div>
@@ -512,7 +599,7 @@
           <button id="btnPushToggle" class="btn btn-primary btn-sm">🔔 Activar notificaciones</button>
         </div>
         <p id="pushNoSoportado" style="display:none; font-size:13px; color:var(--ink-muted); margin-top:10px;">
-          Tu navegador no soporta notificaciones push. Usá Chrome o Edge en Android.
+          Tu navegador no soporta notificaciones push. Usa Chrome o Edge en Android.
         </p>
         <p id="pushBloqueado" style="display:none; font-size:13px; color:#e57373; margin-top:10px;">
           Las notificaciones están bloqueadas. Habilitálas en Configuración del sitio del navegador.
@@ -532,7 +619,7 @@
     <div class="pwa-banner-info">
       <div class="pwa-banner-icon"><img src="/icon-192.png" alt="UbiPet"></div>
       <div class="pwa-banner-text">
-        <div class="title">Instalá UbiPet</div>
+        <div class="title">Instala UbiPet</div>
         <div class="sub">Accede más rápido desde tu celular</div>
       </div>
     </div>
@@ -761,6 +848,15 @@
       renderVacunas(m.vacunas || [])
       renderAlergias(m.alergias || [])
       renderRemedios(m.remedios || [])
+      // Alimentación
+      const alim = m.alimentacion || {}
+      document.getElementById('tipoDieta').value = alim.tipo || ''
+      document.getElementById('marcaAlimento').value = alim.marca || ''
+      document.getElementById('notasAlimentacion').value = alim.notas || ''
+      // Privacidad
+      const priv = m.privacidad || {}
+      setPrivToggle('togglePrivSalud',   'labelPrivSalud',   priv.salud   !== false)
+      setPrivToggle('togglePrivClinica', 'labelPrivClinica', priv.clinica !== false)
       actualizarEtapaVida()
       switchFormTab('general')
     }
@@ -777,6 +873,11 @@
       renderVacunas([])
       renderAlergias([])
       renderRemedios([])
+      document.getElementById('tipoDieta').value = ''
+      document.getElementById('marcaAlimento').value = ''
+      document.getElementById('notasAlimentacion').value = ''
+      setPrivToggle('togglePrivSalud',   'labelPrivSalud',   true)
+      setPrivToggle('togglePrivClinica', 'labelPrivClinica', true)
       limpiarFotoPreview()
       switchFormTab('general')
     }
@@ -817,11 +918,22 @@
         vacunas:           getVacunas(),
         alergias:          getAlergias(),
         remedios:          getRemedios(),
+        alimentacion: {
+          tipo:  document.getElementById('tipoDieta').value || null,
+          marca: document.getElementById('marcaAlimento').value.trim() || null,
+          notas: document.getElementById('notasAlimentacion').value.trim() || null,
+        },
+        privacidad: {
+          salud:   document.getElementById('togglePrivSalud').classList.contains('on'),
+          clinica: document.getElementById('togglePrivClinica').classList.contains('on'),
+        },
       }
       // Supabase necesita los campos jsonb como string JSON
-      payload.vacunas  = JSON.parse(JSON.stringify(payload.vacunas))
-      payload.alergias = JSON.parse(JSON.stringify(payload.alergias))
-      payload.remedios = JSON.parse(JSON.stringify(payload.remedios))
+      payload.vacunas      = JSON.parse(JSON.stringify(payload.vacunas))
+      payload.alergias     = JSON.parse(JSON.stringify(payload.alergias))
+      payload.remedios     = JSON.parse(JSON.stringify(payload.remedios))
+      payload.alimentacion = JSON.parse(JSON.stringify(payload.alimentacion))
+      payload.privacidad   = JSON.parse(JSON.stringify(payload.privacidad))
 
       let error
       if (modoNueva) {
@@ -932,7 +1044,7 @@
     document.getElementById('btnCambiarPass').addEventListener('click', async () => {
       const newPass     = document.getElementById('newPass').value
       const confirmPass = document.getElementById('confirmPass').value
-      if (!newPass || !confirmPass) return showAlert2('Completá ambos campos')
+      if (!newPass || !confirmPass) return showAlert2('Completa ambos campos')
       if (newPass.length < 6) return showAlert2('Mínimo 6 caracteres')
       if (newPass !== confirmPass) return showAlert2('Las contraseñas no coinciden')
 
@@ -1085,11 +1197,66 @@
     }
 
     // ─── TABS FORMULARIO ─────────────────────────
+    // ─── PRIVACIDAD ──────────────────────────────
+    function setPrivToggle(btnId, labelId, activo) {
+      const btn   = document.getElementById(btnId)
+      const label = document.getElementById(labelId)
+      if (!btn || !label) return
+      btn.classList.toggle('on', activo)
+      label.textContent = activo ? 'Visible' : 'Oculto'
+      label.style.color = activo ? 'var(--sage-d)' : 'var(--ink-muted)'
+    }
+
+    document.getElementById('togglePrivSalud').addEventListener('click', function() {
+      const activo = !this.classList.contains('on')
+      setPrivToggle('togglePrivSalud', 'labelPrivSalud', activo)
+    })
+    document.getElementById('togglePrivClinica').addEventListener('click', function() {
+      const activo = !this.classList.contains('on')
+      setPrivToggle('togglePrivClinica', 'labelPrivClinica', activo)
+    })
+
+    // ─── COMPLETITUD ─────────────────────────────
+    function actualizarCompletitud() {
+      const m = mascotaActual
+      const checks = [
+        { label: '📸 Foto',           ok: !!m?.foto_url },
+        { label: '🐾 Nombre',         ok: !!(document.getElementById('nombreMascota').value.trim()) },
+        { label: '📅 Fecha nacim.',   ok: !!(document.getElementById('fechaNacimiento').value) },
+        { label: '⚖️ Peso',           ok: !!(document.getElementById('peso').value) },
+        { label: '📝 Descripción',    ok: !!(document.getElementById('descripcion').value.trim()) },
+        { label: '👤 Dueño',          ok: !!(document.getElementById('nombreDueno').value.trim()) },
+        { label: '📱 WhatsApp',       ok: !!(document.getElementById('telefono').value.trim()) },
+        { label: '💉 Vacunas',        ok: getVacunas().length > 0 },
+        { label: '🍽️ Alimentación',   ok: !!(document.getElementById('tipoDieta').value) },
+        { label: '🏥 Clínica',        ok: !!(document.getElementById('clinicaNombre').value.trim()) },
+      ]
+      const completados = checks.filter(c => c.ok).length
+      const pct = Math.round((completados / checks.length) * 100)
+      document.getElementById('pctCompletitud').textContent = pct + '%'
+      document.getElementById('barraCompletitud').style.width = pct + '%'
+      const color = pct >= 80 ? 'var(--sage)' : pct >= 50 ? 'var(--clay)' : '#e57373'
+      document.getElementById('barraCompletitud').style.background = color
+      document.getElementById('pctCompletitud').style.color = color
+      document.getElementById('itemsCompletitud').innerHTML = checks.map(c => `
+        <div style="display:flex; align-items:center; gap:8px; color:${c.ok ? 'var(--sage-d)' : 'var(--ink-muted)'};">
+          <span style="font-size:14px;">${c.ok ? '✅' : '○'}</span>
+          <span>${c.label}</span>
+        </div>`).join('')
+    }
+
+    // ─── PREVIEW RESCATISTA ──────────────────────
+    document.getElementById('btnPreviewRescatista').addEventListener('click', () => {
+      if (!mascotaActual?.id) return
+      window.open(`/rescate.html?id=${mascotaActual.id}`, '_blank')
+    })
+
     window.switchFormTab = function(tab) {
-      ['general','salud','clinica'].forEach(t => {
+      ['general','salud','clinica','privacidad'].forEach(t => {
         document.getElementById(`ftab-${t}`).classList.toggle('active', t === tab)
         document.getElementById(`ftab-content-${t}`).style.display = t === tab ? 'block' : 'none'
       })
+      if (tab === 'privacidad') actualizarCompletitud()
     }
 
     // ─── ETAPA DE VIDA ───────────────────────────

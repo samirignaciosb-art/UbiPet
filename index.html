@@ -238,6 +238,19 @@
 
       <button class="btn btn-primary btn-full" id="btnLogin">🚀 Iniciar sesión</button>
 
+      <!-- MANTENER SESIÓN -->
+      <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+          <div style="position:relative; width:18px; height:18px; flex-shrink:0;">
+            <input type="checkbox" id="mantenerSesion" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; margin:0; z-index:1;">
+            <div id="checkBox" style="width:18px; height:18px; border-radius:4px; border:1.5px solid var(--sand); background:var(--card-bg); display:flex; align-items:center; justify-content:center; transition:all 0.15s; pointer-events:none;">
+              <svg id="checkMark" width="11" height="9" viewBox="0 0 11 9" fill="none" style="display:none;"><path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <span style="font-size:13px; color:var(--ink-muted); font-weight:500;">Mantener sesión abierta</span>
+        </label>
+      </div>
+
       <div class="divider">o</div>
 
       <button class="btn btn-google btn-full" id="btnGoogle">
@@ -349,6 +362,21 @@
       btn.innerHTML = loading ? '<span class="spinner spinner-sm"></span>' : label
     }
 
+    // ─── REDIRECCIÓN SEGÚN ROL ──────────────────────
+    // Verifica si el usuario es admin y redirige al panel correcto
+    async function redirigirSegunRol(userId, email) {
+      const { data: adminData } = await supabase
+        .from('admins')
+        .select('rol, activo')
+        .eq('email', email)
+        .maybeSingle()
+      if (adminData?.activo) {
+        window.location.href = 'admin.html'
+      } else {
+        window.location.href = 'perfil.html'
+      }
+    }
+
     // ─── VERIFICACIÓN DE PLACA ────────────────────
     // Función central: verifica si el usuario tiene al menos un perfil con placa
     async function tienePlacaActiva(userId) {
@@ -366,13 +394,31 @@
       document.getElementById('registerBoxWrap').scrollIntoView({ behavior: 'smooth' })
     }
 
+    // ─── CHECKBOX MANTENER SESIÓN ───────────────────
+    const chk     = document.getElementById('mantenerSesion')
+    const chkBox  = document.getElementById('checkBox')
+    const chkMark = document.getElementById('checkMark')
+    // Por defecto NO mantener sesión
+    chk.checked = false
+    chk.addEventListener('change', () => {
+      if (chk.checked) {
+        chkBox.style.background  = 'var(--clay)'
+        chkBox.style.borderColor = 'var(--clay)'
+        chkMark.style.display    = 'block'
+      } else {
+        chkBox.style.background  = 'var(--card-bg)'
+        chkBox.style.borderColor = 'var(--sand)'
+        chkMark.style.display    = 'none'
+      }
+    })
+
     // ─── SESIÓN PERSISTENTE ───────────────────────
     // Si ya hay sesión activa al cargar la página, verificar placa y redirigir
     const { data: { session: sessionActual } } = await supabase.auth.getSession()
     if (sessionActual) {
       const tieneAcceso = await tienePlacaActiva(sessionActual.user.id)
       if (tieneAcceso) {
-        window.location.href = 'perfil.html'
+        await redirigirSegunRol(sessionActual.user.id, sessionActual.user.email)
       } else {
         await supabase.auth.signOut()
         mostrarErrorSinPlaca()
@@ -385,7 +431,7 @@
       if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
         const tieneAcceso = await tienePlacaActiva(session.user.id)
         if (tieneAcceso) {
-          window.location.href = 'perfil.html'
+          await redirigirSegunRol(session.user.id, session.user.email)
         } else {
           await supabase.auth.signOut()
           mostrarErrorSinPlaca()
@@ -465,7 +511,11 @@
         await supabase.auth.signOut()
         return mostrarErrorSinPlaca()
       }
-      window.location.href = 'perfil.html'
+      // Si no marcó "mantener sesión", guardar flag para cerrar al salir
+      if (!document.getElementById('mantenerSesion').checked) {
+        sessionStorage.setItem('sesion-temporal', '1')
+      }
+      await redirigirSegunRol(loginData.user.id, loginData.user.email)
     })
     document.getElementById('password').addEventListener('keypress', e => {
       if (e.key === 'Enter') document.getElementById('btnLogin').click()

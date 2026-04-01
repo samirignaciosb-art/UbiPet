@@ -215,6 +215,9 @@
     <div class="menu-label">Gestión</div>
     <button class="menu-item" id="mi-mascotas"           onclick="ir('mascotas')">🐾 Mascotas</button>
     <button class="menu-item solo-superadmin" id="mi-usuarios" onclick="ir('usuarios')">👥 Usuarios</button>
+    <div class="menu-divider"></div>
+    <div class="menu-label">Mi cuenta</div>
+    <a href="perfil.html" class="menu-item" style="text-decoration:none;">🐾 Mis mascotas</a>
     <div class="menu-label solo-superadmin">Configuración</div>
     <button class="menu-item solo-superadmin" id="mi-enlaces" onclick="ir('enlaces')">🔗 Enlaces</button>
     <button class="menu-item" id="mi-tema"               onclick="ir('tema')">🎨 Tema</button>
@@ -565,6 +568,13 @@
       aplicarRol(data.rol)
       await cargarStats()
       resetTimeout() // iniciar contador de inactividad
+      // Sesión temporal: cerrar al salir del tab
+      if (sessionStorage.getItem('sesion-temporal')) {
+        window.addEventListener('pagehide', async () => {
+          await supabase.auth.signOut()
+          sessionStorage.removeItem('sesion-temporal')
+        })
+      }
     }
 
     // ─── SESIÓN ───────────────────────────────────

@@ -648,6 +648,16 @@
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = 'index.html' }
     user = session.user
+
+    // Si la sesión es temporal, cerrarla al salir del tab
+    if (sessionStorage.getItem('sesion-temporal')) {
+      window.addEventListener('pagehide', async () => {
+        if (!document.querySelector('#mantenerSesion')?.checked) {
+          await supabase.auth.signOut()
+          sessionStorage.removeItem('sesion-temporal')
+        }
+      })
+    }
     document.getElementById('menuEmail').textContent = user.email
     document.getElementById('configEmail').textContent = user.email
 

@@ -1008,17 +1008,14 @@ El post debe:
 Responde SOLO con el texto del post, sin comillas ni explicaciones.`
 
       try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        // Llamamos al Cloudflare Worker que actúa como proxy (evita CORS)
+        const response = await fetch('https://ubipet-push.samirignaciosb.workers.dev/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 400,
-            messages: [{ role: 'user', content: prompt }]
-          })
+          body: JSON.stringify({ prompt, max_tokens: 400 })
         })
         const data  = await response.json()
-        const texto = data.content?.[0]?.text?.trim() || 'No se pudo generar el copy.'
+        const texto = data.text?.trim() || 'No se pudo generar el copy.'
         copyText.textContent = texto
         copyWrap.style.display = 'none'
         copyDiv.style.display  = 'block'

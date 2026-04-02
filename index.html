@@ -322,11 +322,11 @@
       <div class="welcome-card" id="welcomePanel" style="display:none;">
         <span class="welcome-emoji">🎉</span>
         <h3>¡Bienvenido a UbiPet!</h3>
-        <p>Tu cuenta fue creada exitosamente. Ya puedes asociar tu placa y crear el perfil de tu mascota.</p>
+        <p>Tu cuenta fue creada exitosamente. Tu placa ya está vinculada — ahora solo completa el perfil.</p>
         <div class="welcome-steps">
-          <div class="step"><div class="step-num">1</div><span>Ingresa el código de tu placa</span></div>
+          <div class="step"><div class="step-num">✓</div><span>Placa vinculada a tu cuenta ✅</span></div>
           <div class="step"><div class="step-num">2</div><span>Completa el perfil de tu mascota</span></div>
-          <div class="step"><div class="step-num">3</div><span>¡Listo! Tu peludito ya está protegido 🐾</span></div>
+          <div class="step"><div class="step-num">3</div><span>¡Listo! Tu mascota ya está protegida 🐾</span></div>
         </div>
         <button class="btn btn-primary btn-full" id="btnIrPerfil">Ir a mi perfil →</button>
       </div>
@@ -533,6 +533,25 @@
     document.getElementById('regCodigo').addEventListener('input', e => {
       e.target.value = e.target.value.toUpperCase()
     })
+
+    // Pre-llenar código de placa desde URL (?placa=UBI-XXXXX)
+    // Así cuando el cliente escanea el QR ya viene pre-cargado
+    ;(function() {
+      const params = new URLSearchParams(window.location.search)
+      const codigoUrl = params.get('placa')
+      if (codigoUrl) {
+        const codigo = codigoUrl.toUpperCase()
+        document.getElementById('regCodigo').value = codigo
+        sessionStorage.setItem('placa_pendiente', codigo)
+        // Abrir panel de registro automáticamente
+        document.getElementById('registerPanel').style.display = 'block'
+        document.getElementById('registerBoxWrap').style.display = 'none'
+        // Scroll suave al formulario
+        setTimeout(() => {
+          document.getElementById('registerPanel').scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 300)
+      }
+    })()
     document.getElementById('btnDoRegister').addEventListener('click', async () => {
       const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
       const email  = document.getElementById('regEmail').value.trim()
@@ -560,21 +579,38 @@
       // Guardar código en sesión para asociarlo en perfil.html
       sessionStorage.setItem('placa_pendiente', codigo)
 
-      // Crear cuenta
-      const { error } = await supabase.auth.signUp({ email, password: pass })
+      // Crear cuenta — emailRedirectTo lleva de vuelta a la app tras confirmar
+      const { data: signUpData, error } = await supabase.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          emailRedirectTo: 'https://app.ubipet.shop/perfil.html',
+          data: { placa_pendiente: codigo } // guardado en user_metadata
+        }
+      })
       setLoading(btn, false, 'Crear cuenta')
       if (error) return showAlert('alertReg', '❌ ' + error.message)
 
-      const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pass })
+      // Intentar login inmediato (funciona si Supabase tiene "Confirm email" desactivado)
+      const { data: loginData, error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pass })
       document.getElementById('registerPanel').style.display = 'none'
-      if (loginErr) {
+
+      if (loginErr || !loginData?.session) {
+        // Supabase requiere confirmación de email — mostrar instrucciones claras
         document.getElementById('welcomePanel').style.display = 'block'
-        document.getElementById('btnIrPerfil').textContent = 'Iniciar sesión →'
-        document.getElementById('btnIrPerfil').onclick = () => {
-          document.getElementById('welcomePanel').style.display = 'none'
-        }
+        document.getElementById('welcomePanel').innerHTML = `
+          <span class="welcome-emoji">📧</span>
+          <h3>¡Casi listo! Revisa tu email</h3>
+          <p style="margin-bottom:20px;">Te enviamos un correo a <strong>${email}</strong>. Haz clic en el enlace para activar tu cuenta y acceder directamente.</p>
+          <div style="background:var(--sage-bg); border:1px solid var(--sage-l); border-radius:var(--radius); padding:14px 16px; font-size:13px; color:var(--sage-d); margin-bottom:20px; text-align:left; line-height:1.7;">
+            💡 <strong>Tip:</strong> Si no ves el correo, revisa tu carpeta de spam. El asunto es "Confirm your email".
+          </div>
+          <button class="btn btn-primary btn-full" onclick="window.location.reload()">← Volver al inicio</button>
+        `
         return
       }
+
+      // Login exitoso sin confirmación — ir directo a perfil
       document.getElementById('welcomePanel').style.display = 'block'
       document.getElementById('btnIrPerfil').onclick = () => window.location.href = 'perfil.html'
     })

@@ -697,7 +697,51 @@
       document.getElementById('fotoPreview').src = ''
       document.getElementById('fotoPlaceholder').style.display = 'flex'
       document.getElementById('fotoInput').value = ''
+    }    
+
+// ─── FIX: CREAR PERFIL SI ES NUEVO ─────────────
+async function inicializarNuevoPerfil() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const { data: perfilExistente } = await supabase
+    .from('perfiles')
+    .select('id')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if (!perfilExistente) {
+    const codigoPlaca = sessionStorage.getItem('placa_pendiente') || session.user.user_metadata?.placa_inicial;
+    if (!codigoPlaca) {
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+      return;
     }
+
+    const { data: placaData } = await supabase
+      .from('placas')
+      .select('id')
+      .eq('codigo', codigoPlaca)
+      .single();
+
+    if (placaData) {
+      const { error: insErr } = await supabase.from('perfiles').insert({
+        user_id: session.user.id,
+        placa_id: placaData.id,
+        nombre_mascota: 'Mi Mascota',
+        email_dueno: session.user.email
+      });
+
+      if (!insErr) {
+        await supabase.from('placas').update({ estado: 'activa' }).eq('id', placaData.id);
+        sessionStorage.removeItem('registro_en_curso');
+        sessionStorage.removeItem('placa_pendiente');
+        window.location.reload(); 
+        return;
+      }
+    }
+  }
+}
 
     // ─── CARGAR MASCOTAS ─────────────────────────
     async function cargarMascotas() {

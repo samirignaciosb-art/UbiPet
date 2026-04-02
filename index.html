@@ -425,19 +425,70 @@
       }
     }
 
-    // ─── GOOGLE OAUTH ─────────────────────────────
-    // Intercepta el redirect de vuelta después del login con Google
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
-        const tieneAcceso = await tienePlacaActiva(session.user.id)
-        if (tieneAcceso) {
-          await redirigirSegunRol(session.user.id, session.user.email)
-        } else {
-          await supabase.auth.signOut()
-          mostrarErrorSinPlaca()
-        }
-      }
-    })
+// --- 1. Ajuste del observador de estado (onAuthStateChange) ---
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    // Si detectamos que es un registro nuevo, lo dejamos pasar a perfil.html
+    const esNuevo = sessionStorage.getItem('registro_en_curso');
+    if (esNuevo) {
+      window.location.href = 'perfil.html';
+      return;
+    }
+
+    // Para usuarios ya existentes, validamos su acceso
+    const tieneAcceso = await tienePlacaActiva(session.user.id);
+    if (tieneAcceso) {
+      await redirigirSegunRol(session.user.id, session.user.email);
+    } else {
+      await supabase.auth.signOut();
+      mostrarErrorSinPlaca();
+    }
+  }
+});
+
+// --- 2. Ajuste del botón de registro (btnDoRegister) ---
+document.getElementById('btnDoRegister').addEventListener('click', async () => {
+  const btn = document.getElementById('btnDoRegister');
+  const codigo = document.getElementById('regCodigo').value.trim().toUpperCase();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+
+  if (!codigo || !email || !pass) return showAlert('alertReg', 'Completa todos los campos');
+
+  setLoading(btn, true, 'Creando cuenta...');
+
+  // VALIDACIÓN PREVIA: Verificar si la placa existe y está disponible
+  const { data: placa, error: pErr } = await supabase
+    .from('placas')
+    .select('id, estado')
+    .eq('codigo', codigo)
+    .maybeSingle();
+
+  if (pErr || !placa || placa.estado !== 'disponible') {
+    setLoading(btn, false, 'Crear cuenta');
+    return showAlert('alertReg', '❌ El código de placa no es válido o ya está en uso.');
+  }
+
+  // Si la placa es válida, marcamos que estamos en proceso de registro
+  sessionStorage.setItem('registro_en_curso', 'true');
+  sessionStorage.setItem('placa_pendiente', codigo);
+
+  const { data: signUpData, error } = await supabase.auth.signUp({
+    email,
+    password: pass,
+    options: {
+      data: { placa_inicial: codigo } // Se guarda en user_metadata por seguridad
+    }
+  });
+
+  if (error) {
+    sessionStorage.removeItem('registro_en_curso');
+    setLoading(btn, false, 'Crear cuenta');
+    return showAlert('alertReg', '❌ ' + error.message);
+  }
+
+  // El onAuthStateChange se encargará de la redirección al detectar SIGNED_IN
+});
 
     document.getElementById('btnGoogle').addEventListener('click', async () => {
       const btn = document.getElementById('btnGoogle')

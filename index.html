@@ -364,7 +364,7 @@
 
     // ─── REDIRECCIÓN SEGÚN ROL ──────────────────────
     // Verifica si el usuario es admin y redirige al panel correcto
-    async function redirigirSegunRol(userId, email) {
+    async function redirigirSegunRol(email) {
       const { data: adminData } = await supabase
         .from('admins')
         .select('rol, activo')
@@ -377,118 +377,20 @@
       }
     }
 
-    // ─── VERIFICACIÓN DE PLACA ────────────────────
-    // Función central: verifica si el usuario tiene al menos un perfil con placa
-    async function tienePlacaActiva(userId) {
-      const { data } = await supabase
-        .from('perfiles')
-        .select('id')
-        .eq('user_id', userId)
-        .not('placa_id', 'is', null)
-        .limit(1)
-      return !!(data?.length)
-    }
-
-    function mostrarErrorSinPlaca(alertId = 'alert') {
-      showAlert(alertId, '❌ Para usar UbiPet necesitas tener una placa activa. Regístrate con tu código de placa.')
-      document.getElementById('registerBoxWrap').scrollIntoView({ behavior: 'smooth' })
-    }
-
-    // ─── CHECKBOX MANTENER SESIÓN ───────────────────
-    const chk     = document.getElementById('mantenerSesion')
-    const chkBox  = document.getElementById('checkBox')
-    const chkMark = document.getElementById('checkMark')
-    // Por defecto NO mantener sesión
-    chk.checked = false
-    chk.addEventListener('change', () => {
-      if (chk.checked) {
-        chkBox.style.background  = 'var(--clay)'
-        chkBox.style.borderColor = 'var(--clay)'
-        chkMark.style.display    = 'block'
-      } else {
-        chkBox.style.background  = 'var(--card-bg)'
-        chkBox.style.borderColor = 'var(--sand)'
-        chkMark.style.display    = 'none'
-      }
-    })
-
     // ─── SESIÓN PERSISTENTE ───────────────────────
-    // Si ya hay sesión activa al cargar la página, verificar placa y redirigir
+    // Si ya hay sesión activa, redirigir según rol directamente
+    // perfil.html maneja usuarios sin placa
     const { data: { session: sessionActual } } = await supabase.auth.getSession()
     if (sessionActual) {
-      const tieneAcceso = await tienePlacaActiva(sessionActual.user.id)
-      if (tieneAcceso) {
-        await redirigirSegunRol(sessionActual.user.id, sessionActual.user.email)
-      } else {
-        await supabase.auth.signOut()
-        mostrarErrorSinPlaca()
+      await redirigirSegunRol(sessionActual.user.email)
+    }
+
+    // ─── GOOGLE OAUTH ─────────────────────────────
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session && session.user.app_metadata?.provider === 'google') {
+        await redirigirSegunRol(session.user.email)
       }
-    }
-
-// --- 1. Ajuste del observador de estado (onAuthStateChange) ---
-supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    // Si detectamos que es un registro nuevo, lo dejamos pasar a perfil.html
-    const esNuevo = sessionStorage.getItem('registro_en_curso');
-    if (esNuevo) {
-      window.location.href = 'perfil.html';
-      return;
-    }
-
-    // Para usuarios ya existentes, validamos su acceso
-    const tieneAcceso = await tienePlacaActiva(session.user.id);
-    if (tieneAcceso) {
-      await redirigirSegunRol(session.user.id, session.user.email);
-    } else {
-      await supabase.auth.signOut();
-      mostrarErrorSinPlaca();
-    }
-  }
-});
-
-// --- 2. Ajuste del botón de registro (btnDoRegister) ---
-document.getElementById('btnDoRegister').addEventListener('click', async () => {
-  const btn = document.getElementById('btnDoRegister');
-  const codigo = document.getElementById('regCodigo').value.trim().toUpperCase();
-  const email = document.getElementById('regEmail').value.trim();
-  const pass = document.getElementById('regPass').value;
-
-  if (!codigo || !email || !pass) return showAlert('alertReg', 'Completa todos los campos');
-
-  setLoading(btn, true, 'Creando cuenta...');
-
-  // VALIDACIÓN PREVIA: Verificar si la placa existe y está disponible
-  const { data: placa, error: pErr } = await supabase
-    .from('placas')
-    .select('id, estado')
-    .eq('codigo', codigo)
-    .maybeSingle();
-
-  if (pErr || !placa || placa.estado !== 'disponible') {
-    setLoading(btn, false, 'Crear cuenta');
-    return showAlert('alertReg', '❌ El código de placa no es válido o ya está en uso.');
-  }
-
-  // Si la placa es válida, marcamos que estamos en proceso de registro
-  sessionStorage.setItem('registro_en_curso', 'true');
-  sessionStorage.setItem('placa_pendiente', codigo);
-
-  const { data: signUpData, error } = await supabase.auth.signUp({
-    email,
-    password: pass,
-    options: {
-      data: { placa_inicial: codigo } // Se guarda en user_metadata por seguridad
-    }
-  });
-
-  if (error) {
-    sessionStorage.removeItem('registro_en_curso');
-    setLoading(btn, false, 'Crear cuenta');
-    return showAlert('alertReg', '❌ ' + error.message);
-  }
-
-  // El onAuthStateChange se encargará de la redirección al detectar SIGNED_IN
-});
+    })
 
     document.getElementById('btnGoogle').addEventListener('click', async () => {
       const btn = document.getElementById('btnGoogle')
@@ -521,20 +423,9 @@ document.getElementById('btnDoRegister').addEventListener('click', async () => {
       const btn = document.getElementById('btnSendReset')
       setLoading(btn, true, 'Enviar enlace')
 
-      // Verificar que el email tiene una cuenta activa con placa antes de enviar reset
-      // (resetPasswordForEmail crearía el usuario si no existe)
-      const { data: perfil } = await supabase
-        .from('perfiles')
-        .select('id')
-        .eq('email_dueno', email)
-        .not('placa_id', 'is', null)
-        .limit(1)
-
-      if (!perfil?.length) {
-        setLoading(btn, false, 'Enviar enlace')
-        return showAlert('alertForgot', '❌ No encontramos una cuenta activa con ese email.')
-      }
-
+      // Verificar que el email existe en auth antes de enviar reset
+      // Nota: Supabase no expone si el email existe por seguridad,
+      // pero resetPasswordForEmail es seguro — no crea usuarios
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'https://app.ubipet.shop/reset-password.html'
       })
@@ -555,18 +446,13 @@ document.getElementById('btnDoRegister').addEventListener('click', async () => {
         setLoading(btn, false, '🚀 Iniciar sesión')
         return showAlert('alert', '❌ ' + error.message)
       }
-      // Verificar placa antes de redirigir
-      const tieneAcceso = await tienePlacaActiva(loginData.user.id)
       setLoading(btn, false, '🚀 Iniciar sesión')
-      if (!tieneAcceso) {
-        await supabase.auth.signOut()
-        return mostrarErrorSinPlaca()
-      }
       // Si no marcó "mantener sesión", guardar flag para cerrar al salir
       if (!document.getElementById('mantenerSesion').checked) {
         sessionStorage.setItem('sesion-temporal', '1')
       }
-      await redirigirSegunRol(loginData.user.id, loginData.user.email)
+      // Redirigir según rol — perfil.html maneja el resto
+      await redirigirSegunRol(loginData.user.email)
     })
     document.getElementById('password').addEventListener('keypress', e => {
       if (e.key === 'Enter') document.getElementById('btnLogin').click()

@@ -472,22 +472,35 @@
     })
 
     // Pre-llenar código de placa desde URL (?placa=UBI-XXXXX)
-    // Así cuando el cliente escanea el QR ya viene pre-cargado
-    ;(function() {
+    // Si la placa está activa → redirigir a rescate.html directamente
+    ;(async function() {
       const params = new URLSearchParams(window.location.search)
       const codigoUrl = params.get('placa')
-      if (codigoUrl) {
-        const codigo = codigoUrl.toUpperCase()
-        document.getElementById('regCodigo').value = codigo
-        sessionStorage.setItem('placa_pendiente', codigo)
-        // Abrir panel de registro automáticamente
-        document.getElementById('registerPanel').style.display = 'block'
-        document.getElementById('registerBoxWrap').style.display = 'none'
-        // Scroll suave al formulario
-        setTimeout(() => {
-          document.getElementById('registerPanel').scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }, 300)
+      if (!codigoUrl) return
+      const codigo = codigoUrl.toUpperCase()
+
+      // Verificar estado de la placa antes de mostrar el formulario
+      const { data: placa } = await supabase
+        .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
+
+      if (placa && placa.estado !== 'disponible') {
+        // Placa activa → buscar perfil y redirigir a rescate
+        const { data: perfilData } = await supabase
+          .from('perfiles').select('id').eq('placa_id', placa.id).maybeSingle()
+        if (perfilData?.id) {
+          window.location.href = `rescate.html?id=${perfilData.id}`
+          return
+        }
       }
+
+      // Placa disponible (o no encontrada) → mostrar formulario de registro normal
+      document.getElementById('regCodigo').value = codigo
+      sessionStorage.setItem('placa_pendiente', codigo)
+      document.getElementById('registerPanel').style.display = 'block'
+      document.getElementById('registerBoxWrap').style.display = 'none'
+      setTimeout(() => {
+        document.getElementById('registerPanel').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 300)
     })()
     document.getElementById('btnDoRegister').addEventListener('click', async () => {
       const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
@@ -510,7 +523,15 @@
       }
       if (placa.estado !== 'disponible') {
         setLoading(btn, false, 'Crear cuenta')
-        return showAlert('alertReg', '❌ Esta placa ya está registrada. Si crees que es un error, contáctanos.')
+        // Placa activa → redirigir a rescate en vez de mostrar error
+        const { data: perfilData } = await supabase
+          .from('perfiles').select('id').eq('placa_id', placa.id).maybeSingle()
+        if (perfilData?.id) {
+          window.location.href = `rescate.html?id=${perfilData.id}`
+        } else {
+          return showAlert('alertReg', '❌ Esta placa ya está registrada. Si crees que es un error, contáctanos.')
+        }
+        return
       }
 
       // Guardar código en sesión para asociarlo en perfil.html

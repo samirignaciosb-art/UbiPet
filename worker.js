@@ -139,7 +139,7 @@ export default {
         consejo:      'consejo veterinario o de cuidado animal útil y práctico',
       }[categoria] || 'tip de cuidado de mascotas'
 
-      const prompt = `Eres el community manager de UbiPet, una marca chilena que vende placas QR inteligentes para mascotas.
+      const prompt = `Eres el community manager de UbiPet, una marca chilena que vende un perfil digital e historial veterinario para tu mascota la placas QR inteligentes el solo la llave a esta vitirna.
 
 Fecha de hoy: ${fecha}
 Tema: "${tema}"
@@ -194,7 +194,7 @@ Reglas:
         console.error('AI error:', err)
         // Fallback — nunca romper el panel
         return new Response(JSON.stringify({
-          text: `Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`
+          text: `oops no hubo resultado, Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })

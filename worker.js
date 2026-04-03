@@ -154,7 +154,7 @@ Escribe un caption para Instagram con este formato EXACTO (sin títulos ni etiqu
 [Línea 5: CTA sutil relacionado con UbiPet — ej: "¿Tu mascota ya tiene su placa UbiPet?" o "Protégela antes de que sea tarde."]
 
 Reglas:
-- Máximo 120 palabras en total
+- Máximo 200 palabras en total
 - 2-3 emojis integrados naturalmente en el texto
 - Tono: cercano, emotivo, nunca corporativo
 - Sin hashtags (van separados)
@@ -194,7 +194,7 @@ Reglas:
         console.error('AI error:', err)
         // Fallback — nunca romper el panel
         return new Response(JSON.stringify({
-          text: `oops no hubo resultado, Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`
+          text: `oops no hubo resultado\n\ Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })

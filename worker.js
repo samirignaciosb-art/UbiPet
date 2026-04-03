@@ -8,7 +8,7 @@
 //   VAPID_SUBJECT  → mailto:samirignaciosb@gmail.com
 //   SUPABASE_URL   → https://hwkyvxzbheegxynoljrw.supabase.co
 //   SUPABASE_KEY      → (service_role key — NO la anon)
-//   ANTHROPIC_API_KEY  → tu API key de Anthropic (Cloudflare Dashboard → Settings → Variables → Secret)
+//   GEMINI_API_KEY     → AIzaSyCD5Fl36sz3p_fisKPIVB2wwMndyBuoFdU (Google AI Studio) — Secret en Cloudflare
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default {
@@ -115,6 +115,10 @@ export default {
     }
 
     // ── POST /ai ─────────────────────────────────────────────────────────────
+    // Genera copy para Instagram con prioridad:
+    // 1. Efeméride del calendario UbiPet (pet_calendar en Supabase)
+    // 2. Tip veterinario o de cuidado
+    // 3. Dato curioso sobre mascotas
     if (request.method === 'POST' && url.pathname === '/ai') {
       let body
       try { body = await request.json() } catch {
@@ -123,40 +127,78 @@ export default {
         })
       }
 
-      const { prompt, max_tokens = 400 } = body
-      if (!prompt) {
-        return new Response(JSON.stringify({ error: 'prompt requerido' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      const { tema, categoria } = body
+
+      // Construir prompt según categoría y tema recibido desde admin.html
+      const hoy = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }))
+      const fecha = `${hoy.getDate()}/${hoy.getMonth()+1}/${hoy.getFullYear()}`
+
+      const tipoPost = {
+        efemeride:    'post conmemorativo de una fecha especial para mascotas',
+        dato_curioso: 'dato curioso sorprendente sobre mascotas',
+        consejo:      'consejo veterinario o de cuidado animal útil y práctico',
+      }[categoria] || 'tip de cuidado de mascotas'
+
+      const prompt = `Eres el community manager de UbiPet, una marca chilena que vende placas QR inteligentes para mascotas.
+
+Fecha de hoy: ${fecha}
+Tema: "${tema}"
+Tipo de post: ${tipoPost}
+
+Escribe un caption para Instagram con este formato EXACTO (sin títulos ni etiquetas, solo el texto):
+
+[Línea 1: Hook emocional o dato impactante — máximo 12 palabras]
+
+[Línea 2-4: Desarrollo del tema en 2-3 oraciones. Conecta con el amor que los dueños sienten por sus mascotas.]
+
+[Línea 5: CTA sutil relacionado con UbiPet — ej: "¿Tu mascota ya tiene su placa UbiPet?" o "Protégela antes de que sea tarde."]
+
+Reglas:
+- Máximo 120 palabras en total
+- 2-3 emojis integrados naturalmente en el texto
+- Tono: cercano, emotivo, nunca corporativo
+- Sin hashtags (van separados)
+- Sin argentinismos (no uses: podés, mirá, hacé, etc.)
+- No menciones IA ni que el texto fue generado automáticamente`
+
+      try {
+        const aiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                maxOutputTokens: 300,
+                temperature:     0.8,
+              }
+            })
+          }
+        )
+
+        if (!aiRes.ok) {
+          const err = await aiRes.text()
+          console.error('Gemini error:', err)
+          throw new Error('Gemini request failed')
+        }
+
+        const data = await aiRes.json()
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+
+        return new Response(JSON.stringify({ text: text || '' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+
+      } catch (err) {
+        console.error('AI error:', err)
+        // Fallback — nunca romper el panel
+        return new Response(JSON.stringify({
+          text: `Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
-
-      // Llamar a la API de Anthropic desde el Worker (sin restricciones CORS)
-      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type':      'application/json',
-          'x-api-key':         env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model:      'claude-sonnet-4-20250514',
-          max_tokens,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      })
-
-      if (!aiRes.ok) {
-        const err = await aiRes.text()
-        console.error('Anthropic error:', err)
-        return new Response(JSON.stringify({ error: 'Error en API de IA' }), {
-          status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-
-      const data = await aiRes.json()
-      return new Response(JSON.stringify({ text: data.content?.[0]?.text || '' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
     }
 
     return new Response('Not found', { status: 404, headers: corsHeaders })

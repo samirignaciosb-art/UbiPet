@@ -355,7 +355,7 @@
       document.getElementById('loadingSpinner').style.display = 'none'
       document.getElementById('notFound').style.display = 'block'
     } else {
-      const { data, error } = await supabase.from('perfiles').select('*').eq('id', perfilId).single()
+      const { data, error } = await supabase.rpc('get_perfil_rescate', { p_id: perfilId })
       document.getElementById('loadingSpinner').style.display = 'none'
 
       if (error || !data) {

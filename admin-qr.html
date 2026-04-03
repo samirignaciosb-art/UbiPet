@@ -161,7 +161,7 @@
     async function cargar() {
       const { data, error } = await supabase
         .from('placas')
-        .select('*, perfiles(nombre_mascota, nombre_dueno, id)')
+        .select('*, perfiles!placas_perfil_id_fkey(nombre_mascota, nombre_dueno, id)')
         .order('codigo')
 
       if (error) {

@@ -139,27 +139,25 @@ export default {
         consejo:      'consejo veterinario o de cuidado animal útil y práctico',
       }[categoria] || 'tip de cuidado de mascotas'
 
-      const prompt = `Eres el community manager de UbiPet, una marca chilena que vende una placa QR inteligente para mascotas: al escanearla, muestra el perfil médico completo y notifica al dueño en tiempo real con ubicación GPS.
+      const prompt = `Eres el community manager de UbiPet, marca chilena de placas QR inteligentes para mascotas ($9.990 CLP, pago único).
 
-Fecha de hoy: ${fecha}
-Tema: "${tema}"
-Tipo de post: ${tipoPost}
+Fecha: ${fecha} | Tema: "${tema}" | Tipo: ${tipoPost}
 
-Escribe un caption para Instagram con este formato EXACTO (sin títulos ni etiquetas, solo el texto):
+Escribe un caption corto para Instagram (máximo 80 palabras, 3 párrafos de 1-2 líneas cada uno).
 
-[Línea 1: Hook emocional o dato impactante — máximo 12 palabras]
+ESTRUCTURA:
+1️⃣ Dato duro o cifra impactante sobre el tema. Una sola oración, directa.
+2️⃣ Por qué importa + UbiPet como solución natural. No publicidad, sentido común.
+3️⃣ Cierre emocional y de comunidad. Ej: "Hagamos más familias felices." / "Porque cada mascota merece volver a casa."
 
-[Línea 2-4: Desarrollo del tema en 2-3 oraciones. Conecta con el amor que los dueños sienten por sus mascotas.]
+ESTILO DE REFERENCIA:
+"1 de cada 3 perros que se pierde en Chile nunca vuelve a casa.
 
-[Línea 5: CTA sutil relacionado con UbiPet — ej: "¿Tu mascota ya tiene su placa UbiPet?" o "Protégela antes de que sea tarde."]
+La mayoría de los rescatistas quieren ayudar, pero no saben cómo contactar al dueño. UbiPet lo resuelve en segundos: escanea el QR y el dueño recibe tu ubicación al instante. 🐾
 
-Reglas:
-- Máximo 200 palabras en total
-- 2-3 emojis integrados naturalmente en el texto
-- Tono: cercano, emotivo, nunca corporativo
-- Sin hashtags (van separados)
-- Sin argentinismos (no uses: podés, mirá, hacé, etc.)
-- No menciones IA ni que el texto fue generado automáticamente`
+Hagamos bajar esa estadística juntos."
+
+REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA`
 
       try {
         const aiRes = await fetch(

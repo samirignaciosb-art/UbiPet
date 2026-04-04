@@ -377,11 +377,44 @@
       }
     }
 
+    // ─── QR SCAN: PLACA ACTIVA → RESCATE (siempre, antes de verificar sesión) ──────
+    // Esto garantiza que el rescatista siempre llegue a rescate.html,
+    // incluso si el dueño (u otra persona) tiene sesión activa en el mismo celular.
+    ;(async function checkPlacaParam() {
+      const params = new URLSearchParams(window.location.search)
+      const codigoUrl = params.get('placa')
+      if (!codigoUrl) return // No viene de un QR → continuar flujo normal
+      const codigo = codigoUrl.toUpperCase()
+
+      const { data: placa } = await supabase
+        .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
+
+      if (placa && placa.estado !== 'disponible') {
+        // Placa activa → buscar perfil y mandar a rescate SIN importar si hay sesión
+        const { data: perfilData } = await supabase
+          .from('perfiles').select('id').eq('placa_id', placa.id).maybeSingle()
+        if (perfilData?.id) {
+          window.location.href = `rescate.html?id=${perfilData.id}`
+          return
+        }
+      }
+
+      // Placa disponible → mostrar formulario de registro con código pre-cargado
+      // (flujo normal de cliente nuevo, no interrumpir verificación de sesión)
+      document.getElementById('regCodigo').value = codigo
+      sessionStorage.setItem('placa_pendiente', codigo)
+      document.getElementById('registerPanel').style.display = 'block'
+      document.getElementById('registerBoxWrap').style.display = 'none'
+      setTimeout(() => {
+        document.getElementById('registerPanel').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 300)
+    })()
+
     // ─── SESIÓN PERSISTENTE ───────────────────────
-    // Si ya hay sesión activa, redirigir según rol directamente
-    // perfil.html maneja usuarios sin placa
+    // Si ya hay sesión activa Y no viene de un QR de placa activa, redirigir según rol.
+    // perfil.html maneja usuarios sin placa.
     const { data: { session: sessionActual } } = await supabase.auth.getSession()
-    if (sessionActual) {
+    if (sessionActual && !new URLSearchParams(window.location.search).get('placa')) {
       await redirigirSegunRol(sessionActual.user.email)
     }
 
@@ -471,37 +504,9 @@
       e.target.value = e.target.value.toUpperCase()
     })
 
-    // Pre-llenar código de placa desde URL (?placa=UBI-XXXXX)
-    // Si la placa está activa → redirigir a rescate.html directamente
-    ;(async function() {
-      const params = new URLSearchParams(window.location.search)
-      const codigoUrl = params.get('placa')
-      if (!codigoUrl) return
-      const codigo = codigoUrl.toUpperCase()
-
-      // Verificar estado de la placa antes de mostrar el formulario
-      const { data: placa } = await supabase
-        .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
-
-      if (placa && placa.estado !== 'disponible') {
-        // Placa activa → buscar perfil y redirigir a rescate
-        const { data: perfilData } = await supabase
-          .from('perfiles').select('id').eq('placa_id', placa.id).maybeSingle()
-        if (perfilData?.id) {
-          window.location.href = `rescate.html?id=${perfilData.id}`
-          return
-        }
-      }
-
-      // Placa disponible (o no encontrada) → mostrar formulario de registro normal
-      document.getElementById('regCodigo').value = codigo
-      sessionStorage.setItem('placa_pendiente', codigo)
-      document.getElementById('registerPanel').style.display = 'block'
-      document.getElementById('registerBoxWrap').style.display = 'none'
-      setTimeout(() => {
-        document.getElementById('registerPanel').scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 300)
-    })()
+    // Nota: la verificación de ?placa= ya se hace al inicio del script,
+    // antes del chequeo de sesión, para garantizar que rescatistas siempre
+    // lleguen a rescate.html sin importar si hay sesión activa.
     document.getElementById('btnDoRegister').addEventListener('click', async () => {
       const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
       const email  = document.getElementById('regEmail').value.trim()

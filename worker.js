@@ -113,7 +113,8 @@ export default {
         })
       }
     }
-// ── POST /ai ─────────────────────────────────────────────────────────────
+
+    // ── POST /ai ─────────────────────────────────────────────────────────────
     // Genera copy para Instagram con prioridad:
     // 1. Efeméride del calendario UbiPet (pet_calendar en Supabase)
     // 2. Tip veterinario o de cuidado
@@ -169,8 +170,11 @@ REGLAS OBLIGATORIAS:
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
-                maxOutputTokens: 500,
+                maxOutputTokens: 1000,
                 temperature:     0.85,
+              },
+              thinkingConfig: {
+                thinkingBudget: 0
               }
             })
           }
@@ -214,7 +218,6 @@ REGLAS OBLIGATORIAS:
     return new Response('Not found', { status: 404, headers: corsHeaders })
   }
 }
-
 // ═════════════════════════════════════════════════════════════════════════════
 // WEB PUSH — implementación VAPID nativa para Cloudflare Workers
 // (sin librerías externas — usa SubtleCrypto disponible en el runtime)

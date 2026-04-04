@@ -135,18 +135,18 @@ export default {
 
       const tipoPost = {
         efemeride:    'post conmemorativo de una fecha especial para mascotas',
-        dato_curioso: 'dato curioso sorprendente sobre mascotas',
         consejo:      'consejo veterinario o de cuidado animal útil y práctico',
+        dato_curioso: 'dato curioso sorprendente sobre mascotas con su respaldo cientifico',
       }[categoria] || 'tip de cuidado de mascotas'
 
-      const prompt = `Eres el community manager de UbiPet, marca chilena de placas QR inteligentes para mascotas ($9.990 CLP, pago único).
+      const prompt = `Eres el community manager de UbiPet, marca chilena de perfil digital para mascotas donda la  placas QR inteligentes es solo la lalve para esta vitrina visrtual.
 
 Fecha: ${fecha} | Tema: "${tema}" | Tipo: ${tipoPost}
 
-Escribe un caption corto para Instagram (máximo 80 palabras, 3 párrafos de 1-2 líneas cada uno).
+Escribe un caption corto para Instagram (máximo 200 palabras).
 
 ESTRUCTURA:
-1️⃣ Dato duro o cifra impactante sobre el tema. Una sola oración, directa.
+1️⃣ Dato duro o cifra real sobre el tema. Una sola oración, directa.
 2️⃣ Por qué importa + UbiPet como solución natural. No publicidad, sentido común.
 3️⃣ Cierre emocional y de comunidad. Ej: "Hagamos más familias felices." / "Porque cada mascota merece volver a casa."
 

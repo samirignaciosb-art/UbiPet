@@ -157,7 +157,7 @@ La mayoría de los rescatistas quieren ayudar, pero no saben cómo contactar al 
 
 Hagamos bajar esa estadística juntos."
 
-REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA`
+REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA | IMPORTANTE: entrega SOLO el caption, sin encabezados, sin "Aquí tienes...", sin comillas al inicio o final`
 
       try {
         const aiRes = await fetch(
@@ -168,7 +168,7 @@ REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA`
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
-                maxOutputTokens: 400,
+                maxOutputTokens: 300,
                 temperature:     0.85,
               }
             })

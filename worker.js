@@ -113,8 +113,7 @@ export default {
         })
       }
     }
-
-    // ── POST /ai ─────────────────────────────────────────────────────────────
+// ── POST /ai ─────────────────────────────────────────────────────────────
     // Genera copy para Instagram con prioridad:
     // 1. Efeméride del calendario UbiPet (pet_calendar en Supabase)
     // 2. Tip veterinario o de cuidado
@@ -126,36 +125,41 @@ export default {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
-
+ 
       const { tema, categoria } = body
-
+ 
       // Construir prompt según categoría y tema recibido desde admin.html
       const hoy = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }))
       const fecha = `${hoy.getDate()}/${hoy.getMonth()+1}/${hoy.getFullYear()}`
-
+ 
       const tipoPost = {
         efemeride:    'post conmemorativo de una fecha especial para mascotas',
         consejo:      'consejo veterinario o de cuidado animal útil y práctico',
         dato_curioso: 'dato curioso sorprendente sobre mascotas con su respaldo cientifico',
       }[categoria] || 'tip de cuidado de mascotas'
-
-      const prompt = `Eres el community manager de UbiPet, marca chilena de perfil digital para mascotas donda la  placas QR inteligentes es solo la lalve para esta vitrina visrtual.
-
-Fecha: ${fecha} | Tema: "${tema}" | Tipo: ${tipoPost}
-
-Escribe un caption corto para Instagram (máximo 200 palabras).
-
-ESTRUCTURA:
-Dato duro o cifra real sobre el tema. Una sola oración, directa.  Por qué importa + UbiPet como solución natural. No publicidad, sentido común,Cierre emocional y de comunidad. Ej: "Hagamos más familias felices." / "Porque cada mascota merece volver a casa."
-ESTILO DE REFERENCIA:
+ 
+      const prompt = `Eres el community manager de UbiPet, marca chilena que vende una placa física con QR para mascotas. Cuando alguien escanea el QR, ve el perfil digital completo de la mascota: foto, alergias, medicamentos, dieta y contacto del dueño. El dueño recibe una notificación push al instante con la ubicación GPS del rescatista.
+ 
+Fecha: ${fecha}
+Tema: "${tema}"
+Tipo de contenido: ${tipoPost}
+ 
+Escribe un caption para Instagram de máximo 150 palabras. Usa este ejemplo como referencia de tono y estructura:
+ 
 "1 de cada 3 perros que se pierde en Chile nunca vuelve a casa.
-
+ 
 La mayoría de los rescatistas quieren ayudar, pero no saben cómo contactar al dueño. UbiPet lo resuelve en segundos: escanea el QR y el dueño recibe tu ubicación al instante. 🐾
-
+ 
 Hagamos bajar esa estadística juntos."
-
-REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA | IMPORTANTE: entrega SOLO el caption, sin encabezados, sin "Aquí tienes...", sin comillas al inicio o final`
-
+ 
+REGLAS OBLIGATORIAS:
+- Escribe en párrafos corridos, NUNCA en listas numeradas ni con viñetas
+- Sin hashtags
+- Máximo 1 emoji, integrado en el texto
+- Español de Chile, tono cercano
+- No menciones que el texto fue generado por IA
+- Entrega SOLO el texto del caption, sin títulos, sin comillas al inicio o final, sin "Aquí tienes tu caption:"`
+ 
       try {
         const aiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
@@ -165,13 +169,13 @@ REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA | I
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
-                maxOutputTokens: 300,
+                maxOutputTokens: 500,
                 temperature:     0.85,
               }
             })
           }
         )
-
+ 
         if (!aiRes.ok) {
           const errText = await aiRes.text()
           console.error('Gemini error status:', aiRes.status, errText)
@@ -183,19 +187,19 @@ REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA | I
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           })
         }
-
+ 
         const data = await aiRes.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
-
+ 
         if (!text) {
           console.error('Gemini respuesta vacía:', JSON.stringify(data))
           throw new Error('Gemini devolvió respuesta vacía')
         }
-
+ 
         return new Response(JSON.stringify({ text }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
-
+ 
       } catch (err) {
         console.error('AI error:', err.message)
         return new Response(JSON.stringify({
@@ -206,7 +210,7 @@ REGLAS: sin hashtags | 1 emoji máximo | español de Chile | no menciones IA | I
         })
       }
     }
-
+ 
     return new Response('Not found', { status: 404, headers: corsHeaders })
   }
 }

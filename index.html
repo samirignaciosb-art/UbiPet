@@ -377,20 +377,19 @@
       }
     }
 
-    // ─── QR SCAN: PLACA ACTIVA → RESCATE (siempre, antes de verificar sesión) ──────
-    // Esto garantiza que el rescatista siempre llegue a rescate.html,
-    // incluso si el dueño (u otra persona) tiene sesión activa en el mismo celular.
+    // ─── QR SCAN: placa activa → rescate (SIEMPRE, antes de verificar sesión) ────
+    // Garantiza que el rescatista llegue a rescate.html incluso si hay sesión activa.
     ;(async function checkPlacaParam() {
-      const params = new URLSearchParams(window.location.search)
+      const params    = new URLSearchParams(window.location.search)
       const codigoUrl = params.get('placa')
-      if (!codigoUrl) return // No viene de un QR → continuar flujo normal
+      if (!codigoUrl) return
       const codigo = codigoUrl.toUpperCase()
 
       const { data: placa } = await supabase
         .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
 
       if (placa && placa.estado !== 'disponible') {
-        // Placa activa → buscar perfil y mandar a rescate SIN importar si hay sesión
+        // Placa activa → ir a rescate sin importar si hay sesión
         const { data: perfilData } = await supabase
           .from('perfiles').select('id').eq('placa_id', placa.id).maybeSingle()
         if (perfilData?.id) {
@@ -399,8 +398,7 @@
         }
       }
 
-      // Placa disponible → mostrar formulario de registro con código pre-cargado
-      // (flujo normal de cliente nuevo, no interrumpir verificación de sesión)
+      // Placa disponible → pre-llenar form de registro
       document.getElementById('regCodigo').value = codigo
       sessionStorage.setItem('placa_pendiente', codigo)
       document.getElementById('registerPanel').style.display = 'block'
@@ -411,8 +409,7 @@
     })()
 
     // ─── SESIÓN PERSISTENTE ───────────────────────
-    // Si ya hay sesión activa Y no viene de un QR de placa activa, redirigir según rol.
-    // perfil.html maneja usuarios sin placa.
+    // Solo redirige si NO viene de un QR de placa (ese caso ya se manejó arriba)
     const { data: { session: sessionActual } } = await supabase.auth.getSession()
     if (sessionActual && !new URLSearchParams(window.location.search).get('placa')) {
       await redirigirSegunRol(sessionActual.user.email)
@@ -480,9 +477,11 @@
         return showAlert('alert', '❌ ' + error.message)
       }
       setLoading(btn, false, '🚀 Iniciar sesión')
-      // Si no marcó "mantener sesión", guardar flag para cerrar al salir
-      if (!document.getElementById('mantenerSesion').checked) {
-        sessionStorage.setItem('sesion-temporal', '1')
+      // Flag para supabase.js: elige localStorage (permanente) vs sessionStorage (temporal)
+      if (document.getElementById('mantenerSesion').checked) {
+        localStorage.setItem('sesion-permanente', '1')
+      } else {
+        localStorage.removeItem('sesion-permanente')
       }
       // Redirigir según rol — perfil.html maneja el resto
       await redirigirSegunRol(loginData.user.email)
@@ -504,9 +503,7 @@
       e.target.value = e.target.value.toUpperCase()
     })
 
-    // Nota: la verificación de ?placa= ya se hace al inicio del script,
-    // antes del chequeo de sesión, para garantizar que rescatistas siempre
-    // lleguen a rescate.html sin importar si hay sesión activa.
+
     document.getElementById('btnDoRegister').addEventListener('click', async () => {
       const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
       const email  = document.getElementById('regEmail').value.trim()
@@ -574,6 +571,7 @@
       }
 
       // Login exitoso sin confirmación — ir directo a perfil
+      localStorage.removeItem('sesion-permanente') // registro nuevo = temporal por defecto
       document.getElementById('welcomePanel').style.display = 'block'
       document.getElementById('btnIrPerfil').onclick = () => window.location.href = 'perfil.html'
     })

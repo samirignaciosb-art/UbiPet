@@ -645,23 +645,18 @@
     function hideAlert() { document.getElementById('alert').className = 'alert' }
 
     // ─── AUTH GUARD ──────────────────────────────
+    // supabase.js usa sessionStorage o localStorage según 'sesion-permanente'.
+    // Si Chrome se cerró y la sesión no era permanente, sessionStorage está vacío
+    // → supabase.getSession() devuelve null → redirect automático al login. Sin lógica extra.
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = 'index.html' }
     user = session.user
 
-    // Si la sesión es temporal, cerrarla al salir del tab
-    if (sessionStorage.getItem('sesion-temporal')) {
-      window.addEventListener('pagehide', async () => {
-        if (!document.querySelector('#mantenerSesion')?.checked) {
-          await supabase.auth.signOut()
-          sessionStorage.removeItem('sesion-temporal')
-        }
-      })
-    }
     document.getElementById('menuEmail').textContent = user.email
     document.getElementById('configEmail').textContent = user.email
 
     document.getElementById('btnLogout').addEventListener('click', async () => {
+      localStorage.removeItem('sesion-permanente')
       await supabase.auth.signOut()
       window.location.href = 'index.html'
     })

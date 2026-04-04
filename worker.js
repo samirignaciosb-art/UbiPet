@@ -146,10 +146,7 @@ Fecha: ${fecha} | Tema: "${tema}" | Tipo: ${tipoPost}
 Escribe un caption corto para Instagram (máximo 200 palabras).
 
 ESTRUCTURA:
-1️⃣ Dato duro o cifra real sobre el tema. Una sola oración, directa.
-2️⃣ Por qué importa + UbiPet como solución natural. No publicidad, sentido común.
-3️⃣ Cierre emocional y de comunidad. Ej: "Hagamos más familias felices." / "Porque cada mascota merece volver a casa."
-
+Dato duro o cifra real sobre el tema. Una sola oración, directa.  Por qué importa + UbiPet como solución natural. No publicidad, sentido común,Cierre emocional y de comunidad. Ej: "Hagamos más familias felices." / "Porque cada mascota merece volver a casa."
 ESTILO DE REFERENCIA:
 "1 de cada 3 perros que se pierde en Chile nunca vuelve a casa.
 

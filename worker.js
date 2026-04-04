@@ -163,38 +163,49 @@ Reglas:
 
       try {
         const aiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
-                maxOutputTokens: 300,
-                temperature:     0.8,
+                maxOutputTokens: 400,
+                temperature:     0.85,
               }
             })
           }
         )
 
         if (!aiRes.ok) {
-          const err = await aiRes.text()
-          console.error('Gemini error:', err)
-          throw new Error('Gemini request failed')
+          const errText = await aiRes.text()
+          console.error('Gemini error status:', aiRes.status, errText)
+          return new Response(JSON.stringify({
+            error: `Gemini ${aiRes.status}: ${errText}`,
+            text: null
+          }), {
+            status: 502,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
         }
 
         const data = await aiRes.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
 
-        return new Response(JSON.stringify({ text: text || '' }), {
+        if (!text) {
+          console.error('Gemini respuesta vacía:', JSON.stringify(data))
+          throw new Error('Gemini devolvió respuesta vacía')
+        }
+
+        return new Response(JSON.stringify({ text }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
 
       } catch (err) {
-        console.error('AI error:', err)
-        // Fallback — nunca romper el panel
+        console.error('AI error:', err.message)
         return new Response(JSON.stringify({
-          text: `Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`
+          text: `Cada día con tu mascota es un regalo 🐾\n\nPor eso en UbiPet creamos la placa más completa del mercado: perfil médico, notificación en tiempo real y ubicación GPS cuando alguien la encuentre.\n\n¿La tuya ya tiene su placa UbiPet?`,
+          fallback: true
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })

@@ -531,6 +531,7 @@
     }
 
     async function cerrarSesionPorTimeout() {
+      localStorage.removeItem('sesion-permanente')
       await supabase.auth.signOut()
       document.getElementById('dashWrap').style.display = 'none'
       document.getElementById('loginWrap').style.display = 'flex'
@@ -639,13 +640,9 @@
       aplicarRol(data.rol)
       await cargarStats()
       resetTimeout() // iniciar contador de inactividad
-      // Sesión temporal: cerrar al salir del tab
-      if (sessionStorage.getItem('sesion-temporal')) {
-        window.addEventListener('pagehide', async () => {
-          await supabase.auth.signOut()
-          sessionStorage.removeItem('sesion-temporal')
-        })
-      }
+      // Admin siempre usa sesión temporal (nunca "mantener sesión")
+      // supabase.js usa sessionStorage si no hay 'sesion-permanente' → se cierra solo al cerrar Chrome
+      localStorage.removeItem('sesion-permanente')
     }
 
     // ─── SESIÓN ───────────────────────────────────
@@ -668,6 +665,7 @@
     })
     document.getElementById('btnLogout').addEventListener('click', async () => {
       clearTimeout(timeoutId)
+      localStorage.removeItem('sesion-permanente')
       await supabase.auth.signOut()
       document.getElementById('loginWrap').style.display = 'flex'
       document.getElementById('dashWrap').style.display  = 'none'

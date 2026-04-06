@@ -208,6 +208,39 @@
       background: none; border: none; cursor: pointer;
       color: var(--ink-muted); font-size: 18px; padding: 4px; line-height: 1;
     }
+
+    /* ── MODAL RECORTE DE FOTO ── */
+    .crop-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.88);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .crop-overlay.active { display: flex; }
+    .crop-modal {
+      background: var(--card-bg); border-radius: var(--radius-xl);
+      padding: 24px; width: 100%; max-width: 340px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .crop-modal h4 {
+      font-family: 'Fraunces', serif; font-size: 18px;
+      color: var(--ink); margin: 0; align-self: flex-start;
+    }
+    .crop-canvas-wrap {
+      position: relative; width: 280px; height: 280px;
+      border-radius: var(--radius); overflow: hidden;
+      background: #111; touch-action: none; user-select: none;
+    }
+    #cropCanvas { position: absolute; top: 0; left: 0; cursor: grab; }
+    #cropCanvas:active { cursor: grabbing; }
+    .crop-guide {
+      position: absolute; inset: 0; pointer-events: none;
+      box-shadow: 0 0 0 999px rgba(0,0,0,0.55); border-radius: 50%;
+    }
+    .crop-zoom { width: 100%; display: flex; align-items: center; gap: 10px; }
+    .crop-zoom input[type=range] { flex: 1; accent-color: var(--clay); }
+    .crop-zoom span { font-size: 15px; }
+    .crop-btns { display: flex; gap: 10px; width: 100%; }
+    .crop-btns button { flex: 1; }
   </style>
   <!-- Firebase -->
   <script type="module">
@@ -215,7 +248,7 @@
     import { getMessaging, getToken, deleteToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js'
 
     const firebaseConfig = {
-      apiKey:            'AIzaSyC2RYcFsBbmippii29V2LKTjCE7OY6yuy0',
+      apiKey:            'AIzaSyC9Qi0GjiNA1drGgRwyKxRbqUyRjzlaAtQ',
       authDomain:        'ubipet1push.firebaseapp.com',
       projectId:         'ubipet1push',
       storageBucket:     'ubipet1push.firebasestorage.app',
@@ -629,6 +662,27 @@
     </div>
   </div>
 
+
+  <!-- MODAL RECORTE FOTO -->
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-modal">
+      <h4>✂️ Recortar foto</h4>
+      <div class="crop-canvas-wrap" id="cropWrap">
+        <canvas id="cropCanvas"></canvas>
+        <div class="crop-guide"></div>
+      </div>
+      <div class="crop-zoom">
+        <span>🔍</span>
+        <input type="range" id="cropZoom" min="1" max="4" step="0.01" value="1">
+        <span>🔎</span>
+      </div>
+      <div class="crop-btns">
+        <button class="btn btn-ghost" id="cropCancelar">Cancelar</button>
+        <button class="btn btn-primary" id="cropConfirmar">✓ Usar esta foto</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { supabase } from '/js/supabase.js'
 
@@ -663,22 +717,153 @@
 
     // ─── FOTO ────────────────────────────────────
     async function subirFoto(file, mascotaId) {
-      const ext = file.name.split('.').pop()
-      const fileName = `${mascotaId}.${ext}`
+      // Si el usuario recortó la foto, subir el blob recortado; si no, el archivo original
+      const blob     = croppedBlob || file
+      const fileName = `${mascotaId}.jpg`
       await supabase.storage.from('fotos-mascotas').remove([fileName])
-      const { error } = await supabase.storage.from('fotos-mascotas').upload(fileName, file, { upsert: true })
+      const { error } = await supabase.storage.from('fotos-mascotas').upload(fileName, blob, { upsert: true, contentType: 'image/jpeg' })
       if (error) throw new Error('Error subiendo foto: ' + error.message)
+      croppedBlob = null
       const { data } = supabase.storage.from('fotos-mascotas').getPublicUrl(fileName)
       return data.publicUrl
     }
 
+    // ─── RECORTE DE FOTO ─────────────────────────
+    let cropImg = null, cropScale = 1, cropOffX = 0, cropOffY = 0
+    let cropDragging = false, cropLastX = 0, cropLastY = 0
+    let croppedBlob = null
+
+    function abrirCrop(dataUrl) {
+      const overlay = document.getElementById('cropOverlay')
+      const canvas  = document.getElementById('cropCanvas')
+      const wrap    = document.getElementById('cropWrap')
+      const zoomEl  = document.getElementById('cropZoom')
+      const SIZE    = wrap.offsetWidth || 280
+      canvas.width  = SIZE
+      canvas.height = SIZE
+      cropImg = new Image()
+      cropImg.onload = () => {
+        const minDim = Math.min(cropImg.width, cropImg.height)
+        cropScale = SIZE / minDim
+        cropOffX  = (SIZE - cropImg.width  * cropScale) / 2
+        cropOffY  = (SIZE - cropImg.height * cropScale) / 2
+        zoomEl.value = cropScale
+        zoomEl.min   = cropScale
+        zoomEl.max   = cropScale * 4
+        zoomEl.step  = cropScale * 0.01
+        dibujarCrop()
+      }
+      cropImg.src = dataUrl
+      overlay.classList.add('active')
+    }
+
+    function dibujarCrop() {
+      const canvas = document.getElementById('cropCanvas')
+      const ctx    = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(cropImg, cropOffX, cropOffY, cropImg.width * cropScale, cropImg.height * cropScale)
+    }
+
+    function clampOffset() {
+      const canvas = document.getElementById('cropCanvas')
+      const SIZE = canvas.width
+      cropOffX = Math.min(0, Math.max(SIZE - cropImg.width  * cropScale, cropOffX))
+      cropOffY = Math.min(0, Math.max(SIZE - cropImg.height * cropScale, cropOffY))
+    }
+
+    function generarBlob() {
+      const canvas  = document.getElementById('cropCanvas')
+      const SIZE    = canvas.width
+      const output  = document.createElement('canvas')
+      output.width  = 400
+      output.height = 400
+      const ctx = output.getContext('2d')
+      ctx.beginPath()
+      ctx.arc(200, 200, 200, 0, Math.PI * 2)
+      ctx.clip()
+      ctx.drawImage(canvas, 0, 0, SIZE, SIZE, 0, 0, 400, 400)
+      output.toBlob(blob => {
+        croppedBlob = blob
+        const url = URL.createObjectURL(blob)
+        mostrarFotoPreview(url)
+        document.getElementById('cropOverlay').classList.remove('active')
+      }, 'image/jpeg', 0.92)
+    }
+
+    function setupCropEventos() {
+      const canvas = document.getElementById('cropCanvas')
+      const zoomEl = document.getElementById('cropZoom')
+
+      zoomEl.addEventListener('input', () => {
+        const ns = parseFloat(zoomEl.value)
+        const cx = canvas.width / 2, cy = canvas.height / 2
+        cropOffX = cx - (cx - cropOffX) * (ns / cropScale)
+        cropOffY = cy - (cy - cropOffY) * (ns / cropScale)
+        cropScale = ns; clampOffset(); dibujarCrop()
+      })
+
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault()
+        const delta = -e.deltaY * 0.001
+        const ns = Math.min(Math.max(parseFloat(zoomEl.min), cropScale + delta * cropScale), parseFloat(zoomEl.max))
+        const rect = canvas.getBoundingClientRect()
+        const px = e.clientX - rect.left, py = e.clientY - rect.top
+        cropOffX = px - (px - cropOffX) * (ns / cropScale)
+        cropOffY = py - (py - cropOffY) * (ns / cropScale)
+        cropScale = ns; zoomEl.value = ns; clampOffset(); dibujarCrop()
+      }, { passive: false })
+
+      canvas.addEventListener('mousedown', e => { cropDragging = true; cropLastX = e.clientX; cropLastY = e.clientY })
+      window.addEventListener('mousemove', e => {
+        if (!cropDragging) return
+        cropOffX += e.clientX - cropLastX; cropOffY += e.clientY - cropLastY
+        cropLastX = e.clientX; cropLastY = e.clientY
+        clampOffset(); dibujarCrop()
+      })
+      window.addEventListener('mouseup', () => { cropDragging = false })
+
+      let lastTouch = null, lastDist = null
+      canvas.addEventListener('touchstart', e => {
+        e.preventDefault()
+        if (e.touches.length === 1) { lastTouch = e.touches[0]; lastDist = null }
+        if (e.touches.length === 2) lastDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY)
+      }, { passive: false })
+      canvas.addEventListener('touchmove', e => {
+        e.preventDefault()
+        if (e.touches.length === 1 && lastTouch) {
+          cropOffX += e.touches[0].clientX - lastTouch.clientX
+          cropOffY += e.touches[0].clientY - lastTouch.clientY
+          lastTouch = e.touches[0]; clampOffset(); dibujarCrop()
+        }
+        if (e.touches.length === 2 && lastDist !== null) {
+          const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY)
+          const ns = Math.min(Math.max(parseFloat(zoomEl.min), cropScale * dist / lastDist), parseFloat(zoomEl.max))
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
+          const rect = canvas.getBoundingClientRect()
+          cropOffX = (cx - rect.left) - ((cx - rect.left) - cropOffX) * (ns / cropScale)
+          cropOffY = (cy - rect.top)  - ((cy - rect.top)  - cropOffY) * (ns / cropScale)
+          cropScale = ns; zoomEl.value = ns; lastDist = dist; clampOffset(); dibujarCrop()
+        }
+      }, { passive: false })
+      canvas.addEventListener('touchend', () => { lastTouch = null; lastDist = null })
+
+      document.getElementById('cropConfirmar').addEventListener('click', generarBlob)
+      document.getElementById('cropCancelar').addEventListener('click', () => {
+        document.getElementById('cropOverlay').classList.remove('active')
+        document.getElementById('fotoInput').value = ''
+        croppedBlob = null
+      })
+    }
+
     function setupFotoPreview() {
+      setupCropEventos()
       document.getElementById('fotoInput').addEventListener('change', function() {
         const file = this.files[0]
         if (!file) return
-        if (file.size > 5 * 1024 * 1024) { showAlert('La foto no puede superar 5MB'); return }
+        if (file.size > 10 * 1024 * 1024) { showAlert('La foto no puede superar 10MB'); return }
         const reader = new FileReader()
-        reader.onload = e => mostrarFotoPreview(e.target.result)
+        reader.onload = e => abrirCrop(e.target.result)
         reader.readAsDataURL(file)
       })
     }
@@ -1094,16 +1279,9 @@
       if (Notification.permission !== 'granted') return
       const token = await getFCMToken()
       if (!token) return
-      // Comparar con el guardado en Supabase
-      const { data } = await supabase
-        .from('push_subscriptions').select('subscription').eq('user_id', user.id).maybeSingle()
-      const savedToken = data?.subscription?.fcm_token
-      if (savedToken !== token) {
-        console.log('🔄 Actualizando token FCM...')
-        await supabase.from('push_subscriptions')
-          .upsert({ user_id: user.id, subscription: { fcm_token: token } }, { onConflict: 'user_id' })
-        console.log('✅ Token FCM actualizado')
-      }
+      // Siempre actualizar — garantiza rotación al cambiar de dispositivo
+      await supabase.from('push_subscriptions')
+        .upsert({ user_id: user.id, subscription: { fcm_token: token } }, { onConflict: 'user_id' })
     }
 
     async function setupPush() {

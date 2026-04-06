@@ -508,7 +508,8 @@
       const codigo = document.getElementById('regCodigo').value.trim().toUpperCase()
       const email  = document.getElementById('regEmail').value.trim()
       const pass   = document.getElementById('regPass').value
-      if (!codigo) return showAlert('alertReg', 'Ingresa el código de tu placa')
+      if (!codigo) return showAlert('alertReg', 'Ingresá el código de tu placa')
+      if (!codigo.match(/^UBI-[A-Z0-9]{4,8}$/)) return showAlert('alertReg', '❌ Formato inválido. Debe ser UBI-XXXXXX (ej: UBI-K7X2M9)')
       if (!email || !pass) return showAlert('alertReg', 'Completa todos los campos')
       if (pass.length < 6) return showAlert('alertReg', 'La contraseña debe tener al menos 6 caracteres')
 

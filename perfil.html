@@ -331,11 +331,21 @@
         <div id="mascotasTabs" class="mascotas-nav"></div>
 
         <!-- Estado vacío -->
-        <div id="emptyState" class="card" style="display:none; text-align:center; padding:56px 24px;">
+        <div id="emptyState" class="card" style="display:none; text-align:center; padding:40px 24px;">
           <div style="font-size:56px; margin-bottom:16px;">🐾</div>
           <h2 style="margin-bottom:8px;">¡Bienvenido a UbiPet!</h2>
-          <p style="margin-bottom:24px; max-width:280px; margin-left:auto; margin-right:auto;">Agrega tu primera mascota para comenzar a protegerla</p>
-          <button class="btn btn-primary" id="btnPrimeraMascota">➕ Agregar mascota</button>
+          <p style="color:var(--ink-soft); margin-bottom:24px; max-width:300px; margin-left:auto; margin-right:auto; line-height:1.6;">
+            Para crear el perfil de tu mascota necesitás ingresar el código de tu placa física.
+          </p>
+          <div id="alertPlaca" class="alert" style="margin-bottom:16px;"></div>
+          <div class="input-group" style="text-align:left; max-width:300px; margin:0 auto 16px;">
+            <label>Código de tu placa UbiPet</label>
+            <input type="text" id="codigoPlacaEmpty" placeholder="Ej: UBI-K7X2M9"
+              style="text-transform:uppercase; letter-spacing:0.05em;"
+              autocomplete="off">
+            <div style="font-size:12px; color:var(--ink-muted); margin-top:4px;">El código está grabado en tu placa física.</div>
+          </div>
+          <button class="btn btn-primary" id="btnActivarPlaca">🔗 Vincular placa y continuar</button>
         </div>
 
         <!-- FORMULARIO -->
@@ -939,6 +949,50 @@
     }
 
     document.getElementById('btnPrimeraMascota')?.addEventListener('click', nuevaMascota)
+
+    // ─── VINCULAR PLACA DESDE EMPTY STATE ────────
+    document.getElementById('btnActivarPlaca')?.addEventListener('click', async () => {
+      const input  = document.getElementById('codigoPlacaEmpty')
+      const codigo = input.value.trim().toUpperCase()
+      const alertEl = document.getElementById('alertPlaca')
+
+      function showPlacaAlert(msg, type = 'err') {
+        alertEl.textContent = msg
+        alertEl.className = `alert alert-${type} show`
+      }
+
+      if (!codigo) return showPlacaAlert('Ingresá el código de tu placa')
+
+      const btn = document.getElementById('btnActivarPlaca')
+      btn.disabled = true
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Verificando...'
+
+      // Verificar que la placa existe y está disponible
+      const { data: placa, error } = await supabase
+        .from('placas').select('id, estado').eq('codigo', codigo).maybeSingle()
+
+      if (error || !placa) {
+        btn.disabled = false
+        btn.textContent = '🔗 Vincular placa y continuar'
+        return showPlacaAlert('❌ Código no válido. Verificá que esté bien escrito.')
+      }
+      if (placa.estado !== 'disponible') {
+        btn.disabled = false
+        btn.textContent = '🔗 Vincular placa y continuar'
+        return showPlacaAlert('❌ Esta placa ya está en uso. Si es tuya, contactanos.')
+      }
+
+      // Guardar en sessionStorage y abrir el form de nueva mascota
+      sessionStorage.setItem('placa_pendiente', codigo)
+      btn.disabled = false
+      btn.textContent = '🔗 Vincular placa y continuar'
+      alertEl.className = 'alert'
+      nuevaMascota()
+    })
+
+    document.getElementById('codigoPlacaEmpty')?.addEventListener('input', function() {
+      this.value = this.value.toUpperCase()
+    })
     document.getElementById('btnCancelar').addEventListener('click', () => {
       if (mascotas.length > 0) seleccionarMascota(mascotas[0])
       else { document.getElementById('emptyState').style.display = 'block'; document.getElementById('formContainer').style.display = 'none' }
